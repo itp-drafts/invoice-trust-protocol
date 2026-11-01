@@ -50,7 +50,7 @@ normative:
     seriesinfo:
       Internet-Draft: draft-martinez-itp-lifecycle-00
   I-D.ietf-oauth-sd-jwt-vc:
-  I-D.gco-oauth-delegate-sd-jwt:
+  I-D.ietf-oauth-delegate-sd-jwt:
 
 informative:
   OPENID4VP:
@@ -377,7 +377,7 @@ mandate.  Before it signs or forwards anything for the agent, it MUST:
 
 1. verify the mandate signature against a key of the principal's
    accepted Participant Document that is not listed in "delegates" and, for a delegated mandate, verify
-   the chain as specified in {{I-D.gco-oauth-delegate-sd-jwt}}, each
+   the chain as specified in {{I-D.ietf-oauth-delegate-sd-jwt}}, each
    delegation being signed with the "cnf" key of the mandate before
    it, and check the validity period and status of each
    mandate in the chain;
@@ -479,7 +479,7 @@ status message with an "agent" member unless:
 3. the root mandate verifies with a key of the principal's accepted
    Participant Document that is not listed in "delegates", the chain
    of a delegated mandate verifies as specified in
-   {{I-D.gco-oauth-delegate-sd-jwt}} ({{delegation}}), and every mandate in the chain was valid at the
+   {{I-D.ietf-oauth-delegate-sd-jwt}} ({{delegation}}), and every mandate in the chain was valid at the
    signing time;
 
 4. the root mandate's "iss" (or "principal") is the URN of the
@@ -505,7 +505,7 @@ the audience of a mandate and does not reject it for that reason.
 
 An agent whose mandate has "max_delegation" greater than 0 can pass
 part of its authority to another agent.  Delegation uses Delegate
-SD-JWT {{I-D.gco-oauth-delegate-sd-jwt}}, in which the Key Binding JWT
+SD-JWT {{I-D.ietf-oauth-delegate-sd-jwt}}, in which the Key Binding JWT
 of one SD-JWT becomes itself an SD-JWT that carries the next
 credential.
 
