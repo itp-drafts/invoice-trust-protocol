@@ -1,0 +1,3826 @@
+---
+title: "Invoice Trust Protocol (ITP): Discovery, Delivery, and Verification of Electronic Invoices"
+abbrev: "ITP Core"
+category: exp
+docname: draft-martinez-itp-core-latest
+submissiontype: IETF
+number:
+date: 2026-10-28
+consensus: true
+v: 3
+keyword:
+ - electronic invoicing
+ - verification
+ - transparency
+ - discovery
+venue:
+  group: "DISPATCH"
+  type: "Working Group"
+  mail: "dispatch@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/dispatch/"
+author:
+ -
+    fullname: "Carlos Martínez García-Villarrubia"
+    asciiFullname: "Carlos Martinez Garcia-Villarrubia"
+    initials: "C."
+    surname: "Martínez García-Villarrubia"
+    asciiSurname: "Martinez Garcia-Villarrubia"
+    organization: "BeeL. (Honey Solutions, S.L.)"
+    city: Tarragona
+    country: Spain
+    email: carlos@martinezgv.com
+
+normative:
+  ISO4217:
+    title: "Codes for the representation of currencies"
+    author:
+      - org: ISO
+    date: 2015
+    seriesinfo:
+      ISO: "4217:2015"
+  ISO3166:
+    title: "Codes for the representation of names of countries and their subdivisions - Part 1: Country code"
+    author:
+      - org: ISO
+    date: 2020
+    seriesinfo:
+      ISO: "3166-1:2020"
+  ISO3166-2:
+    title: "Codes for the representation of names of countries and their subdivisions - Part 2: Country subdivision code"
+    author:
+      - org: ISO
+    date: 2020
+    seriesinfo:
+      ISO: "3166-2:2020"
+  ISO17442:
+    title: "Financial services - Legal entity identifier (LEI) - Part 1: Assignment"
+    author:
+      - org: ISO
+    date: 2020
+    seriesinfo:
+      ISO: "17442-1:2020"
+  UNTDID1001:
+    title: "UN/EDIFACT code list 1001: Document name code, directory D.16B"
+    author:
+      - org: UN/CEFACT
+    date: 2016
+  UAX15:
+    title: "Unicode Normalization Forms"
+    author:
+      - org: The Unicode Consortium
+    seriesinfo:
+      Unicode Standard Annex: "15"
+    target: https://www.unicode.org/reports/tr15/
+  PEPPOL-EAS:
+    title: "Peppol Code Lists - Participant identifier schemes, version 9.7"
+    author:
+      - org: OpenPeppol AISBL
+    date: 2026-07-02
+    target: https://docs.peppol.eu/edelivery/codelists/
+  PEPPOL-IDS:
+    title: "Peppol Policy for use of Identifiers, version 4.4.0"
+    author:
+      - org: OpenPeppol AISBL
+    date: 2025-02-06
+    target: https://docs.peppol.eu/edelivery/policies/Peppol-EDN-Policy-for-use-of-identifiers-4.4.0-2025-02-06.pdf
+  UBL21:
+    title: "Universal Business Language Version 2.1"
+    author:
+      - org: OASIS
+    date: 2013-11-04
+    target: https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html
+  OPENID-FED:
+    title: "OpenID Federation 1.0"
+    author:
+      - name: R. Hedberg
+      - name: M.B. Jones
+      - name: A.Å. Solberg
+      - name: J. Bradley
+      - ins: G. De Marco
+        name: Giuseppe De Marco
+      - name: V. Dzhuvinov
+    date: 2026-02-17
+    target: https://openid.net/specs/openid-federation-1_0-final.html
+  I-D.ietf-httpapi-idempotency-key-header:
+  
+informative:
+  I-D.martinez-itp-lifecycle:
+    title: "Invoice Trust Protocol (ITP): Lifecycle Status and Payment Information"
+    author:
+      - ins: C. Martínez García-Villarrubia
+        name: Carlos Martínez García-Villarrubia
+    date: 2026-10
+    seriesinfo:
+      Internet-Draft: draft-martinez-itp-lifecycle-00
+  I-D.martinez-itp-agent-mandates:
+    title: "Invoice Trust Protocol (ITP): Agent Mandates"
+    author:
+      - ins: C. Martínez García-Villarrubia
+        name: Carlos Martínez García-Villarrubia
+    date: 2026-10
+    seriesinfo:
+      Internet-Draft: draft-martinez-itp-agent-mandates-00
+  I-D.jaakola-simple-invoicing-protocol:
+  EN16931:
+    title: "Electronic invoicing - Part 1: Semantic data model of the core elements of an electronic invoice"
+    author:
+      - org: European Committee for Standardization (CEN)
+    date: 2026
+    seriesinfo:
+      EN: "16931-1:2026"
+  PEPPOL-PINT:
+    title: "Peppol Specifications for PINT"
+    author:
+      - org: OpenPeppol AISBL
+    target: https://docs.peppol.eu/poac/pint/
+  PEPPOL-BIS:
+    title: "Peppol BIS Billing 3.0"
+    author:
+      - org: OpenPeppol AISBL
+    target: https://docs.peppol.eu/poacc/billing/3.0/
+  UBL:
+    title: "Universal Business Language Version 2.5"
+    author:
+      - org: OASIS
+    date: 2026-08-12
+    target: https://docs.oasis-open.org/ubl/UBL-2.5.html
+  CII:
+    title: "Cross Industry Invoice, D16B"
+    author:
+      - org: UN/CEFACT
+    date: 2016
+  GOBL:
+    title: "GOBL: Go Business Language"
+    author:
+      - org: Invopop SL
+    target: https://github.com/invopop/gobl
+  BDXL:
+    title: "Business Document Metadata Service Location Version 1.0"
+    author:
+      - org: OASIS
+    date: 2017-08-01
+    target: https://docs.oasis-open.org/bdxr/BDX-Location/v1.0/BDX-Location-v1.0.html
+  SMP2:
+    title: "Service Metadata Publishing (SMP) Version 2.0"
+    author:
+      - org: OASIS
+    date: 2021-02-14
+    target: https://docs.oasis-open.org/bdxr/bdx-smp/v2.0/bdx-smp-v2.0.html
+  BDX-AS4:
+    title: "AS4 Interoperability Profile for Four-Corner Networks Version 1.0"
+    author:
+      - org: OASIS
+    date: 2021-11-12
+    seriesinfo:
+      OASIS Committee Specification: "01"
+    target: https://docs.oasis-open.org/bdxr/bdx-as4/v1.0/bdx-as4-v1.0.html
+  DBNA:
+    title: "Digital Business Networks Alliance Exchange Framework"
+    author:
+      - org: Digital Business Networks Alliance
+    target: https://dbnalliance.org/
+  OECD-TA3:
+    title: "Tax Administration 3.0 and Electronic Invoicing: Initial Findings"
+    author:
+      - org: OECD
+    date: 2022
+    target: https://www.oecd.org/en/publications/tax-administration-3-0-and-electronic-invoicing_2ffc88ed-en.html
+  UNCITRAL-MLETR:
+    title: "UNCITRAL Model Law on Electronic Transferable Records"
+    author:
+      - org: United Nations Commission on International Trade Law
+    date: 2017
+    target: https://uncitral.un.org/en/texts/ecommerce/modellaw/electronic_transferable_records
+  ETSI-ERDS:
+    title: "Electronic Signatures and Infrastructures (ESI); Electronic Registered Delivery Services; Part 1: Framework and Architecture"
+    author:
+      - org: ETSI
+    date: 2024-01
+    seriesinfo:
+      ETSI EN: "319 522-1 V1.2.1"
+  ETSI-TL:
+    title: "Electronic Signatures and Infrastructures (ESI); Trusted Lists"
+    author:
+      - org: ETSI
+    seriesinfo:
+      ETSI TS: "119 612"
+  XADES:
+    title: "Electronic Signatures and Infrastructures (ESI); XAdES digital signatures; Part 1: Building blocks and XAdES baseline signatures"
+    author:
+      - org: ETSI
+    date: 2016
+    seriesinfo:
+      ETSI EN: "319 132-1"
+  CADES:
+    title: "Electronic Signatures and Infrastructures (ESI); CAdES digital signatures; Part 1: Building blocks and CAdES baseline signatures"
+    author:
+      - org: ETSI
+    seriesinfo:
+      ETSI EN: "319 122-1"
+  JADES:
+    title: "Electronic Signatures and Trust Infrastructures (ESI); JAdES digital signatures; Part 1: Building blocks and JAdES baseline signatures"
+    author:
+      - org: ETSI
+    date: 2024
+    seriesinfo:
+      ETSI TS: "119 182-1 V1.2.1"
+  W3C-VC:
+    title: "Verifiable Credentials Data Model v2.0"
+    author:
+      - org: W3C
+    date: 2025-05-15
+    target: https://www.w3.org/TR/vc-data-model-2.0/
+  FIDES-DEI:
+    title: "FIDES Innovation Track: Direct e-invoicing - Phase 3: Key findings, recommendations & proposed next steps"
+    author:
+      - ins: R. Crooijmans
+        name: Roel Crooijmans
+      - ins: H. van der Kooij
+        name: Harmen van der Kooij
+    date: 2026-03
+    target: https://fides.community/app/uploads/2026/04/FIDES-Direct_eInvoicing_v1.0.pdf
+  UNVTD:
+    title: "UN Verifiable Trade Documents (UNVTD)"
+    author:
+      - org: UN/CEFACT
+    date: 2026
+    target: https://spec-unvtd-790c10.opensource.unicc.org/
+  UNTP:
+    title: "UN Transparency Protocol (UNTP)"
+    author:
+      - org: UN/CEFACT
+    date: 2026
+    target: https://spec-untp-fbb45f.opensource.unicc.org/
+  XHE:
+    title: "Exchange Header Envelope (XHE) Version 1.0"
+    author:
+      - org: OASIS
+    date: 2021-04-25
+    target: https://docs.oasis-open.org/bdxr/xhe/v1.0/os/xhe-v1.0-os-oasis.html
+  PEPPOL-SMP:
+    title: "Peppol Service Metadata Publishing (SMP), version 1.4.0"
+    author:
+      - org: OpenPeppol AISBL
+    date: 2025-02-06
+    target: https://docs.peppol.eu/edelivery/smp/Peppol-EDN-Service-Metadata-Publishing-1.4.0-2025-02-06.pdf
+  PEPPOL-AS4:
+    title: "Peppol AS4 Profile, version 2.0.3"
+    author:
+      - org: OpenPeppol AISBL
+    date: 2024-04-22
+    target: https://docs.peppol.eu/edelivery/as4/specification/
+  ETSI-REM:
+    title: "Electronic Signatures and Infrastructures (ESI); Registered Electronic Mail (REM) Services; Part 1: Framework and architecture"
+    author:
+      - org: ETSI
+    date: 2018-09
+    seriesinfo:
+      ETSI EN: "319 532-1 V1.1.1"
+  ETSI-PRES:
+    title: "Electronic Signatures and Trust Infrastructures (ESI); Policy and security requirements for trust service providers providing long-term preservation of digital signatures or general data using digital signature techniques"
+    author:
+      - org: ETSI
+    date: 2025-10
+    seriesinfo:
+      ETSI TS: "119 511 V1.2.1"
+  ETSI-VAL:
+    title: "Electronic Signatures and Trust Infrastructures (ESI); Procedures for Creation and Validation of AdES Digital Signatures; Part 1: Creation and Validation"
+    author:
+      - org: ETSI
+    date: 2024-06
+    seriesinfo:
+      ETSI EN: "319 102-1 V1.4.1"
+  UNCITRAL-MLES:
+    title: "UNCITRAL Model Law on Electronic Signatures"
+    author:
+      - org: United Nations Commission on International Trade Law
+    date: 2001
+    target: https://uncitral.un.org/en/texts/ecommerce/modellaw/electronic_signatures
+  UNCITRAL-MLIT:
+    title: "UNCITRAL Model Law on the Use and Cross-border Recognition of Identity Management and Trust Services"
+    author:
+      - org: United Nations Commission on International Trade Law
+    date: 2022
+    target: https://uncitral.un.org/en/mlit
+  ISO17442-3:
+    title: "Financial services - Legal entity identifier (LEI) - Part 3: Verifiable LEIs (vLEIs)"
+    author:
+      - org: ISO
+    date: 2024
+    seriesinfo:
+      ISO: "17442-3:2024"
+  WCAG22:
+    title: "Web Content Accessibility Guidelines (WCAG) 2.2"
+    author:
+      - org: W3C
+    date: 2024-12-12
+    target: https://www.w3.org/TR/WCAG22/
+  VLEI:
+    title: "verifiable Legal Entity Identifier (vLEI)"
+    author:
+      - org: Global Legal Entity Identifier Foundation
+    target: https://www.gleif.org/en/organizational-identity/introducing-the-verifiable-lei-vlei
+  VIES:
+    title: "VIES VAT number validation"
+    author:
+      - org: European Commission
+    target: https://ec.europa.eu/taxation_customs/vies/
+  C2SP-CHECKPOINT:
+    title: "tlog-checkpoint: Transparency Log Checkpoints, version 1.1.0"
+    author:
+      - org: C2SP
+    target: https://c2sp.org/tlog-checkpoint@v1.1.0
+  C2SP-WITNESS:
+    title: "tlog-witness: Transparency Log Witness Protocol, version 1.1.0"
+    author:
+      - org: C2SP
+    target: https://c2sp.org/tlog-witness@v1.1.0
+  EU-VAT-DIR:
+    title: "Council Directive 2006/112/EC of 28 November 2006 on the common system of value added tax"
+    author:
+      - org: Council of the European Union
+    date: 2006-11-28
+    target: https://eur-lex.europa.eu/eli/dir/2006/112/oj/eng
+  VIDA:
+    title: "Council Directive (EU) 2025/516 of 11 March 2025 amending Directive 2006/112/EC as regards VAT rules for the digital age"
+    author:
+      - org: Council of the European Union
+    date: 2025-03-11
+    target: https://eur-lex.europa.eu/eli/dir/2025/516/oj/eng
+  EIDAS2:
+    title: "Regulation (EU) 2024/1183 amending Regulation (EU) No 910/2014 as regards establishing the European Digital Identity Framework"
+    author:
+      - org: European Parliament and Council of the European Union
+    date: 2024-04-11
+    target: https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng
+  EU-BW:
+    title: "Proposal for a Regulation on the establishment of European Business Wallets, COM(2025) 838 final, 2025/0358(COD)"
+    author:
+      - org: European Commission
+    date: 2025-11
+    target: https://data.consilium.europa.eu/doc/document/ST-15701-2025-INIT/en/pdf
+  GDPR:
+    title: "Regulation (EU) 2016/679 (General Data Protection Regulation)"
+    author:
+      - org: European Parliament and Council of the European Union
+    date: 2016-04-27
+    target: https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng
+  EDPB-BC:
+    title: "Guidelines 02/2025 on processing of personal data through blockchain technologies, version 2.0"
+    author:
+      - org: European Data Protection Board
+    date: 2026-07-07
+    target: https://www.edpb.europa.eu/system/files/2026-07/edpb_guidelines_202502_blockchain_v2_en.pdf
+  IANA-SPECIAL:
+    title: "IANA IPv4 and IPv6 Special-Purpose Address Registries"
+    author:
+      - org: IANA
+    target: https://www.iana.org/assignments/iana-ipv4-special-registry/
+  IC3-2024:
+    title: "Internet Crime Report 2024"
+    author:
+      - org: Federal Bureau of Investigation, Internet Crime Complaint Center
+    date: 2025
+    target: https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf
+  X12:
+    title: "ASC X12 Standards"
+    author:
+      - org: Accredited Standards Committee X12
+    target: https://x12.org/
+  EDIFACT:
+    title: "Electronic data interchange for administration, commerce and transport (EDIFACT) - Application level syntax rules"
+    author:
+      - org: ISO
+    seriesinfo:
+      ISO: "9735"
+  UAX9:
+    title: "Unicode Bidirectional Algorithm"
+    author:
+      - org: The Unicode Consortium
+    seriesinfo:
+      Unicode Standard Annex: "9"
+    target: https://www.unicode.org/reports/tr9/
+
+--- abstract
+
+This document specifies the core of the Invoice Trust Protocol (ITP).
+ITP lets a business in any country find where and in which syntaxes
+another business receives invoices, deliver a signed invoice to it
+over HTTP, and obtain a signed acknowledgment.  It also lets any later
+holder of the invoice, such as the buyer, a bank, or an auditor, check
+who issued it, that it was not altered, and which tax or network
+registrations exist for it.  ITP carries invoices in existing
+syntaxes, defines no invoice data model, and works alongside the
+channels that tax authorities and networks make mandatory.  Commercial
+statuses, payment information, and agent mandates are specified in
+companion documents.
+
+--- middle
+
+# Introduction
+
+Business-to-business invoices travel as PDF files attached to email,
+through supplier portals, through four-corner networks such as Peppol
+{{PEPPOL-BIS}} and the Digital Business Networks Alliance {{DBNA}},
+through EDI value-added networks, and through clearance or reporting platforms run by
+tax authorities.  The OECD {{OECD-TA3}} describes these platforms
+and how tax administrations use them.  None of these channels gives the parties a common way to:
+
+* find where, and in which syntaxes, a given legal entity receives
+  invoices, unless both are in the same network;
+
+* check, without trusting the channel that delivered it, that an
+  invoice comes from the entity named in it and was not modified,
+  including the account it gives for payment; and
+
+* check which tax registration, clearance, or network acknowledgment
+  exists for that invoice.
+
+Payment redirection through forged invoices or changed bank details is
+a common fraud.  The FBI's Internet Crime Complaint Center attributes
+about 2.8 billion US dollars of reported losses in 2024 to business
+email compromise {{IC3-2024}}, a category that includes requests to
+change payment details.  Mandatory structured electronic
+invoicing is spreading in every region {{OECD-TA3}}: in Latin
+America, where it started, in Asia, the Middle East, Africa, and
+Europe.  In the European Union, Directive (EU) 2025/516 {{VIDA}} makes
+it the rule for most intra-EU business-to-business supplies from 1
+July 2030.  This will increase the number of structured invoices
+exchanged across networks and borders.
+
+This document defines:
+
+* participant identifiers that reuse existing schemes ({{pid}});
+* discovery of receiving capabilities through DNS and a well-known
+  URI ({{discovery}});
+* a trust model for participant keys ({{trust}});
+* a signed envelope that carries an invoice in its original syntax,
+  plus evidence added after signing ({{envelope}});
+* an HTTP binding for delivery, copies for the issuer, and status messages ({{transport}});
+* the format of status messages and the two statuses that delivery
+  needs ({{status}});
+* registration of commitments to envelopes in transparency services
+  {{!RFC9943}} ({{transparency}}); and
+* a verification procedure ({{verification}}).
+
+Two companion documents build on it.  {{I-D.martinez-itp-lifecycle}}
+specifies commercial and payment statuses, payment information, and
+models of jurisdictions and networks.  {{I-D.martinez-itp-agent-mandates}} lets a
+business authorize a software agent to act within limits.  This document can be implemented without the companion documents.
+
+## Scope
+
+ITP carries invoices in syntaxes defined elsewhere: national formats
+prescribed by tax authorities, syntaxes based on {{EN16931}} or
+Peppol PINT {{PEPPOL-PINT}}, such as {{UBL}} and {{CII}}, {{GOBL}},
+and EDI standards such as ASC X12 {{X12}} and UN/EDIFACT {{EDIFACT}}.  ITP assumes no
+semantic model; {{semantic-mapping}} is informative.  Tax treatment and the execution of
+payments are out of scope.  Where law or a network agreement mandates
+a channel, ITP runs alongside it, and the invoice produced or
+validated by that channel is the legal invoice ({{legal-original}}).
+
+## Relationship to Existing Work {#related}
+
+Peppol and the Digital Business Networks Alliance {{DBNA}} locate a
+recipient's access point through U-NAPTR records {{?RFC4848}} in a
+zone run by the network, as specified by OASIS BDXL {{BDXL}}, and
+through a service metadata publisher.  The Digital Business Networks
+Alliance profiles OASIS SMP 2.0 {{SMP2}} and the OASIS AS4 profile
+{{BDX-AS4}}; Peppol uses its own SMP specification {{PEPPOL-SMP}} and
+AS4 profile {{PEPPOL-AS4}}.  Those networks admit access points by contract and certificate.  ITP reuses their identifiers; an ITP envelope can be carried over them, and a Participant Document can point to a Peppol endpoint.  {{why-not-bdxl}} explains why ITP does not reuse
+BDXL for discovery.
+
+EDI value-added networks and exchange platforms that tax authorities
+run or designate address participants by their own identifiers.  ITP
+treats them as it treats Peppol:
+their identifiers can be registered as PID schemes ({{pid}}), their
+endpoints as channel types ({{participant-document}}), and an ITP
+envelope can be carried over any of them that carries arbitrary
+documents.
+
+The IETF EDIINT working group defined AS1 {{?RFC3335}}, AS2
+{{?RFC4130}}, and AS3 {{?RFC4823}} for signed EDI exchange with signed
+receipts.  Their S/MIME signatures cover the transferred payload, but keys are
+exchanged when the trading partnership is established and
+certificates may be self-signed ({{Section 8 of RFC4130}}), so a party
+outside that partnership cannot tie a signature to a legal entity.
+ITP signs the invoice itself, independently of any transfer, and binds the key to the legal entity through attestations, so that third parties that later hold it, such as banks, auditors, or factors, can check it.  An
+earlier individual draft {{I-D.jaakola-simple-invoicing-protocol}}
+addressed parties by email address and was not pursued.  Registered
+delivery services {{ETSI-ERDS}}, including registered electronic mail
+{{ETSI-REM}}, give evidence of sending and receipt
+and can complement ITP's signed acknowledgments.
+
+UN/CEFACT and OASIS define the Exchange Header Envelope {{XHE}}, the
+successor of the UN/CEFACT Standard Business Document Header, which
+references or contains business documents without changing them and
+can be signed.  ITP defines a JSON envelope so that it can be signed
+with JOSE, registered in SCITT transparency services, and carry
+evidence added after signing ({{envelope}}).  An XHE envelope can be
+carried as the document of an ITP envelope.
+
+Two current efforts address parts of the same problem.  The FIDES
+Direct e-invoicing track {{FIDES-DEI}} tests business wallets,
+decentralized identifiers, verifiable credentials, and qualified
+seals for identifying the parties to an invoice and for federated
+discovery alongside Peppol.  UN/CEFACT is specifying verifiable trade
+documents, including the commercial invoice {{UNVTD}}, and the UN Transparency
+Protocol {{UNTP}}, in which an authoritative register, such as a
+business register, issues a credential that binds a registered entity
+to its identifier and optionally to a decentralized identifier.  ITP does not
+require wallets or decentralized identifiers: it uses DNS, HTTPS, JOSE,
+and SCITT, and adds delivery, status messages, and transparency.
+An attestation issuer can rely on credentials from business wallets
+when it issues ITP attestations ({{attestations}}), and documents
+defined by UNVTD can be carried in an ITP envelope.
+
+Organizational identity can come from several sources: business and
+tax registers, certificates issued under electronic signature laws
+(for example qualified certificates under {{EIDAS2}} in the European
+Union, and certificates issued under the laws of other jurisdictions,
+for which the UNCITRAL Model Laws on Electronic Signatures
+{{UNCITRAL-MLES}} and on identity management and trust services
+{{UNCITRAL-MLIT}} give a basis for recognition across borders), the
+verifiable LEI {{VLEI}} {{ISO17442-3}},
+verifiable credentials {{W3C-VC}}, or business wallets such as the
+European Business Wallet proposal {{EU-BW}}.  Certificates are used
+directly under rule 3 of {{accepting}}, and attestation issuers can
+rely on the other sources when they issue ITP attestations
+({{attestations}}).  ITP does not define a new identity scheme.
+
+## Why the IETF
+
+This document specifies a DNS node name, a well-known URI, an HTTP binding, JOSE and COSE profiles, and a use of SCITT transparency services.  No single IETF working group covers all of these.
+The closest are SCITT (transparency), KEYTRANS (key transparency),
+HTTPAPI (idempotency), WEBBOTAUTH (HTTP signatures for automated
+clients), and, for the credentials used by ITP and by
+{{I-D.martinez-itp-agent-mandates}}, OAUTH (SD-JWT VC and status
+lists).  The author asks
+DISPATCH whether this document fits an existing group or needs a
+BoF.  The meaning of invoice fields and lifecycle codes stays with
+CEN, OASIS, UN/CEFACT, OpenPeppol and other network operators, and
+tax authorities.
+
+## The Experiment
+
+This document is Experimental.  The experiment is whether:
+
+1. at least two independent implementations interoperate on
+   discovery, delivery, signature verification, and transparency
+   receipts, using the test vectors in {{test-vectors}};
+
+2. at least two recipients verify envelopes that reach them over
+   channels other than ITP, for example as email attachments, over
+   Peppol or an EDI value-added network, or from a tax authority
+   platform, and publish the share of envelopes that failed
+   verification and why; and
+
+3. at least one operator of an existing network or regulated
+   platform publishes ITP discovery data for its participants.
+
+Results will be reported on the mailing list where this document is
+discussed and in later revisions of it.  The experiment ends 24 months
+after publication, when the author expects either to propose a
+Standards Track revision or to declare the experiment concluded.
+
+# Conventions and Definitions
+
+{::boilerplate bcp14-tagged}
+
+## JSON
+
+JSON texts {{!RFC8259}} defined by this document MUST be I-JSON
+{{!RFC7493}}.  Receivers MUST reject ITP JSON texts that contain
+duplicate member names, unpaired surrogates, or nesting deeper than
+32 levels, before any canonicalization or signature check.  Signed
+objects are serialized with the JSON Canonicalization Scheme (JCS)
+{{!RFC8785}} before signing ({{design-jcs}}).  To keep JCS output
+stable across implementations, ITP objects MUST NOT contain
+non-integer numbers or integers whose absolute value exceeds
+2^53 - 1, and receivers reject objects that do.
+
+## Amounts
+
+Monetary amounts are strings that match the "amount" rule below,
+paired with a currency code {{ISO4217}}:
+
+~~~ abnf
+amount = ["-"] ( "0" / %x31-39 *DIGIT ) ["." 1*DIGIT]
+~~~
+
+An amount has at most 18 digits before the decimal point and no more
+decimals than the minor unit of its currency in {{ISO4217}}, which is
+0 for some currencies and 3 for others.  A receiver rejects an
+envelope whose amounts break these rules with "envelopeInvalid".  The value "-0", and any value equal to zero with a
+minus sign, is invalid.  Amounts are compared as numbers, not as
+strings.  The amount syntax is a wire format, independent of the decimal
+separator used in documents and displays.  A verifier does not reject
+an envelope because its currency code was withdrawn after the issue
+date; the minor unit is then that of the code at the issue date.
+
+## Text and Language {#text}
+
+Strings that identify documents, such as "invoice_number", are UTF-8
+strings in Unicode Normalization Form C {{UAX15}} that conform to the
+FreeformClass of {{!RFC8264}}.  The issuer writes them in the core
+after removing leading and trailing spaces, after applying the width
+mapping described in {{Section 5.2.1 of !RFC8264}}, which maps fullwidth and halfwidth
+characters (common in Chinese, Japanese, and Korean input) to their
+decomposition mappings, and after any further mapping, such as case
+mapping, that a profile in "profiles" defines for the numbering
+scheme.  Digits SHOULD be ASCII digits.  Where the tax authority
+records a number with other decimal digits, such as Arabic-Indic
+digits, the core carries it as recorded, and a receiver that checks
+for duplicates first maps characters of General Category Nd to the
+ASCII digits with the same value.  Bidirectional formatting
+characters, such as U+200F RIGHT-TO-LEFT MARK, are not allowed by the
+FreeformClass and are removed from a value taken from the document.
+Receivers compare these strings code point by code point, and check
+consistency with the document after applying the same mappings to
+the value in the document.  Other strings are compared after
+Normalization Form C; general compatibility normalization (NFKC) is
+not applied, because it changes meaningful characters in some
+scripts.
+
+Members that hold human-readable text, such as names and reason
+texts, are UTF-8 strings.  An object that contains such members MAY
+contain "lang", a language tag {{!RFC5646}} that applies to all of
+them; {{i18n}} gives details.
+
+## Other Conventions
+
+Timestamps are "date-time" values of {{!RFC3339}} in UTC.  Calendar
+dates, such as the issue date of an invoice, are "full-date" values in
+the time zone determined as described for "issue_tz" ({{core}}).  Identifiers of ITP
+objects are UUID version 7 values {{!RFC9562}}.  Base64url encoding
+follows {{Section 2 of !RFC7515}} without padding.  SHA-256 is
+specified in {{!RFC6234}} and HMAC in {{!RFC2104}}.  URIs follow
+{{!RFC3986}}.  ABNF follows {{!RFC5234}} and {{!RFC7405}}.  Examples
+fold long lines as described in {{?RFC8792}}.
+
+All identifiers of legal entities in examples are fictitious and have
+no valid check digits.  Domain names are taken from {{?RFC2606}}.
+Values in examples that are not in the initial contents of a registry
+are illustrative.
+
+## Terminology
+
+The terms Signed Statement, Transparency Service, Receipt, Transparent
+Statement, Registration Policy, Auditor, and Relying Party are used
+as defined in {{RFC9943}}.  "Origin" and "same-origin" are used as in
+{{!RFC6454}}.  In addition:
+
+Participant:
+: A legal entity, or a natural person acting in business, that issues
+  or receives invoices.
+
+Seller, buyer:
+: The parties to the supply that an invoice documents.
+
+Issuer:
+: The party that issues a given document and signs its envelope.  It
+  is the seller, except in self-billing (the buyer) and in issuance by
+  a third party on the seller's behalf.  Where a tax authority platform, an authorized provider, or a fiscal
+  device generates or numbers the invoice, the issuer is still the
+  party in whose name it is issued, and the platform's or device's
+  role is recorded as evidence.
+
+Node:
+: An HTTP server that sends and receives ITP messages for one or more
+  participants.
+
+Operator:
+: The organization that runs a node.
+
+Directory:
+: A service that answers queries for Participant Documents.  Directory answers are used only if they are accepted under {{trust}}.
+
+Envelope:
+: The signed ITP object that carries one commercial document, plus
+  unsigned evidence about it ({{envelope}}).
+
+Envelope core:
+: The JSON object that the issuer signs.
+
+Document:
+: The invoice or other commercial document in its original syntax.
+
+Legal original:
+: The representation of the invoice that the applicable law treats as
+  the invoice ({{legal-original}}).
+
+Evidence:
+: Signed objects added after the issuer signature: renditions, stamps,
+  and Receipts.
+
+Stamp:
+: Evidence produced by a tax authority, a network, a fiscal device,
+  or a timestamping service about an envelope.
+
+Bridge:
+: A component that exchanges documents with a non-ITP channel, such
+  as a tax platform, on behalf of a node.
+
+Attestation:
+: A credential in which an attestation issuer asserts an attribute of
+  a participant ({{attestations}}).
+
+Trust list:
+: A signed list of parties that a relying party accepts for given
+  roles ({{trust-lists}}).
+
+Profile:
+: A specification, maintained outside this document, of how ITP is
+  used with a given jurisdiction or network.
+
+Participant Document:
+: A signed document in which a participant publishes its identifiers,
+  keys, and receiving and sending nodes ({{participant-document}}).
+
+Node Document:
+: A signed document in which a node publishes its endpoints and keys
+  ({{node-document}}).
+
+# Overview
+
+## Deployment Model
+
+A participant normally uses a node run by its invoicing or accounting software provider.  The
+participant publishes, or lets its operator publish, a Participant
+Document that names its receiving endpoints and its keys.  An
+attestation issuer binds the participant's tax identifier to those
+keys.
+
+When the participant issues an invoice, its node signs an envelope,
+obtains any stamp that the issuer's tax regime requires through a
+bridge, registers a commitment to the envelope in a transparency
+service, and delivers the envelope to the recipient's node.  The
+recipient's node checks the envelope and answers with a signed
+"delivered" status.  Later statuses are specified in
+{{I-D.martinez-itp-lifecycle}}.
+
+A recipient whose suppliers do not use ITP can publish its own receiving endpoint and can verify envelopes that reach it through other channels.
+
+## Message Flow
+
+~~~ ascii-art
+ Issuer node                    Recipient's DNS, web, directory, node
+     |                                               |
+     |  1. DNS _itp TXT, /.well-known/itp            |
+     |---------------------------------------------->|
+     |  2. Participant Document, Node Document       |
+     |<----------------------------------------------|
+     |  3. sign envelope; stamp via bridge;          |
+     |     register Signed Statement --> TS          |
+     |  4. GET nonce                                 |
+     |---------------------------------------------->|
+     |  5. Replay-Nonce                              |
+     |<----------------------------------------------|
+     |  6. POST envelope (HTTP Message Signature)    |
+     |---------------------------------------------->|
+     |  7. 201 + "delivered" status                  |
+     |<----------------------------------------------|
+~~~
+{: #fig-flow title="Main message flow (TS: transparency service)"}
+
+## Conformance Classes {#conformance}
+
+Sending node:
+: Implements discovery ({{discovery}}), acceptance of Participant
+  Documents ({{trust}}), envelope creation ({{envelope}}), and the
+  HTTP binding as a client ({{transport}}), including copies to the
+  issuer's archive node ({{issuer-copies}}).  Because status messages
+  are sent to "issuer_node", it also publishes a Node Document and
+  accepts status messages as a server ({{status-http}}).
+
+Receiving node:
+: Publishes Participant and Node Documents, implements the HTTP
+  binding as a server, steps 1 to 4 of {{verification}}, duplicate
+  detection ({{idempotency}}), the "copies" endpoint when a participant names it in "archive" ({{issuer-copies}}), and the "delivered" and
+  "technical-rejected" statuses ({{status}}).  A receiving node
+  carries documents as octets and does not need to interpret them, so
+  it MUST NOT reject a document only because it cannot interpret its
+  syntax, and it answers "unsupportedDocument" only when the document
+  matches no entry of the recipient's "accepts"
+  ({{participant-document}}).  So
+  that any two participants share at least one syntax, a receiving
+  node MUST accept invoices and credit notes in UBL 2.1 {{UBL21}} or a
+  later version, that is, documents with "media_type"
+  "application/xml" whose root element is in the namespace
+  "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" or
+  "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2",
+  whatever their customization, and deliver them to the
+  recipient, even when the recipient's "accepts" does not list them;
+  it MUST NOT answer "unsupportedDocument" for them.  It SHOULD also accept the syntax that the registered
+  profile of each jurisdiction in which its participant holds a "tax"
+  PID designates as the legal original, such as CFDI in Mexico.  UBL is the
+  common base of Peppol BIS Billing 3.0 {{PEPPOL-BIS}}, Peppol PINT
+  {{PEPPOL-PINT}}, the specifications of the Digital Business Networks
+  Alliance in the United States {{DBNA}}, and several national formats.
+  Other syntaxes are optional.
+
+Verifier:
+: Implements all of {{verification}}.  A verifier need not implement
+  the HTTP binding.
+
+Directory:
+: Answers exact-match queries for Participant Documents
+  ({{directories}}) and does not alter the documents it returns.
+
+# Participant Identifiers {#pid}
+
+A participant identifier (PID) has the following syntax:
+
+~~~ abnf
+pid      = scheme ":" value
+scheme   = %x61-7A *( %x61-7A / DIGIT / "-" )
+value    = 1*( ALPHA / DIGIT / "-" / "." / ":" / "_" / pct-encoded )
+pct-encoded = "%" UPHEX UPHEX
+UPHEX       = DIGIT / %x41-46
+tax-value    = jurisdiction ":" tax-type *( ":" qualifier )
+               ":" tax-id
+jurisdiction = 2UPALPHA [ "-" 1*3( UPALPHA / DIGIT ) ]
+tax-type     = %x61-7A *( %x61-7A / DIGIT / "-" )
+qualifier    = 1*( ALPHA / DIGIT / "-" / "." / "_" )
+tax-id       = 1*( UPALPHA / DIGIT / "-" / "." / "_" / pct-encoded )
+UPALPHA      = %x41-5A
+
+; The value of a "tax" PID matches tax-value.  The identifier is
+; the last colon-separated component; a ":" in it is percent-encoded.
+~~~
+
+Characters outside this set, such as "&" or non-ASCII letters that
+some tax identifiers contain, are percent-encoded as UTF-8 octets, as
+in {{Section 2.1 of RFC3986}}, with uppercase hexadecimal digits.
+Each scheme defines a normalization that MUST be applied before two
+PIDs are compared.  After normalization, two PIDs are equal only if
+they are identical octet strings.  PIDs of different schemes, or of
+different types of the "tax" scheme, are never equal, even when they
+contain the same identifier; a relation between them is established
+only by attestations ({{attestations}}).  Schemes are registered in the ITP PID Schemes
+registry ({{iana-registries}}).  The initial schemes are:
+
+tax:
+: A tax identifier of any jurisdiction, as "tax:" followed by a jurisdiction code
+  in uppercase, a colon, a type from the ITP Tax Identifier Types
+  registry, a colon, and the identifier.  The jurisdiction code is an
+  {{ISO3166}} alpha-2 country code or, for identifiers issued by a
+  subdivision, its {{ISO3166-2}} code, for example "CA-QC"; "XK", a user-assigned code under {{ISO3166}}, is used for Kosovo.  The jurisdiction is the one
+  whose register the identifier belongs to, as recorded in the
+  registry entry, written with its {{ISO3166}} code even where
+  documents use another prefix ({{tax-id-types}}).  A type MAY
+  define further colon-separated qualifiers before the identifier,
+  such as a municipality code.  Unless the registry entry for the type defines
+  another normalization, the identifier is written without separators
+  or spaces, in Unicode Normalization Form C, with letters in
+  uppercase (letters outside ASCII by their Unicode simple uppercase
+  mapping) before percent-encoding, fullwidth characters
+  mapped to their ASCII equivalents, any check digit included, and
+  without the country prefix that documents add to some identifiers,
+  such as the prefix of VAT identification numbers in the European
+  Union.
+  An identifier that the authority derives
+  from a base identifier for an establishment or a subdivision, such
+  as a GSTIN per Indian state or an Indonesian NITKU per branch, is a
+  separate type whose registry entry says how it relates to the base
+  identifier.  The registry
+  entry lists the prefixes and suffixes that documents and validation
+  services use for the type ({{tax-id-types}}), so that two spellings
+  of one identifier normalize to the same PID; for example
+  "ESB00000000" in a document maps to "tax:ES:vat:B00000000".  Examples are
+  "tax:JP:qualified-invoice:T0000000000000", "tax:ES:vat:B00000000",
+  "tax:GB:vat:000000000", and "tax:MX:rfc:AAA010101AA0".  {{tax-id-types}} lists the initial
+  types.  A party can hold several tax identifiers,
+  for example one per state or one for income tax and one for
+  consumption tax; each is a separate PID.  A party registered for tax in a jurisdiction other than its own
+  holds a PID of that jurisdiction, for example "tax:FR:vat:..." for a
+  Spanish company registered for VAT in France, and "seller" and
+  "buyer" carry the PID that the document uses for the transaction.
+  Some tax identifiers are shared by several legal entities, such as
+  the number of a group registration for VAT or another
+  consumption tax; the registry entry for such a type says
+  so.  A participant MUST NOT use a shared tax identifier as its
+  primary PID; it lists it in "aliases", covered by an attestation
+  that names the member by another PID.  A relying party MUST NOT
+  accept a Participant Document under {{accepting}} on the basis of a
+  shared tax identifier alone.
+
+eas:
+: A Peppol Electronic Address Scheme code {{PEPPOL-EAS}}, a colon, and
+  the identifier, for example "eas:0009:00000000000000" (French
+  SIRET) or "eas:0088:0000000000000" (Global Location Number).  Values are
+  normalized to lowercase, except the hexadecimal digits of
+  percent-encoded octets, since Peppol participant identifiers are
+  case-insensitive {{PEPPOL-IDS}}.
+
+  "eas" is an initial scheme because its code list is public.  The list includes international schemes, such as 0088 (Global Location Number) and 0060 (D-U-N-S Number), and national ones, such as 0151 (Australian Business Number).  "eas" has no precedence over other schemes.  Other networks, exchange platforms that tax authorities run or designate, and EDI value-added networks that address participants by identifiers of their own register PID schemes on the same terms.
+
+lei:
+: A Legal Entity Identifier {{ISO17442}} in uppercase.
+
+domain:
+: A DNS name controlled by the participant, as an A-label in lowercase
+  without a trailing dot.  A "domain" PID does not identify a legal
+  entity on its own ({{trust}}).
+
+Where a PID appears in a claim that requires a URI, such as the "iss"
+or "sub" claim of a JWT, it is written as the URN
+"urn:ietf:params:itp:pid:" followed by the PID, for example
+"urn:ietf:params:itp:pid:tax:MX:rfc:AAA010101AA0".
+
+A participant MAY hold several PIDs.  A PID is "verified" for a
+relying party only if an attestation that the relying party accepts
+binds it to the participant's keys, or if the relying party accepted
+the Participant Document under rule 3 of {{accepting}} and the
+certificate identifies the participant by that PID.
+
+# Discovery {#discovery}
+
+## Starting Point
+
+ITP discovery starts from a DNS name that the sender already knows,
+for example from a "domain" PID, from a previous invoice, or from the
+recipient's email address when the recipient controls that domain.
+Addresses at shared mailbox providers do not identify a participant.  Finding a domain from another kind of
+PID is outside the scope of this document.  Directories that offer
+such lookups are caches whose answers are accepted only under
+{{trust}} ({{directories}}).  In many economies most small
+businesses have no domain name of their own and are known to their
+counterparties by a tax identifier, a business registration number,
+or a telephone number.  For them, a directory run by a network, an
+operator, or a tax authority is the usual starting point, and a
+profile can designate one.  The Participant Document it returns is
+accepted under rule 1 or rule 3 of {{accepting}}, which do not
+require a domain.
+
+## Channels Required by Law or by Network Agreements {#mandated}
+
+Some jurisdictions designate the channel or registry through which
+invoices are delivered to a recipient, and some require clearance by
+the tax authority before delivery.  This document does not change
+those obligations.  ITP discovery can be used in addition, for
+example to obtain the recipient's keys or to send a copy.  An
+envelope sent through ITP in addition to a designated channel is
+marked as a copy ({{core}}); a copy is not a separate payable.
+
+## DNS Record {#dns}
+
+A participant that controls a domain announces ITP support with a TXT
+record at the underscored name "_itp" {{!RFC8552}} of that domain.
+The record signals presence and a version, as the "_mta-sts" record of
+{{?RFC8461}} does; all other data is retrieved over HTTPS.
+
+~~~ abnf
+itp-record  = %s"v=ITP1" 1*( *WSP ";" *WSP itp-field ) *WSP [";"]
+itp-field   = field-name "=" field-value
+field-name  = 1*( ALPHA / DIGIT / "_" )
+field-value = 1*( %x21-3A / %x3C-7E )
+~~~
+
+~~~ dns-rr
+_itp.acme.example. 3600 IN TXT (
+  "v=ITP1; id=20261028T0900; pid=tax:ES:vat:B00000000" )
+~~~
+
+v:
+: The version.  It MUST be the first field and MUST be "ITP1".
+
+id:
+: Required.  An opaque value of 1 to 32 alphanumeric characters that
+  changes whenever the participant's metadata changes.
+
+pid:
+: Optional.  The participant's primary PID.  This is a claim,
+  verified only as described in {{trust}}.  Participants that are
+  natural persons SHOULD omit it ({{privacy}}).
+
+kt:
+: Optional.  A comma-separated list of base64url-encoded SHA-256 JWK
+  Thumbprints {{!RFC7638}} of keys that may sign Participant Documents
+  published for the domain.  When the record is validated with
+  DNSSEC, this binds those keys to the domain ({{accepting}}).  Several thumbprints can be listed, for example for several participants under one domain or during a key change.
+
+issuers:
+: Optional.  A comma-separated list of attestation issuer identifiers,
+  as they appear in trust lists, that the participant authorizes to
+  issue attestations for its PIDs.  When the field is present, an
+  attestation issuer MUST NOT issue an attestation that binds a key or
+  a domain to a PID of the participant unless its own identifier is listed.  This is analogous to the CAA record {{?RFC8659}}.
+
+The strings of one TXT record are concatenated.  TXT records at the
+name that do not match "itp-record" are ignored.  If more than one TXT
+record at the name starts with "v=ITP1", the client MUST treat
+discovery as failed for that domain.  Unknown fields MUST be ignored.
+
+The record is optional; a client can use the well-known URI directly.  The "id" field signals a change of metadata, the presence of the record distinguishes a withdrawn participant from a temporary HTTP failure, and, with DNSSEC {{!RFC4033}}, the "kt" field binds keys to the domain.  DNSSEC is
+RECOMMENDED ({{sec-downgrade}}).
+
+## Well-Known URI {#wellknown}
+
+The URI "https://{domain}/.well-known/itp" returns a JSON object of
+media type "application/itp-metadata+json" that links to the
+documents published for that domain:
+
+~~~ json
+{
+  "id": "20261028T0900",
+  "participants": [
+    {"pid": "tax:ES:vat:B00000000",
+     "document": "https://node.example.com/p/7f3a9c2e41d8b605"}
+  ]
+}
+~~~
+
+id (required, string):
+: The same value as the "id" field of the DNS record, if one exists.
+  A client that finds different values treats the resource as not yet
+  updated and retries later.
+
+participants (required, array):
+: Objects with "pid" and "document", the URL of a Participant
+  Document.
+
+Participant Document URLs SHOULD contain at least 64 bits of
+randomness, and nodes MUST NOT offer an index of the documents they
+host, so that an operator's participants cannot be listed by
+following URLs.
+
+Clients MUST NOT follow redirects to other origins when retrieving
+this resource.  HTTP caching follows {{!RFC9111}}.  The resource is
+not signed; trust decisions use only the signed Participant Document.
+
+## Participant Document {#participant-document}
+
+A Participant Document is a JWS {{!RFC7515}} in the Flattened JSON
+Serialization, or in the General JSON Serialization during a key
+change ({{keys}}), with "typ" "itp-participant+jws".  Its payload is:
+
+~~~ json
+{
+  "pid": "tax:ES:vat:B00000000",
+  "aliases": ["eas:9920:esb00000000", "domain:acme.example"],
+  "name": "Example Logistics S.L.",
+  "lang": "es",
+  "seq": 7,
+  "inbound": [
+    {"channel": "itp",
+     "node": "https://node.example.com/itp",
+     "kids": ["FtIu-VbGrfe_KB6CH7GNwODB72MNxj_ml11dEvO-7kk"],
+     "accepts": [
+       {"media_type": "application/xml",
+        "customization": "urn:cen.eu:en16931:2017"}]},
+    {"channel": "peppol",
+     "id": "iso6523-actorid-upis::9920:esb00000000"}
+  ],
+  "senders": [
+    {"node": "https://node.example.com/itp",
+     "kids": ["FtIu-VbGrfe_KB6CH7GNwODB72MNxj_ml11dEvO-7kk"]}],
+  "jwks": {"keys": ["<participant key>", "<operator-held key>"]},
+  "delegates": [
+    {"kid": "<thumbprint of the operator-held key>",
+     "node": "https://node.example.com/itp"}],
+  "attestations": [],
+  "pin_max_age": 604800,
+  "predecessors": [],
+  "superseded_by": null,
+  "updated": "2026-10-28T09:00:00Z"
+}
+~~~
+
+pid (required, string):
+: The participant's primary PID.
+
+aliases (optional, array of strings):
+: Other PIDs of the participant, including other tax identifiers.
+
+name (optional, string or array):
+: The registered name, or the registered names in several languages
+  and scripts as described in {{i18n}}, for example in Arabic and in
+  English.  It SHOULD be omitted when the participant is a
+  natural person ({{privacy}}).
+
+seq (required, integer):
+: Increases with every new version of the document.
+
+inbound (required, array):
+: Receiving channels.  For "itp", "node" is the URL of a Node Document,
+  "kids" lists the thumbprints of the node keys the participant
+  accepts for that node, and "accepts" lists accepted syntaxes as a media type plus, where
+  applicable, the customization identifier of the syntax (for UBL,
+  the content of the CustomizationID element; for ASC X12 and
+  UN/EDIFACT, carried as "application/EDI-X12" and
+  "application/EDIFACT" {{?RFC1767}}, the transaction set or message
+  type, its version, and any implementation guide, for example
+  "810:005010").  A document matches an "accepts" entry if its "media_type" is
+  equal to that of the entry and, when the entry has
+  "customization", the document's "customization" is equal to it or
+  starts with it followed by "#".  For "peppol", "id" is
+  the Peppol participant identifier including its scheme.  Channel
+  types are registered ({{iana-registries}}), and each registration
+  states the members that identify the participant in that channel.
+  Other four-corner networks, exchange platforms that tax authorities
+  run or designate, and EDI value-added networks register channel
+  types on the same terms as "peppol".  Until a type is registered for
+  a channel, an entry MAY use the type "network", with "profile", an
+  identifier from the ITP Profiles registry that describes the
+  channel, and "id", the participant's identifier in it.  An entry MAY contain
+  "address", an object with "buyer_endpoint" (a PID, matched against
+  "buyer" and "party_ids.buyer") or "buyer_reference" (a string,
+  matched against "references.buyer_reference") or both; the entry
+  applies only to documents in which every member present matches.  A legal entity can use this to route invoices for different establishments or departments to different endpoints.
+  Entries are evaluated in order, and a sender uses the first entry
+  that matches the document and whose channel type it supports.
+
+senders (required, array of objects):
+: The nodes authorized to send envelopes and status messages on behalf
+  of the participant, each with "node" (a Node Document URL) and
+  "kids" (thumbprints of the node keys accepted for it).  A node key
+  not listed in "kids" is not accepted for that node, so control of
+  the node's web origin alone does not let an attacker replace its
+  keys.
+
+archive (optional, object):
+: The node that keeps the participant's own copy of every envelope
+  issued in its name, with "node" (a Node Document URL) and "kids"
+  (thumbprints of the node keys accepted for it), as in "senders".
+  Nodes listed in "senders" send copies to it as described in
+  {{issuer-copies}}.  A participant that issues through several
+  nodes, for example from several software products, can name the
+  node of its "itp" entry in "inbound", so that one node holds both
+  the documents it issues and those it receives.
+
+jwks (required, object):
+: The JWK Set {{!RFC7517}} with the participant's signing keys
+  ({{keys}}).  Keys are carried by value so that they are covered by
+  the signature on the document.
+
+delegates (optional, array):
+: Keys in "jwks" that an operator holds rather than the participant,
+  each with "kid" and "node", the Node Document URL of that operator.
+  Only these keys produce "delegated-issuer" signatures.
+
+attestations (optional, array):
+: Attestations about the participant ({{attestations}}).  Each entry
+  is the attestation as a string, or an object with "attestation",
+  the string, and "receipts", an array of objects with the structure
+  of "itp_evidence.receipts" ({{transparency}}) for its
+  registration.
+
+pin_max_age (optional, integer):
+: Seconds, at most 31536000, during which a client that has accepted
+  this document keeps it and treats payment details received through
+  other channels as unverified ({{sec-downgrade}}).  The value 0
+  removes an existing pin.
+
+predecessors (optional, array of objects):
+: Former PIDs of the participant after a merger, a conversion, or a
+  change of tax identifier, each with "pid", "until" (a "full-date"),
+  and "attestation", a "kyb" attestation whose "pids" claim contains
+  both the former and the current PID.
+
+superseded_by (optional, string or null):
+: Set in the last document published by a former operator to the URL
+  of the participant's new document.  This is a hint; the new document is accepted only under {{accepting}}.
+
+updated (required, string):
+: Time of the last change.
+
+A Participant Document MUST be signed with a key in "jwks" that is not
+listed in "delegates".  Elsewhere in this document, "listed in
+senders" means listed as "node" in an entry of "senders".  An operator that holds only delegated keys
+cannot change the participant's identity, keys, senders, archive node, or pin.
+
+## Node Document {#node-document}
+
+A Node Document is a JWS in the Flattened JSON Serialization with
+"typ" "itp-node+jws", signed with a key in its own "jwks".  As
+recommended by {{?RFC9205}} and {{?RFC8820}}, this specification does
+not fix endpoint paths; they are published here:
+
+~~~ json
+{
+  "node": "https://node.example.com/itp",
+  "versions": ["1"],
+  "endpoints": {
+    "nonce": "https://node.example.com/itp/nonce",
+    "inbox": "https://node.example.com/itp/in",
+    "envelope": "https://node.example.com/itp/env/{id}",
+    "status": "https://node.example.com/itp/env/{id}/status"
+  },
+  "jwks": {"keys": [
+    {"kty": "OKP", "crv": "Ed25519", "alg": "Ed25519",
+     "kid": "FtIu-VbGrfe_KB6CH7GNwODB72MNxj_ml11dEvO-7kk",
+     "x": "PUAXw-hDiVqStwqnTRt-vJyYLM8uxJaMwM1V8Sr0Zgw"}]},
+  "max_envelope_size": 10485760,
+  "storage": {"jurisdictions": ["ES"]},
+  "meta": {"terms_of_service": "https://node.example.com/tos"}
+}
+~~~
+
+"node" is the URL of the Node Document itself.  "versions" lists the
+major versions of the envelope core that the node accepts.  Endpoint
+values are URI Templates {{!RFC6570}} of level 1; {id} is an envelope
+id.  The "inbox" endpoint is the same for all participants of the
+node: the recipient is taken from the signed envelope core, so that
+identifiers do not appear in URLs or in access logs.  A node named in "archive" of a Participant Document also
+publishes a "copies" endpoint ({{issuer-copies}}).  A signed GET
+request to "envelope" returns the envelope as received and all status
+messages the node holds for it.  The node answers such a request, and
+a GET request to a location returned with status 202, only if it is
+signed by a node listed in "senders" of the accepted Participant
+Document of the issuer or of the recipient of that envelope;
+otherwise it answers 404, as for an envelope it does not hold.  "jwks" holds the keys that the node
+uses for HTTP Message Signatures, operator seals, and the statuses it
+signs as a node.  A Node Document is trusted only because a
+participant lists it in "senders", "inbound", or "archive", or because an
+"operator" entry of an accepted trust list has the Node Document URL as its "id", and only its
+keys listed in that entry's "kids" (or in the trust list entry's
+"jwks") are accepted.
+"max_envelope_size" is in octets.  "storage" describes where the node
+stores envelopes: "jurisdictions" lists {{ISO3166}} alpha-2 codes, and
+"authority_access" (optional, array of strings) names tax authorities
+that have online access to them.  "meta" holds informational links
+and is not processed.
+
+## Directories {#directories}
+
+A directory returns Participant Documents unchanged.  It answers
+exact-match queries on a PID only; it MUST NOT offer search by name or
+by partial identifier, and it applies rate limits per client
+({{privacy}}).  A directory is identified by a URI Template
+{{RFC6570}} of level 1 with the variable "pid", configured locally or
+named by a profile; a GET request to its expansion with the PID in URN
+form returns the Participant Document with media type
+"application/itp-participant+jws", or status 404.  A directory MAY
+answer only requests signed as in {{auth}} by nodes of operators on a
+trust list it accepts, and rate-limit per operator, so that bulk
+queries are attributable.  Answers from a directory carry no more trust than the
+signatures and attestations in the documents returned.
+
+# Trust and Keys {#trust}
+
+DNS, web servers, and directories only distribute ITP documents.  A document is bound to a legal entity by attestations from issuers that the relying party accepts.
+
+## Trust Lists {#trust-lists}
+
+A trust list is a JWS with "typ" "itp-trust-list+jws".  Its payload
+has "issuer", "seq", "updated", "exp" (after which the whole list is
+no longer used), and "entries", an array of objects with: "id" (an
+HTTPS URL that identifies the entry), "role" (from the ITP Trust List
+Roles registry, {{iana-registries}}), "jwks", "types" (attestation
+types it may issue, for attestation issuers), "schemes" (values of the
+ITP Bridge Schemes registry, for bridges), "jurisdictions"
+({{ISO3166}} codes), "nbf", and "exp".  The initial roles are
+"attestation-issuer", "operator", "transparency-service", "witness",
+and "bridge".
+
+"jurisdictions" contains {{ISO3166}} alpha-2 codes or {{ISO3166-2}}
+subdivision codes.  A relying party MUST NOT accept an attestation
+that binds a "tax" PID, in "sub" or in a claim such as "pids", or a
+PID of another scheme whose registry entry ties the identifier to one
+jurisdiction (for "eas", an EAS code that designates a national
+identifier), unless that jurisdiction, or the country of that
+subdivision code, is in the "jurisdictions" of the issuer's entry.  An entry that lists a subdivision covers only PIDs with that
+subdivision code.  An entry without "jurisdictions" covers no such PID.  "issuer",
+"seq", "exp", and "entries" are required, as are "id", "role", and
+"jwks" in each entry, and a trust list replaces an earlier one from
+the same issuer only if its "seq" is greater.
+
+How relying parties obtain trust lists, and which they accept, is a matter of local configuration, as for other trust anchors.  Trust lists can be derived from existing registers, such as
+the trusted lists of qualified trust service providers {{ETSI-TL}},
+registers of Peppol service providers, or national registers of
+accredited platforms.  {{sec-trust}} discusses the consequences.
+
+## Accepting a Participant Document {#accepting}
+
+A relying party MUST NOT accept a Participant Document unless one of
+the following holds:
+
+1. A "kyb" or "tax-registration" attestation from an issuer on an
+   accepted trust list binds the PID to the key that signs the
+   document.
+
+2. The "_itp" record of the participant's domain was validated with
+   DNSSEC and its "kt" field lists the key that signs the document,
+   and a "domain-control" attestation from an accepted issuer binds
+   that domain and that key to the PID.
+
+3. The document is signed with a key bound to an X.509 certificate
+   {{!RFC5280}} that identifies the participant, is carried with its
+   chain as "x5c" of the signing key's JWK in "jwks", and chains to a
+   trust anchor carried as "x5c" of a key in the "jwks" of an
+   "attestation-issuer" entry of an accepted trust list, for example a qualified
+   certificate for electronic seals under {{EIDAS2}}, a certificate
+   issued under the electronic signature law of another jurisdiction,
+   or a certificate issued to the taxpayer by a certification
+   authority that a tax authority runs or licenses for invoicing.
+   Trust anchors are local configuration and can include
+   certification authorities accredited in only one jurisdiction.
+   Some certificates identify a billing device or software
+   installation rather than the taxpayer; local configuration or the
+   applicable profile states which certificate profiles identify the
+   participant.
+
+Rules 1 and 3 are of higher assurance than rule 2.  When a relying
+party holds an accepted document for a PID and obtains another one:
+
+* A document accepted under rule 2 MUST NOT replace one accepted under
+  rule 1 or rule 3.
+
+* A document that adds a key not present in the accepted document
+  MUST be signed with a non-delegated key of the accepted document
+  ({{keys}}), or the attestation that covers the new key MUST carry a
+  Receipt from a transparency service in an accepted trust list.  In
+    the second case the new key is "recently bound" for 72 hours after
+  the registration time of that Receipt.
+
+* A document that omits a key present in the accepted document MUST be
+  rejected.
+
+* Otherwise, the document with the greater "seq" replaces the other.
+  If two different documents have the same "seq", the one registered
+  first in a transparency service accepted by the relying party
+  prevails.  If neither is registered, the relying party MUST NOT
+  deliver to that participant through ITP until a document with a
+  greater "seq" is accepted.
+
+A key bound to a PID for the first time through an attestation
+registered less than 72 hours earlier is also "recently bound" until
+72 hours after registration; this rule applies to first contact.  A
+key that a relying party accepts for the first time under rule 3 is
+recently bound until 72 hours after the "notBefore" time of its
+certificate.  Participants accepted under rule 3 SHOULD register their
+Participant Documents ({{monitoring}}), since certificates are not
+registered in ITP transparency services.
+Companion documents that carry payment details, such as
+{{I-D.martinez-itp-lifecycle}}, say how recently bound keys affect
+them.
+
+## Attestations {#attestations}
+
+Attestations are SD-JWTs {{!RFC9901}} with "typ"
+"itp-attestation+sd-jwt".  The issuer-signed JWT contains "iss" (the
+"id" of the attestation issuer's trust list entry), "sub" (the
+subject's PID in URN form, {{pid}}), "type" (from the ITP Attestation
+Types registry), and the claims of that type.  The initial types are:
+
+kyb:
+: The entity exists and is active and a representative was verified.
+  Claims: "pids" (all PIDs covered, in URN form) and "keys"
+  (thumbprints of the participant keys the entity confirmed).
+
+tax-registration:
+: The PID in "sub" is a valid tax identifier of the entity.  Claims:
+  "keys", and "check" with the source and date of the check, for
+  example a query to the validation service of a tax authority or
+  to a service that covers several jurisdictions, such as {{VIES}}.
+
+domain-control:
+: The legal entity identified by "sub" controls the domain in
+  "domain", as verified by the attestation issuer both for the domain
+  (for example with a technique from
+  {{?I-D.ietf-dnsop-domain-verification-techniques}}) and for the
+  entity.  Claims: "domain" and "keys".  Its validity period is at
+  most 90 days.
+
+issuance-authorization:
+: The seller in "sub" authorizes another party to issue documents on
+  its behalf.  Claims: "authorized_issuer" (the authorized PID in URN form),
+  "role" ("buyer" or "third-party"), and "period", an object with
+  "start" and optional "end" ("full-date" values); the authorization
+  covers documents whose "issue_date" falls in that period.
+
+The attestation type "tax-registration" is distinct from the stamp
+type of the same name ({{evidence}}); text that uses the name says
+which one it means.
+
+Claims not registered by {{!RFC7519}} are private claim names
+({{Section 4.3 of RFC7519}}) whose meaning is given by this section
+for the "typ" value "itp-attestation+sd-jwt" only.
+
+{{I-D.martinez-itp-lifecycle}} defines an attestation type for payment
+accounts.  Every attestation includes "iat", "exp", and a status
+reference in the format of {{!I-D.ietf-oauth-status-list}}.
+Attestation issuers MUST register each attestation they issue in a
+transparency service ({{transparency}}), so that participants, or
+monitors acting for them ({{monitoring}}), can detect attestations
+issued without their knowledge.  An attestation issuer that learns
+that a key listed in "keys" is compromised, or that an attestation was
+issued in error, MUST revoke the attestation through its status
+reference.  When it obtains a Participant Document in order to
+deliver, a relying party uses an attestation under {{accepting}} only
+if it is within its validity period and not revoked at that time.
+
+## Keys {#keys}
+
+The "kid" of each JWK MUST be its JWK SHA-256 Thumbprint {{RFC7638}},
+and each JWK MUST contain "alg".  A verifier MUST reject a signature
+whose algorithm differs from the "alg" of the key.  The validity of a
+key is given by the "nbf" and "exp" JWK parameters and its revocation
+by the "revoked" JWK parameter, all registered by {{OPENID-FED}}.  A
+key whose "revoked" member has the reason "compromised" is treated as
+compromised from its "revoked_at" time.
+
+Keys are never removed from "jwks"; a key that is no longer used is
+expired or revoked.  Revocation is monotonic: once a relying party has
+seen a key revoked in an accepted document, it treats the key as
+revoked even if a later document omits the "revoked" member, and it
+keeps the earliest "revoked_at" it has seen.
+
+Implementations MUST support verification with "Ed25519" {{!RFC8032}}
+{{!RFC9864}}, "ES256", and "PS256" {{!RFC7518}}.  Ed25519 public keys are JWKs with "kty" "OKP" and "crv" "Ed25519" {{!RFC8037}}.  Ed25519 signatures
+are verified with the checks of {{Section 5.1.7 of RFC8032}},
+rejecting non-canonical encodings.  Every envelope MUST carry at least
+one "issuer" or "delegated-issuer" signature with one of these
+algorithms.  An issuer MAY add
+signatures with other algorithms, including ML-DSA as specified for
+JOSE in {{?RFC9964}}; the envelope core lists every algorithm used in
+"sig_algs" ({{core}}).  Keys certified for tax purposes
+can use other algorithms, such as RSASSA-PKCS1-v1_5 ("RS256") on
+hardware tokens, or national algorithms such as GOST R 34.10-2012
+{{?RFC7091}} or SM2 with SM3.  A signature with such a key is added as an additional
+signature, once a JOSE identifier exists for its algorithm, or is
+applied inside the legal original and declared in "native_signature"
+({{legal-original}}); the envelope still needs a signature with one
+of the mandatory algorithms, which can be a "delegated-issuer"
+signature, so that any verifier can check it.  The values "none" and "EdDSA", and symmetric
+algorithms, MUST be rejected {{!RFC8725}}.  Implementations SHOULD support verification with "RS256"
+{{RFC7518}}, which keys certified for tax purposes often use.
+
+A signature is valid only if the key was within its validity period
+at the signing time, and the signing time precedes any compromise
+time.  The signing time is established by a Receipt
+({{transparency}}) or by a timestamp stamp; a time asserted by the
+signer alone is not sufficient.  Where the profile for its scheme
+allows it, a "fiscal-device-signature", "tax-registration", or
+"tax-clearance" stamp from a signer accepted under {{evidence}} also
+establishes it; this serves issuers whose certified devices or tax
+platforms are reachable when a transparency service is not.  When neither is yet available, a
+relying party MAY use the time at which it received the envelope,
+provided the key is valid and not revoked at that time, and it
+re-evaluates the signature when evidence is added later.
+
+To change keys, the participant publishes a Participant Document with
+a greater "seq" in the General JSON Serialization, signed with both
+the old and the new non-delegated key, so that it proves possession of
+both, as ACME account key rollover does ({{Section 7.3.5 of
+!RFC8555}}).  If the old key is compromised, an attestation issuer
+instead attests the new key ({{accepting}}).
+
+## Key Transparency and Monitoring {#monitoring}
+
+Each Participant Document SHOULD be registered in a transparency
+service ({{transparency}}).  Participants, or monitors acting for them, can then detect keys or attestations that an operator or attestation issuer added without their consent.  This is a simpler form of the key transparency systems
+described in {{?I-D.ietf-keytrans-architecture}}: registrations are
+logged for monitoring, without the verifiable lookups that those
+systems provide.
+
+A participant can rely on a monitor: a service that watches the logs for registrations that name its PIDs or keys and alerts the participant.  Monitors have no role in the protocol, and any party can operate one.
+
+# The Envelope {#envelope}
+
+## Serialization
+
+An envelope is a JWS in the General JSON Serialization {{RFC7515}},
+with one additional member, "itp_evidence":
+
+~~~ json
+{
+  "payload": "<base64url of JCS(envelope core)>",
+  "signatures": [
+    {"protected": "<base64url of header>",
+     "signature": "<base64url of signature>"}
+  ],
+  "itp_evidence": {
+    "renditions": [],
+    "stamps": [],
+    "receipts": []
+  }
+}
+~~~
+
+The payload is the octet string that JCS produces from the envelope
+core.  Verifiers check signatures over the payload octets as received
+and MUST NOT re-serialize the core before verification.  Signatures
+MUST NOT have an unprotected "header" member.  "itp_evidence" is not
+covered by the issuer signature; each item in it is a separately
+signed object bound to the envelope digest.
+
+The envelope digest is the SHA-256 hash of the payload octets.  Where
+this document writes a digest as a JSON value, it is an object with
+"alg" and "value" (the base64url-encoded hash).  Values of "alg" are
+taken from the "Hash Algorithms for HTTP Digest Fields" registry
+{{!RFC9530}}; "sha-256" MUST be supported.
+
+Over HTTP, an envelope uses the media type
+"application/itp-envelope+jws" ({{iana-media}}).
+
+## Envelope Core {#core}
+
+Members are listed with their requirement level and JSON type.  The
+correspondence with {{EN16931}} and PINT business terms is given in
+{{semantic-mapping}} for information; mappings to other models are
+left to profiles.
+
+itp (required, string):
+: The major version, "1".
+
+crit (optional, array of strings):
+: Names of members of the core that a receiver MUST understand.  A
+  receiver that does not understand a listed member rejects the
+  envelope with "unsupportedExtension".  Members defined in this
+  document are never listed.
+
+id (required, string):
+: A UUIDv7 assigned by the issuing node.
+
+type (required, string):
+: A value from the ITP Document Types registry.  The initial values
+  are "invoice", "credit-note", "debit-note", "prepayment-invoice",
+  "simplified-invoice", "consolidated-invoice", "sales-receipt",
+  "payment-receipt" (a fiscal document that records a payment, such
+  as a Mexican CFDI of type P), "withholding-certificate",
+  "transport-document", "correction-letter", and "proforma".  All of
+  them except "proforma" are fiscal documents.  A "proforma" document
+  has no fiscal effect and MUST NOT carry stamps of type
+  "tax-registration", "tax-clearance", or "tax-report".  {{doc-types}} gives the properties of each initial value.
+
+type_code (optional, string):
+: The {{UNTDID1001}} document name code, for example "380" or "381".
+  It SHOULD be present where such a code applies to the document.
+
+native_type (optional, object):
+: The document type code of the applicable regime, with "scheme"
+  (from the ITP Bridge Schemes registry) and "code", where numbering
+  depends on it, as when sequences run per national document type.
+  Duplicate detection ({{idempotency}}) treats documents with
+  different "native_type" as different.
+
+issuer_role (required, string):
+: "seller", "buyer" (self-billing), or "third-party".
+
+issuer (required, string):
+: The PID of the party that issues the document and signs the
+  envelope.
+
+seller (required, string):
+: The PID of the seller.
+
+buyer (string):
+: The PID of the buyer.  It is omitted only for documents addressed to
+  consumers or to unidentified buyers.  Generic identifiers that some
+  tax authorities prescribe for consumers, unidentified buyers, or
+  foreign parties identify no party; they MUST NOT be used as PIDs and
+  appear only in the document.
+
+party_ids (optional, object):
+: Additional PIDs of the parties, as arrays under "seller" and
+  "buyer", for jurisdictions where a party has several tax
+  identifiers.
+
+recipient (string):
+: The PID of the party the envelope is delivered to: normally the
+  buyer, and the seller in self-billing.  Required when the envelope
+  is delivered through ITP.
+
+authorization (string):
+: Required when "issuer_role" is not "seller" and the document is
+  issued on the seller's behalf: an "issuance-authorization"
+  attestation ({{attestations}}) in which the seller authorizes the
+  issuer.  Document types that the buyer issues in its own right, such
+  as "withholding-certificate", are marked as such in the ITP Document
+  Types registry; they need no authorization, and "issuer" MUST equal
+  "buyer".
+
+issuer_node (required, string):
+: The URL of the issuing node's Node Document.  Status messages from
+  the recipient's side are sent to it ({{status-http}}).
+
+issuer_participant_document (optional, string):
+: The HTTPS URL of the issuer's current Participant Document, so that
+  a recipient that has not dealt with the issuer before can obtain
+  it.  It carries no trust: the document is accepted only under
+  {{accepting}}, and the rules for dereferencing URLs in
+  {{transport}} apply.  It SHOULD be present.
+
+invoice_number (string):
+: The identifier that the issuer assigned to the document, including
+  any series, unique within that series.  Required for fiscal
+  documents unless the number is assigned by a tax authority, in which
+  case it appears in "fiscal_codes" of the core or of a stamp or
+  rendition ({{evidence}}).
+
+issue_date (required, string):
+: The date of issue as stated in the document, a "full-date".
+
+issue_tz (optional, string):
+: The time zone name from the IANA Time Zone Database {{?RFC6557}} in
+  which "issue_date" is expressed.  It SHOULD be present when the issuer's
+  country has more than one time zone or the issuer is not the seller.
+  If it is absent, the time zone of the place of issue stated in the
+  document applies or, if the document states none, verifiers treat
+  "issue_date" as uncertain by one day when they compare it with
+  other times.
+
+issued_at (optional, string):
+: The "date-time" at which the document was generated, where a
+  jurisdiction gives legal effect to a time of issue.
+
+issuance_mode (optional, string):
+: "normal" (the default), "contingency" when the document was issued
+  under a procedure that the tax authority defines for periods in which
+  its system cannot be reached, or "offline" when the issuing device or
+  software was not connected.  Both require later regularization under
+  the applicable rules.
+
+tax_point_date (optional, string):
+: The date on which the tax becomes chargeable, if different from the
+  issue date.
+
+invoice_period (optional, object):
+: "start" and "end" dates of a summary or periodic invoice.
+
+currency (required, string):
+: The {{ISO4217}} code of the invoice currency.
+
+tax_currency (optional, string):
+: The {{ISO4217}} code in which tax is accounted, when it differs from
+  "currency".
+
+exchange_rate (optional, object):
+: "rate" (a decimal string, the number of units of "tax_currency" per
+  unit of "currency"), "date", and "source", when amounts are
+  converted for tax purposes.
+
+total_with_tax, amount_due (strings):
+: The invoice total including taxes, and the amount due for payment,
+  as "amount" values.  Required for document types that the ITP
+  Document Types registry marks as stating an amount, and omitted
+  otherwise, for example in correction letters and transport
+  documents.
+
+tax_summary (optional, array):
+: One object per tax, component, category, and jurisdiction, with
+  "scheme" (for example "vat", "gst", "sales-tax", or a national scheme
+  registered in the ITP Tax Schemes registry), optional "component"
+  (for taxes split between levels of government, such as the central,
+  state, and integrated components of Indian GST, as the profile names
+  them), "category", "percent" (a percentage as a decimal string), "base",
+  and "amount"; optional "jurisdiction" (an {{ISO3166}} or
+  {{ISO3166-2}} code, or a code that the tax scheme defines for a
+  county, city, or municipality); and optional "withheld" (true when
+  the buyer withholds the tax and pays it to the authority, so that it
+  is not part of "amount_due").  A tax levied per unit has
+  "unit_amount" and "unit" in place of "percent".  A verifier can use it to compare tax totals with tax authority records without parsing the document.
+
+fiscal_codes (optional, array):
+: Codes that identify the document for tax purposes, each with
+  "scheme" (from the ITP Bridge Schemes registry), "type" ("number", "uuid", "hash", or a value that the
+  specification of the bridge scheme defines), "value", "assigned_by"
+  ("issuer", "authority", or "device" for a certified fiscal device
+  or control unit), and optional "qr_payload".  Codes
+  assigned by an authority are usually not known when the core is
+  signed; they are then carried in the stamp or rendition that the
+  authority's response produces ({{evidence}}).
+
+chain (optional, object):
+: For regimes that chain documents: "scope" (the series, device, or
+  establishment the chain belongs to), "counter", and "prev_digest" (a
+  digest object over the previous document as the regime defines it).
+
+fiscal_device (optional, object):
+: For documents produced by a certified fiscal device: "scheme"
+  (from the ITP Bridge Schemes registry), "serial", and
+  "registration_id".
+
+native_signature (optional, object):
+: Declares a signature or seal inside the document that the
+  applicable regime requires: "format" (for example "xades",
+  "cades", "jades", "xmldsig" for XML Signature without AdES
+  properties, or a seal format defined by a bridge scheme, such as a
+  signature over a canonical string of the document), "level" (where
+  the format defines levels), and "cert_scheme" (the certification
+  framework of the signing certificate, such as a national public key
+  infrastructure or certificates issued by a tax authority).  The signature
+  itself stays in the document ({{legal-original}}).
+
+document_languages (optional, array of strings):
+: Language tags {{RFC5646}} of the human-readable text in the
+  document.
+
+profiles (optional, array of strings):
+: Identifiers of the profiles that apply to the document, from the
+  ITP Profiles registry.  They tell the recipient which jurisdiction
+  rules, such as deadlines and cancellation policies, apply.
+
+delivery_role (required, string):
+: "primary" or "copy" ({{mandated}}).
+
+document (required, object):
+: The document, given as "content_b64" (base64url of its octets) or
+  "href" (an HTTPS URL), together with "media_type", optional
+  "customization" and "profile" identifiers, and "digest", computed
+  over the octets.  "content_b64" is RECOMMENDED.  An "href" URL MUST
+  be same-origin with "issuer_node" or with a node listed in
+  "senders" of the issuer's Participant Document.  A recipient that
+  receives "href" MUST retrieve the document when it accepts the
+  envelope and store it with the envelope.  JSON documents are also
+  carried as octets, so the digest never depends on canonicalization.
+
+attachments (optional, array):
+: Supporting documents, each with "name", "media_type", "digest", and
+  "content_b64" or "href", processed like "document".
+
+legal_original (string):
+: "document", or "rendition" when the legal original is produced by a
+  clearance channel ({{legal-original}}).  Required for fiscal
+  documents.
+
+required_evidence (optional, array of strings):
+: Stamp types ({{evidence}}) that the issuer has obtained or will
+  obtain for this envelope.  Verifiers report any that is missing.
+
+sig_algs (required, array of strings):
+: The algorithms of all issuer and delegated-issuer signatures that
+  the issuer applied.  For each algorithm in "sig_algs" that a
+  verifier supports, it MUST find a valid issuer or delegated-issuer
+  signature with that algorithm, so that removing a signature cannot
+  downgrade verification.  An "issuer" or "delegated-issuer"
+  signature whose algorithm is not listed in "sig_algs" is reported
+  as failed and is not used to validate the envelope.
+
+references (optional, object):
+: "order", "buyer_reference", "contract", "project",
+  "receiving_advice", "despatch_advice" (an array), "prepayments" (an array
+  of references to prepayment documents settled by this one),
+  "public_buyer" (an object with administrative codes of a public
+  buyer, as a profile defines them), and "replaces", the id of an
+  envelope that this one replaces after a clearance rejection.
+
+correction (optional, object):
+: For corrective documents: "corrects", an array of references to
+  corrected documents, each an object with "envelope_id", with
+  "invoice_number" and "issue_date", or, for a document whose number
+  an authority assigned, with "fiscal_code", an object with "scheme",
+  "type", and "value" as in "fiscal_codes"; "method" ("substitution" or
+  "difference"); optional "period" for corrections that cover a
+  period; and "code", a code of the applicable jurisdiction.
+
+payment (optional, object):
+: Payment terms, as defined in {{I-D.martinez-itp-lifecycle}}.  A
+  receiver that does not implement that document ignores it.
+
+transparency_salt (string):
+: 32 random octets, base64url-encoded.  Required if the envelope is
+  registered ({{transparency}}).
+
+agent (optional, object):
+: Present when a software agent produced the envelope; defined in
+  {{I-D.martinez-itp-agent-mandates}}.
+
+Members that repeat content of the document MUST be consistent with
+it, and the document prevails.  A receiving node that interprets the
+document and finds a contradiction rejects the envelope with
+"inconsistentCore".  XML documents MUST be parsed with document type
+definitions and external entities disabled.
+
+## Legal Original {#legal-original}
+
+Where the issuer's own document is the invoice, the legal original is
+"document".  In clearance regimes, the invoice is the artifact that
+the tax authority, or a provider it accredits, accepts, stamps, or
+delivers.  A bridge adds that artifact to "itp_evidence.renditions".
+Because the core is signed before the rendition exists, the issuer
+sets "legal_original" to "rendition", and the verifier takes as legal
+original the rendition from a signer accepted under {{evidence}} for
+the applicable scheme.  If there is more than one such rendition for
+the same scheme, the verifier reports the conflict and does not
+choose.  The envelope core is not modified after signing; renditions are carried only in "itp_evidence".
+
+A human-readable rendition, such as a PDF produced from the document,
+is never the legal original unless the applicable profile says so.
+Renditions produced for people are expected to be accessible, for
+example by following {{WCAG22}} for HTML renditions.
+
+Where the tax authority's platform issues the invoice and assigns its
+number, the data that the issuer submits is not an invoice until the
+platform issues it.  The issuer sets "legal_original" to "rendition"
+and omits "invoice_number", and a bridge adds the platform's output
+as a rendition.  The same applies where the law makes a code added by
+the authority part of the invoice.
+
+The issuer signature is an envelope-level signature.  It is not by
+itself an advanced or qualified electronic signature or seal under
+{{EIDAS2}} or under any other regime, and a "delegated-issuer"
+signature identifies the operator, not the participant.  Whether ITP
+evidence contributes to the controls that establish authenticity of
+origin and integrity of an invoice under the applicable tax law, for
+example Article 233 of {{EU-VAT-DIR}} in the European Union, is for
+the issuer and its tax authority to determine.
+Where a signature or seal on the invoice itself is required, it is
+applied in the native syntax of the legal original, for example
+XAdES {{XADES}} on UBL, CAdES {{CADES}}, or JAdES {{JADES}}, and is
+declared in "native_signature".
+
+## Signature Header Parameters {#sig-header}
+
+The protected header of every signature on an envelope contains
+"alg", "kid", "typ" with the value "itp-envelope+jws", "itp_role", and
+"crit" with a value that includes "itp_role" ({{Section 4.1.11 of
+RFC7515}}).  A JOSE library that does not know "itp_role" therefore
+rejects the signature instead of ignoring the role.
+
+itp_role:
+: A value from the ITP Signer Roles registry: "issuer" (a key of the
+  participant that signs the object: the issuer of an envelope, or the
+  party in "by" of a status message), "delegated-issuer" (a key listed
+  in "delegates" of that participant's Participant Document), "node" (a
+  node key, for the statuses that a node signs), "operator-seal" (a
+  node stating that it validated the envelope), "bridge" (a key of a
+  bridge, for renditions, stamps, and the statuses a bridge emits), or
+  "agent" (see {{I-D.martinez-itp-agent-mandates}}).
+
+A verifier MUST reject an "issuer" signature whose key is listed in
+"delegates", and a "delegated-issuer" signature whose key is not.
+An envelope is valid if at least one "issuer" or "delegated-issuer"
+signature verifies with a key valid at the signing time, and the
+"sig_algs" rule in {{core}} is met.  Other signatures that fail are
+reported and ignored, so that a signature added by a third party
+cannot invalidate an envelope.  An "operator-seal" or "agent"
+signature is never accepted in place of an "issuer" or
+"delegated-issuer" signature.  An "operator-seal" signature is made
+with a key listed in "kids" of the "senders" entry for that node in
+the issuer's Participant Document or, on a status message, in the
+Participant Document of the party in "by".  Keys for "agent" signatures come
+from the mandate in the "agent" member, and not from {{trust}}; a verifier that does not
+implement {{I-D.martinez-itp-agent-mandates}} ignores "agent"
+signatures.
+
+A protected header MAY contain "x5c" when the key is accepted under
+rule 3 of {{accepting}}.  A key in "jwk" or "x5c" MUST NOT be used
+unless its JWK SHA-256 Thumbprint equals a "kid" accepted under
+{{trust}} for the signing time.
+
+## Evidence Objects {#evidence}
+
+Each rendition and stamp is a JWS in the Flattened JSON Serialization
+signed by the bridge that obtained it from the authority, network,
+fiscal device, or timestamping service, or by the issuer's node where
+the profile for the scheme lets that node act as bridge.  Its
+protected header has "typ" "itp-rendition+jws" or "itp-stamp+jws",
+"itp_role" "bridge", and "crit" including "itp_role".  Any signature
+of the authority, device, or service itself is carried in
+"evidence_token".  The JWS payload contains
+"type" (required, a stamp type, or "rendition"), "scheme" (required,
+from the ITP Bridge Schemes registry), "envelope_digest" (required),
+"issued_at" (required), optional "authority_reference" (the
+identifier that the authority or network assigned), optional
+"response_digest" (the digest of the authority's or network's response),
+optional "evidence_token" (base64url of a token that the scheme
+defines), and optional "fiscal_codes" with the same structure as in
+{{core}}.  A "timestamp" stamp has the scheme "rfc3161" and carries in
+"evidence_token" a time-stamp token {{!RFC3161}} over the envelope
+digest or, in a status message, over the status message digest.  A verifier uses the genTime of the token as a trusted time
+only if the token validates to a time-stamping authority accepted by
+local configuration or whose certificate is for a key in the "jwks"
+of the bridge's trust list entry, and its
+messageImprint equals, under the same hash algorithm, the envelope
+digest or, for a stamp in the "itp_evidence" of a status message, the
+status message digest ({{status}}).  A rendition
+also contains "media_type" and "content_b64" with the legal original.
+For example:
+
+~~~ json
+{
+  "type": "tax-registration",
+  "scheme": "example-registration",
+  "envelope_digest": {"alg": "sha-256",
+    "value": "<envelope digest>"},
+  "issued_at": "2026-10-28T10:15:03Z",
+  "authority_reference": "A-0000000000000000",
+  "response_digest": {"alg": "sha-256",
+    "value": "RBNvo1WzZ4oRRq0W9-hknpT7T8If536DEMBg9hyq_4o"}
+}
+~~~
+
+Stamp types and scheme names are registered ({{iana-registries}}).
+The initial stamp types are "tax-registration", "tax-clearance",
+"tax-report", "network-ack", "fiscal-device-signature", and
+"timestamp".  The bridge retains the response whose digest is in
+"response_digest".  Verifiers accept
+a rendition or a stamp only if its signer is a bridge on an accepted
+trust list for the scheme concerned, or a node listed in "senders" of
+the issuer's Participant Document when the profile for that scheme
+allows the issuer's own node to act as bridge.  Unknown stamp types
+are reported and otherwise ignored.
+
+Stamps can also be attached to envelopes that are never delivered,
+for example when a jurisdiction requires reporting of a transaction
+but no exchange of the invoice through ITP.
+
+Receipts are described in {{transparency}}.
+
+# HTTP Transport {#transport}
+
+## General
+
+ITP uses HTTPS with TLS 1.3 {{!RFC9846}}, following {{!RFC9325}}, and
+servers are authenticated as described in {{!RFC9525}}.  The TLS
+trust anchors that a node uses are local configuration and need not
+be limited to those of web browsers.  Nodes MAY also offer TLS 1.3
+cipher suites with national algorithms, such as those of {{?RFC8998}}
+or {{?RFC9367}}, but MUST support the mandatory-to-implement cipher
+suite, signature algorithms, and key exchange groups of {{Section 9.1
+of RFC9846}}, so that nodes in different jurisdictions can connect.  HTTP
+semantics follow {{!RFC9110}}.  Clients obtain endpoint URLs from Node
+Documents.
+
+When a node dereferences a URL while processing ITP objects,
+including status list and trust list URLs, it MUST use HTTPS, MUST NOT
+follow redirects to other origins, and MUST apply limits on size,
+time, and the number of retrievals caused by one inbound request.  It
+MUST check the address it actually connects to, after DNS resolution
+and for every connection, and MUST NOT connect to addresses whose
+"Globally Reachable" value is "False" in the IANA special-purpose
+address registries {{IANA-SPECIAL}} {{!RFC6890}} {{!RFC8190}}, such as loopback,
+private, or link-local addresses.  This prevents DNS rebinding.  A node MUST NOT obtain
+verification keys from URLs found in an inbound envelope; keys come
+only from documents accepted under {{trust}}.
+
+## Request Authentication and Replay Protection {#auth}
+
+Every request between nodes, and every response that a node generates
+for such a request, MUST be signed with HTTP Message Signatures
+{{!RFC9421}}, in a profile similar to the one in
+{{?I-D.ietf-webbotauth-httpsig-protocol}}:
+
+* The signature label is "itp" and the "tag" parameter is "itp".
+
+* The "keyid" parameter is the "kid" of a key in the sending node's
+  Node Document.  The algorithm is determined by that key and not by
+  an "alg" parameter.  Node keys are "Ed25519" keys, used with
+  "ed25519", or "ES256" keys, used with "ecdsa-p256-sha256".
+
+* Requests with content cover "@method", "@target-uri",
+  "content-digest" {{RFC9530}}, "content-type", and
+  "idempotency-key".  Requests without content cover "@method" and
+  "@target-uri".  All requests include the "created", "expires", and
+  "nonce" parameters, and "expires" is at most 300 seconds after
+  "created".
+
+* Responses cover "@status" and, if there is content,
+  "content-digest", plus the request components "@method",
+  "@target-uri", and, where present, "idempotency-key", with the "req"
+  parameter ({{Section 2.4 of RFC9421}}).  They include the "created"
+  and "keyid" parameters.
+
+* Requests to the "nonce" endpoint use HEAD or GET and are not signed,
+  since the client has no nonce yet.
+
+A client MUST verify the signature of each response with a key listed
+in "kids" of the "inbound" or "senders" entry, or for copies
+({{issuer-copies}}) the "archive" entry, through which it found that
+node.  A client
+treats an unsigned response, or one whose signature does not verify,
+such as a 413 or 502 response from an intermediary, as a transport
+failure and retries according to {{idempotency}}.
+
+A receiver MUST verify "content-digest" against the content received
+and MUST reject a signature whose "created" time is more than 60
+seconds in the future.  A request whose HTTP Message Signature or "content-digest" does
+not verify is rejected with "badSignature".
+
+Nonces are issued by the receiving node and carried in the
+Replay-Nonce response field defined in {{Section 6.5.1 of RFC8555}}.
+A client obtains a first nonce from the "nonce" endpoint, and every
+response from a node includes a fresh one.  A node MUST accept each
+nonce at most once and MUST reject a request with an unknown or used
+nonce with the error "badNonce" ({{errors}}).  Nonces SHOULD be
+generated so that the node can check them without keeping state for
+unused nonces, for example by authenticating an expiry time with a
+node secret, so that the nonce endpoint cannot be used to exhaust
+memory.
+
+For delivery, the sending node MUST be listed in "senders" of the
+issuer's Participant Document.  For status messages, it MUST be listed
+in "senders" of the issuer's or the recipient's Participant Document,
+or be the node of the recipient's "itp" "inbound" entry that accepted
+the envelope; the status message itself is verified separately, as
+{{status}} describes.  The receiving node resolves "keyid" among the
+"kids" of those entries, and otherwise rejects the request with
+"unauthorizedSender".
+
+How software authenticates to its own node is outside this
+specification; OAuth 2.0 {{?RFC6749}} with sender-constrained access
+tokens ({{?RFC9449}} or {{?RFC8705}}), as recommended in
+{{?RFC9700}}, is one option.
+
+## Delivery {#delivery}
+
+A node delivers an envelope with a POST request to the "inbox"
+endpoint of the recipient's node.  It takes that endpoint only from a
+Node Document that it has verified with a key listed in "kids" of the
+recipient's "inbound" entry for that node, so that a party that
+controls only the node's web origin, for example after its domain has
+expired, does not receive envelopes.  The recipient is the "recipient"
+member of the signed core.  The values below are those of
+{{test-vectors}}; the content, shown truncated, is the 1365-octet
+envelope described there:
+
+~~~ http-message
+NOTE: '\' line wrapping per RFC 8792
+
+POST /itp/in HTTP/1.1
+Host: node.example.net
+Content-Type: application/itp-envelope+jws
+Content-Length: 1365
+Idempotency-Key: "01a18201-84a0-7b2a-9d41-6c1f0e8a5b77"
+Content-Digest: \
+  sha-256=:tGM8fHYi3ZCow6CDlj142ehZqwBn0THA+Lw0u7U3zMc=:
+Signature-Input: itp=("@method" "@target-uri" "content-digest" \
+  "content-type" "idempotency-key");created=1793182503;\
+  expires=1793182803;nonce="dG9rZW4tMDAx";\
+  keyid="FtIu-VbGrfe_KB6CH7GNwODB72MNxj_ml11dEvO-7kk";tag="itp"
+Signature: itp=:bOzCUemhJyw3eBk8Wy/00zxlzv773K0IBmEaFL5e6LkQqP2W8rDR\
+  dAK9uujlKF8hzCc1KwTj57eziXc3ysvjDA==:
+
+{"itp_evidence":{"receipts":[],"renditions":[],"stamps":[]},...}
+~~~
+
+The receiving node validates the request and the envelope as in
+steps 1 to 4 of {{verification}}.  If it accepts the envelope, it
+responds with status 201, a Location field with the envelope URL, and
+content of type "application/itp-status+jws" holding a "delivered"
+status message.  Otherwise the response is a problem details object
+{{!RFC9457}} with an ITP error type, for example "unknownRecipient"
+when the node serves no participant with the PID in "recipient", or
+"untrustedIssuer" when step 2 of {{verification}} fails.  An envelope larger than
+"max_envelope_size" results in status 413 with "envelopeTooLarge".  A receiving node that
+learns, after a 201 response, that it cannot pass the envelope to the
+recipient sends a "technical-rejected" status ({{status}}).
+
+A receiving node processes a delivery request in this order: it
+checks the size, the nonce, and "content-digest"; it performs step 1
+of {{verification}}; it obtains and accepts the issuer's Participant
+Document as in step 2; it resolves "keyid" among the "kids" of the
+issuer's "senders" entries and verifies the HTTP Message Signature
+({{auth}}); it completes steps 2 and 3; and only then does it look up
+the recipient and perform step 4.  The time it takes to fail one of
+the checks before the recipient lookup does not depend on the
+recipient.
+It returns "unknownRecipient" only to a sending node that has passed
+these checks, and it rate-limits such answers per issuer.  A client
+that has not passed them therefore cannot learn from the inbox whether
+a PID is a participant of the node.
+
+## Idempotency and Duplicates {#idempotency}
+
+ITP uses the Idempotency-Key field defined in
+{{I-D.ietf-httpapi-idempotency-key-header}} for its syntax and
+registration; the processing rules below replace those of that
+document for ITP requests.  The field is required on
+delivery and status requests.  Its value is the id of
+the envelope or status message.  The scope of a key is the
+authenticated sending node.  Two requests have the same content if
+they carry the same envelope digest, for envelopes, or the same
+status message digest, so a retry that adds evidence to
+"itp_evidence" is not a conflict.  The receiving node verifies new
+evidence items, adds them to its stored envelope, and returns them on
+a GET request to "envelope".  A missing key results in status
+400 with "idempotencyKeyMissing", reuse of a key with different
+content in status 422 with "idempotencyKeyReused", and a concurrent
+request with the same key in status 409 with "requestInProgress".  A repeated
+request with the same content receives the original response.  Nodes
+MUST retain keys for at least 7 days.
+
+Independently of HTTP idempotency, a receiving node keeps track of
+the envelopes it has received for as long as it retains them:
+
+* An envelope with the same envelope digest as one already received
+  is a duplicate.  The node returns the original "delivered" status
+  and MUST NOT present it to the recipient as a new payable.
+
+* An envelope with an "id" already seen and a different digest is
+  rejected with "envelopeInvalid", unless the Idempotency-Key rules
+  already reject it with "idempotencyKeyReused".
+
+* An envelope with a different "id" from one already received, but
+  with the same issuer (any PID verified for the same Participant
+  Document) and the same "invoice_number" within the same numbering
+  scope, where both envelopes contain "invoice_number" and either
+  neither contains "native_type" or both contain equal "native_type"
+  values, or with a "fiscal_codes" entry assigned by an authority or a
+  device (in the core or in an accepted stamp or rendition) that has
+  the same "scheme", "type", and "value", is delivered and flagged
+  to the recipient as a possible duplicate, unless its
+  "references.replaces" names an envelope that was rejected in
+  clearance.  The numbering scope is defined by the applicable
+  profile, for example a fiscal year from 1 April to 31 March; without
+  a profile it is the calendar year of "issue_date".
+
+## Copies for the Issuer {#issuer-copies}
+
+A participant can name in "archive" of its Participant Document a
+node that keeps a copy of every envelope issued in its name
+({{participant-document}}).  When the issuer's accepted Participant
+Document contains "archive", a node listed in its "senders" that
+creates an envelope MUST send a copy of it to the archive node,
+whether or not it delivers the envelope through ITP, unless it is
+itself that node.  The copy is the envelope as signed, with the
+evidence the sending node holds.  It is sent with a POST request to
+the "copies" endpoint of the archive node, which the sending node
+takes only from a Node Document that it has verified with a key
+listed in "kids" of the "archive" entry.  {{auth}} and {{delivery}}
+apply to the request and the response, with these differences:
+
+* The archive node accepts a copy only if the sending node is listed
+  in "senders" of the issuer's accepted Participant Document and the
+  archive node is the node named in "archive" of that document;
+  otherwise it rejects the request with "unauthorizedSender".  It
+  validates the envelope as in steps 1 to 4 of {{verification}}.  Where the processing order of {{delivery}} looks up the recipient, the archive node looks up the participant named in "issuer", and it does not answer "unknownRecipient"; "recipient" can be absent from a copy.
+
+* The envelope is not changed for the copy.  Its "delivery_role"
+  keeps the meaning given in {{mandated}} and refers to delivery to
+  the recipient.  What marks the request as a copy is the endpoint to
+  which it is sent, which the HTTP Message Signature covers.  The
+  archive node therefore holds an envelope with the same envelope
+  digest as the one the recipient holds.
+
+* On success the archive node responds with status 201 and a
+  Location field, without content.  It signs no status message about
+  a copy, so a copy never produces a "delivered" or
+  "technical-rejected" status.
+
+* Idempotency keys of requests to "copies" have a scope of their own,
+  separate from that of requests to "inbox" and "status" at the same
+  node.  The duplicate rules of {{idempotency}} apply among the copies
+  held for one participant, separately from the envelopes received
+  for it: a copy with an envelope digest already held receives the
+  original response, and new evidence is added to the stored copy.  A
+  possible duplicate is flagged to the participant, which can show
+  that two of its senders used the same number.
+
+The sending node also sends to the "copies" endpoint, with media type
+"application/itp-status+jws", each status message for the envelope
+that it signs or receives, including the "delivered" status from the
+recipient's node and messages signed by the counterparty.  The
+archive node stores each status message whose signature is valid
+with the copy named by its "envelope_id" and "envelope_digest", and
+answers 404 for an envelope it does not hold.  It does not send
+copies or their status messages to any other node; the forwarding
+rule of {{status-http}} does not apply to them.  It presents copies
+to the participant as documents issued in the participant's name and
+MUST NOT present them as documents received from another party.
+
+## Asynchronous Results
+
+Bridges to clearance platforms can take minutes or hours to produce a
+result.  A node that cannot complete processing synchronously
+responds with status 202, a Location field identifying the envelope,
+and a Retry-After field.  The client obtains the result with a signed
+GET request to that location.  Until processing completes, the node
+answers again with status 202 and Retry-After; afterwards it answers
+with status 200 and the "delivered" status message, or with the
+problem details object that the POST request would have received.
+
+## Errors {#errors}
+
+Errors are problem details objects {{RFC9457}} whose "type" is a URN
+of the form "urn:ietf:params:itp:error:{name}", registered in the ITP
+Error Types registry ({{iana-errors}}).  When several checks fail, the
+object contains a "subproblems" array whose elements have "type",
+"detail", and, where applicable, "pointer" (a JSON Pointer
+{{!RFC6901}} into the envelope core), as in {{Section 6.7.1 of RFC8555}}.  "detail" is text for people; a problem
+details object MAY contain "lang" ({{i18n}}).
+
+| Type | Status | Meaning |
+|---|---|---|
+| badNonce | 400 | Nonce unknown or already used |
+| badSignature | 400 | HTTP Message Signature invalid |
+| unauthorizedSender | 403 | Sending node not authorized by the party concerned |
+| unknownRecipient | 404 | No participant with that PID at this node |
+| envelopeInvalid | 422 | Envelope signature, digest, or structure invalid |
+| untrustedIssuer | 422 | Issuer keys not accepted under the trust model |
+| inconsistentCore | 422 | Core contradicts the document |
+| unsupportedDocument | 422 | Document type or syntax not accepted by the recipient |
+| unsupportedExtension | 422 | A member listed in "crit" is not understood |
+| unsupportedVersion | 422 | Major version not listed in "versions" |
+| storageJurisdiction | 422 | The recipient cannot store the envelope where the applicable rules require |
+| invalidTransition | 409 | Status not allowed in the current state |
+| channelRequired | 409 | The recipient must be reached through another channel |
+| idempotencyKeyMissing | 400 | Idempotency-Key field missing on a delivery or status request |
+| idempotencyKeyReused | 422 | Idempotency key reused with different content |
+| requestInProgress | 409 | A request with the same idempotency key is being processed |
+| envelopeTooLarge | 413 | Envelope larger than "max_envelope_size" |
+{: title="Initial ITP error types"}
+
+A "channelRequired" problem includes a "channel" member naming the
+channel, for example "peppol", or a channel type registered for a
+tax authority platform or another network.  Because node responses are signed, an intermediary cannot inject it.
+
+## Status Messages over HTTP {#status-http}
+
+Status messages ({{status}}) are sent with a POST request to the
+"status" endpoint, expanded with the envelope id, with the same
+authentication and idempotency rules as delivery.  Messages signed by
+the issuer, by a bridge used by the issuer, or, when "issuer_role" is
+"seller", by the payee ({{I-D.martinez-itp-lifecycle}}) go to the node that returned the "delivered"
+status.  All other messages go to the issuer's node, found through "issuer_node"; a node
+MUST NOT send them there unless that URL is listed in "senders" of the
+issuer's accepted Participant Document.  A node MUST forward to the
+counterparty's node every status message for the envelope that it
+holds and that the counterparty has not received, including those
+signed by nodes, bridges, or third parties.  A party that is not
+a participant in the envelope, such as an assignee, sends its messages
+through the seller's node, which relays them.  Each node stores every
+status message whose signature is valid and returns all of them on a GET request to the "envelope" endpoint, so that both sides
+hold the same set.  Clients MAY send Accept-Language; nodes SHOULD
+take it into account for text they generate and set
+Content-Language.
+
+## Caching
+
+Participant Documents and Node Documents are cacheable; servers
+SHOULD send Cache-Control with a "max-age" of at most 86400 seconds.
+Responses that contain envelopes or status messages are private and
+SHOULD carry "Cache-Control: no-store".
+
+## Versioning and Extensibility {#extensibility}
+
+The "itp" member of the envelope core carries the major version, and
+the "versions" member of a Node Document lists the versions a node
+accepts; a receiving node rejects an envelope whose "itp" value is
+not listed with "unsupportedVersion".  Receivers MUST ignore unknown members in ITP objects, except
+those listed in "crit", and unknown fields in the DNS record.  Each
+member whose values come from a registry says what a receiver does
+with an unknown value; for registries where this document says
+nothing, an unknown value is reported to the user and otherwise
+ignored.  A change that existing receivers cannot safely ignore
+requires either a "crit" entry or a new major version.
+
+# Status Messages {#status}
+
+A status message is a JWS with "typ" "itp-status+jws", in the
+Flattened JSON Serialization, or in the General JSON Serialization
+when it carries several signatures (for example with an "agent"
+member, {{I-D.martinez-itp-agent-mandates}}).  Its protected header
+contains "alg", "kid", "typ", "itp_role", and "crit" including
+"itp_role".  Its payload is:
+
+~~~ json
+{
+  "id": "01a18205-1c2e-7f00-8a10-2b3c4d5e6f70",
+  "envelope_id": "01a18201-84a0-7b2a-9d41-6c1f0e8a5b77",
+  "envelope_digest": {"alg": "sha-256",
+    "value": "<envelope digest>"},
+  "status": "delivered",
+  "effective_date": "2026-10-28",
+  "by": "https://node.example.net/itp",
+  "seq": 1
+}
+~~~
+
+id (required, string):
+: A UUIDv7 assigned by the signer.
+
+envelope_id, envelope_digest (required):
+: The envelope the message is about.
+
+status (required, string):
+: A value from the ITP Statuses registry.
+
+reason (optional, object):
+: "code", from the ITP Status Reason Codes registry or, for
+  "technical-rejected", the name of an ITP error type ({{iana-errors}});
+  "text"; and optional "lang".
+
+effective_date (required, string):
+: The "full-date" on which the event took place, which can differ from
+  the date of the message.
+
+by (required, string):
+: The signer: the PID of a participant; the Node Document URL of a
+  node, for statuses that a node signs; or the "id" of a bridge's trust
+  list entry, for statuses that a bridge signs.
+
+seq (required, integer), prev (object):
+: "seq" counts the messages of one signer for one envelope, starting
+  at 1, and "prev" is the digest of that signer's previous message; it
+  is absent from the first.
+
+agent (optional, object):
+: Present when a software agent produced the message
+  ({{I-D.martinez-itp-agent-mandates}}).
+
+A status message MAY have an "itp_evidence" member next to "payload"
+and "signatures", with stamps bound to the status message digest, for
+example a timestamp.  A participant MUST sign the status messages for
+one envelope through a single node, so that its "seq" chain does not
+fork.
+
+The digest of a status message is the SHA-256 hash of its JWS Payload
+octets.  A status message is signed by the party named in "by": a participant with a key covered by its accepted Participant Document,
+including a "delegated-issuer" key; a node with a key listed in
+"kids" of the recipient's "inbound" entry for that node; a bridge with
+a key from its trust list entry.
+
+This document defines two statuses, both signed by the receiving node
+with "itp_role" "node":
+
+delivered:
+: The envelope reached the recipient's node and passed steps 1 to 4 of
+  {{verification}}.
+
+technical-rejected:
+: The envelope was refused, or could not be passed to the recipient,
+  for technical or regulatory reasons; "reason" is required and gives
+  the cause.  It is final for delivery;
+  {{I-D.martinez-itp-lifecycle}} defines its effect on other
+  statuses.
+
+{{I-D.martinez-itp-lifecycle}} defines further statuses, their
+signers, and how a state is derived from the set of messages.  A node
+that does not implement that document stores and returns such
+messages but does not interpret them.
+
+# Transparency {#transparency}
+
+## Signed Statements
+
+An issuing node SHOULD register each envelope it signs; without a
+Receipt or a timestamp stamp an envelope has no trusted signing time
+({{keys}}).  After signing an envelope, the issuing node computes the
+commitment
+
+~~~
+C = HMAC-SHA256(transparency_salt, envelope digest octets)
+~~~
+
+where the HMAC key is the 32 octets obtained by decoding
+"transparency_salt", and registers C in a transparency service
+{{RFC9943}} in one of two ways:
+
+Per envelope:
+: A Signed Statement, which is a COSE_Sign1 message {{!RFC9052}},
+  signed with the key that produced the "issuer" or "delegated-issuer"
+  envelope signature.  The COSE algorithm corresponds to the "alg" of
+  the key: -19 ("Ed25519") and -9 ("ESP256") as registered by
+  {{RFC9864}}, and -37 ("PS256") as registered by {{?RFC8230}}.  Its protected header contains the
+  "kid" (the UTF-8 octets of the key's JWK "kid" value), the content type "application/itp-commitment", and the CWT
+  Claims header parameter {{!RFC9597}} with "iss" set to
+  "urn:ietf:params:oauth:jwk-thumbprint:sha-256:" followed by the
+  key's thumbprint {{!RFC9278}}, and "sub" set to the base64url
+  encoding of C.  The payload is C.
+
+In batches:
+: The node collects the commitments it creates during an interval of
+  at most 3600 seconds, builds a Merkle tree over them as defined in
+  {{Section 2.1 of !RFC9162}} with the commitments as leaf inputs in
+  creation order, and registers one Signed Statement whose payload is
+  the tree head, with content type "application/itp-batch-head",
+  signed with a key listed in "kids" of the issuer's "senders" entry
+  for the node, with "iss" set to the
+  Node Document URL and "sub" set to the base64url encoding of the
+  tree head.  Each envelope receives the inclusion proof of its
+  commitment ({{Section 2.1.3 of RFC9162}}).
+
+Batched registration is RECOMMENDED because it does not reveal to the
+transparency service, or to readers of the log, how many envelopes
+each issuer key produces ({{privacy}}).
+
+The node registers the Signed Statement, for example with
+{{?I-D.ietf-scitt-scrapi}}, and adds to "itp_evidence.receipts" an
+object with: "statement", the base64url encoding of the Signed
+Statement; "receipt", the base64url encoding of the Receipt
+{{!RFC9942}}; and, in batch mode, "batch", an object with "tree_size",
+"leaf_index", and "path" (the inclusion proof as an array of base64url
+values).  The Signed Statement together with its Receipt is a
+Transparent Statement in the sense of {{RFC9943}}.
+
+The Registration Policy of a transparency service used for ITP MUST
+verify that the Signed Statement is signed with a key accepted under
+{{trust}} for the role concerned (participant, node, or attestation
+issuer).  The submitter provides the Participant Document, Node
+Document, or trust list entry that lists the key; the transparency
+service uses it only for this check and does not register it.  The transparency service MUST use the RFC9162_SHA256
+verifiable data structure of {{RFC9942}}, and MUST include the
+registration time as the "iat" claim of a CWT Claims header parameter
+{{RFC9597}} in the protected header of each Receipt; that is the
+"registration time" used in this document.  An attestation for which
+no Receipt is available is treated as registered when the relying
+party first sees it.
+
+## Participant Documents and Attestations
+
+Participant Documents and attestations are registered in the same
+way, with two differences.  The commitment is the SHA-256 hash,
+without a salt, of the JWS Compact Serialization of the Participant
+Document payload and the signature whose "kid" sorts first in
+lexicographic order, or of the issuer-signed JWT
+of the attestation.  The CWT "sub" claim is the "PID digest": the
+base64url encoding of the SHA-256 hash of the US-ASCII octets of the
+normalized PID in URN form, so that
+a participant or its monitor ({{monitoring}}) can find every
+registration about a PID without learning other PIDs.  For a
+participant that is a natural person, the PID digest is instead an
+HMAC-SHA256 of the PID in URN form with a secret that the participant
+gives to the attestation issuer and to its monitor, so that the log
+does not let others test guesses of the identifier.
+
+## Receipts and Their Verification
+
+A verifier checks a Receipt with the key of a transparency service
+that is listed with the role "transparency-service" in an accepted
+trust list.  Receipts alone do not prevent a transparency service
+from showing different logs to different parties.  Transparency
+services SHOULD therefore publish checkpoints of the same tree that
+their Receipts refer to, cosigned by independent witnesses, for
+example with {{C2SP-CHECKPOINT}} and {{C2SP-WITNESS}}, and verifiers that can check such checkpoints SHOULD keep the latest
+one they have seen for each log and check consistency against it.
+
+## What Transparency Provides
+
+Registration shows that an envelope existed no later than the registration time, and lets participants or their monitors detect keys, attestations, or envelopes signed with a stolen key while they watch the log.  Registration does not detect duplicates or check invoice content, and a missing registration is not evidence of forgery.  Duplicates are detected by recipients and by the registration systems of tax authorities.
+
+Verifiers compare the registration time with "issue_date" and
+"invoice_period".  A gap larger than the issuance deadline of the
+applicable jurisdiction is reported as a risk signal.  Envelopes with "issuance_mode"
+"offline" or "contingency", and envelopes from fiscal devices that
+synchronize later, are registered when connectivity returns; for them
+verifiers compare the earliest trusted time in their stamps with the
+regularization period that the profile gives.  Issuance
+deadlines differ between jurisdictions and kinds of transaction, for
+example the ten days that {{VIDA}} sets for certain intra-EU
+transactions from July 2030; profiles say which deadlines apply.
+
+# Verification {#verification}
+
+Any holder of an envelope can verify it locally:
+
+1. Check size limits, I-JSON conformance including the rejections in
+   {{json}}, and the structure of the JWS.
+2. Obtain the issuer's Participant Document, from a document already
+   accepted, from "issuer_participant_document", or from a directory, and accept
+   it as described in {{trust}}.  Check that "issuer", and "seller" when
+   "issuer_role" is "seller", are PIDs verified ({{pid}}) for the
+   Participant Document that lists the signing key; "aliases" alone
+   do not verify a PID.  If "issuer_role"
+   is not "seller", check "authorization", unless the ITP Document
+   Types registry marks the document type as issued by the buyer in
+   its own right, in which case check that "issuer" equals "buyer".  If an "agent" member is present and the verifier
+   implements {{I-D.martinez-itp-agent-mandates}}, apply it.
+3. Verify the signatures as described in {{sig-header}}, including
+   "crit", "typ", "itp_role", and "sig_algs", with keys valid at the
+   signing time.
+4. Retrieve the document if needed and recompute its digest.  A
+   verifier that interprets the document syntax also checks that the
+   core is consistent with the document ({{core}}); a receiving node
+   that does not interpret the syntax omits this check.
+5. Recompute C and verify each Receipt and, in batch mode, the
+   inclusion proof, and check that the key that signed the batch
+   statement is listed in "kids" of a "senders" entry of the issuer's
+   Participant Document.  In per-envelope mode, check that the Signed
+   Statement is signed with the key of a valid "issuer" or
+   "delegated-issuer" signature on the envelope.
+6. Verify each rendition and stamp, and report any stamp type listed
+   in "required_evidence" that is missing.  Where the authority offers
+   public verification, query it and check that its record matches the
+   issuer, the number or fiscal code, the issue date, and, where the
+   document type states an amount, the total.
+7. Check whether the envelope duplicates one already held.
+8. Verify the chain of status messages ({{status}}).
+
+A failure in steps 1 to 4 makes the envelope invalid.  A receiving
+node then answers "envelopeInvalid" for steps 1 and 3 and for a
+digest mismatch in step 4, "untrustedIssuer" for step 2, and
+"inconsistentCore" for a contradiction found in step 4 ({{errors}}).
+The results of steps 5 to 8 are reported and do not by themselves make
+the envelope invalid.
+
+Authenticity is judged with the status of attestations at the signing
+time.  A verification result covers the origin and integrity of an
+envelope.  It does not establish that the issuer is a known supplier or that the amount is owed, and is not an authorization to pay.  Envelopes signed with a recently bound
+key ({{accepting}}) are reported as such.  A receiving node also reports
+to the recipient an envelope from an issuer from which that recipient
+has not received an envelope before.
+
+A node MAY offer verification as a service.  The result is a JWS with
+"typ" "itp-verification+jws", signed with a node key, whose payload
+has "envelope_digest", "verified_at", "verifier" (the Node Document
+URL), and "results", an array with one object per step above, each
+with "step" (the step number), "result" ("pass", "fail", or
+"not-applicable"), and optional "detail" and "lang".  Sending an
+envelope to a third party discloses its content, so local
+verification is RECOMMENDED.  A verification service MUST NOT return
+commercial status, duplicate information, or account numbers except
+to the issuer, the recipient, or parties they authorize.
+
+# Operational Considerations
+
+Signing keys of participants and nodes need non-exportable storage,
+such as hardware security modules or equivalent cloud services.
+Operators need a procedure to tell participants and counterparties
+about a key compromise.
+
+Networks and jurisdictions set their own requirements on platforms,
+for example certification to ISO/IEC 27001.  A node that also acts in
+a designated channel holds whatever accreditation that channel
+requires, and trust lists can record such accreditations.
+
+Retention periods for invoices and accounting records are set by each jurisdiction and can span decades.  Recipients SHOULD store, with each envelope, the Participant
+Document, attestations, status list snapshots, trust lists, the keys
+and latest checkpoints of the transparency services, and Receipts
+used at verification, so that the verification can be repeated after the
+issuer's domain or operator has changed or ceased.  Long-term
+validity of signatures can be preserved with evidence records
+{{?RFC4998}}, with JAdES archival signatures {{JADES}}, or by a
+preservation service, for example one that follows {{ETSI-PRES}}.
+Signatures inside the legal original ("native_signature") are
+validated, and validated again later, with the procedures of their own
+format, for example {{ETSI-VAL}} for AdES signatures.  The
+transparency salt is kept as long as the envelope; deleting it breaks
+the link between the envelope and its commitment.
+
+Some jurisdictions require that invoices be stored in their territory,
+or that the place of storage be notified or accessible online to the
+tax authority.  Nodes describe their storage in the "storage" member
+of their Node Document, and a node that cannot meet the requirements
+that apply to a recipient answers "storageJurisdiction".
+
+Network access across borders is not uniform.  In some jurisdictions
+connections to hosts abroad can be slow, filtered, or blocked, public
+web sites need a local filing, and DNSSEC validation is uncommon.
+Participants there are expected to use nodes, transparency services,
+status list endpoints, and trust list distribution points that are
+reachable from within the jurisdiction, and a sending node abroad can
+deliver through a node in the recipient's jurisdiction that the
+recipient lists in "inbound".
+
+When a participant changes operator, the former operator publishes a
+last document with "superseded_by", and keeps serving its last
+Participant Document for at least the pin period it announced.  When
+a participant changes PID through a merger or re-registration, the
+successor lists the former PID in "predecessors".  Envelopes issued
+under the former PID remain verifiable with the former keys.
+
+Pinning ({{sec-downgrade}}) restricts the use of payment details that
+arrive through unlisted channels.  It never prevents an invoice from
+being issued through a channel that the law requires, so an outage of
+a participant's node does not stop invoicing within legal deadlines.
+
+Participants with low bandwidth or intermittent connectivity, and
+fiscal devices that work offline, usually rely on a node hosted by
+their operator, which queues envelopes and registrations and retries
+as described in {{idempotency}}.  Nodes cache Participant Documents,
+trust lists, and status lists within their validity, and senders
+avoid "href" documents and large attachments for recipients that
+announce a small "max_envelope_size".
+
+Transparency services and witnesses have to run for as long as
+invoices are retained.  Operators of nodes are expected to choose
+services with published policies on availability and retention, and
+to register with at least one service that is independent of
+themselves.
+
+Sanctions, controls on cryptography, and data localization rules can
+prevent a participant in one jurisdiction from using a transparency
+service, witness, trust list, or attestation issuer operated in
+another, or can end that use while invoices are retained.  ITP names
+no global operator: relying parties configure these services per
+jurisdiction, an envelope can carry Receipts from several
+transparency services, and verification uses the evidence that the
+recipient stored with the envelope.
+
+For manageability ({{?I-D.ietf-opsawg-rfc5706bis}}), nodes are
+expected to log, for each envelope, the result of each verification
+step and the evidence used, to count deliveries, rejections by error
+type, and verification failures by step, and to warn their operators
+before trust lists, attestations, Participant Documents, or node keys
+expire.  These counts are the data that the experiment asks
+recipients to publish.
+
+# Implementation Status
+
+Note to the RFC Editor: please remove this section before
+publication, as described in {{?RFC7942}}.
+
+Test vector generator:
+: Organization: the author.  Description: a Python program that
+  produces the values in {{test-vectors}} from the RFC 8032 test keys,
+  using the "cryptography" library.  Maturity: prototype.  Coverage:
+  envelope core serialization, envelope digest, issuer signature,
+  Content-Digest, HTTP Message Signature, and transparency
+  commitment.  License: to be published under the Apache License 2.0 with the reference implementation.  Contact: the author.  Date:
+  October 2026.
+
+Reference implementation:
+: Organization: BeeL.&nbsp;(Honey Solutions, S.L.).  Description: an open
+  source node covering discovery, Participant and Node Documents,
+  envelope signing and verification, delivery, status messages, and
+  registration with a transparency service.  Maturity: in
+  development.  License: Apache 2.0 (intended).  Contact: the author.
+
+No independent implementation is known at the time of writing.
+
+# Security Considerations
+
+## Threat Model
+
+The attacker can read, modify, and inject network traffic; control a
+supplier's or a buyer's email account; register look-alike domains
+and shell companies; run a malicious directory or control an
+authoritative DNS server; compromise a participant's key, an
+operator, or an employee of an attestation issuer; and place text in
+invoice content that software processing it may act on.  ITP aims to
+let a recipient detect forged or altered invoices and changed payment
+details, and to let participants detect keys and attestations issued
+without their consent.  It does not protect against a participant
+that issues false invoices with its own valid key, including
+unsolicited invoices to parties it has never dealt with, against a
+buyer that gives another party's tax identifier, or against
+compromise of the recipient's own systems ({{sec-first-contact}}).
+
+## Impersonation and Trust {#sec-trust}
+
+Signatures identify a legal entity only through the trust model of
+{{trust}}, and their assurance is limited by that of the attestation issuers in the trust lists that a relying party accepts.  A relying party that accepts an inadequately vetted trust list, or obtains one over an unauthenticated channel, accepts any key its issuers attest.  Trust lists are signed and
+expire, and relying parties are expected to obtain the signing keys of
+the lists they use out of band, as they do for other trust anchors.
+Restricting each issuer to its jurisdictions limits the damage a
+single issuer can do.
+
+Envelopes from look-alike domains, re-registered expired domains, and shell companies with genuine registrations verify.  The damage is limited because "domain-control" attestations
+cover the legal entity and the key and expire after 90 days; a
+document accepted under rule 2 cannot replace one accepted under rules
+1 or 3; recently bound keys are flagged for 72 hours; and
+verification does not authorize payment.  Recipients still need to match the issuer's PID
+against their own supplier records.
+
+A compromised or dishonest attestation issuer can bind an attacker's
+key to a victim's PID.  The "issuers" field of the DNS record limits
+which honest issuers will do so, although without DNSSEC an attacker
+can strip it from the responses an issuer sees.  Registration of
+attestations under the PID digest lets the victim's monitor detect a
+mis-issued attestation, and the 72-hour rules in {{accepting}} give a
+participant that watches the logs, itself or through a monitor, time
+to react before payment details change.  A participant that does not
+watch them learns of a mis-issued attestation only from its
+counterparties.
+
+## Discovery and Downgrade {#sec-downgrade}
+
+Without DNSSEC, an attacker that controls DNS responses can remove
+the "_itp" record or serve a different well-known resource.  That
+alone does not let it impersonate a participant, because acceptance
+requires the rules of {{accepting}}, and rule 2 requires DNSSEC.  It
+can, however, make a participant look absent and push a sender to
+another channel.  Pinning is carried in the signed Participant
+Document, not in DNS or in the unsigned well-known resource, so an
+attacker who controls only those cannot set or extend it.  Clients
+that have accepted a participant's document keep it for
+"pin_max_age", and payment details that arrive through other channels
+during that time are not used automatically.  As with MTA-STS ({{Section 10.2 of RFC8461}}), pinning does not protect the first contact.
+
+## First Contact {#sec-first-contact}
+
+A typical first contact starts when a buyer gives a seller its tax
+identifier, for example at checkout.  The seller's node normalizes the
+identifier to a PID ({{pid}}) and SHOULD check its format and check
+digit and, where the tax authority offers a validation service, that
+it is registered.  It obtains a Participant Document for the PID from
+a directory that it is configured to use or that a profile
+designates, or from the "_itp" record and well-known resource of a
+domain that the buyer gave, and accepts it only under {{accepting}}.
+For a buyer without a domain this means rule 1 or rule 3, which do
+not depend on DNS.  If no document is accepted, the seller uses
+another channel.  The seller's node verifies the Node Document of the
+"itp" inbound entry with a key listed in "kids" of that entry and
+delivers ({{delivery}}).  The receiving node obtains the seller's
+Participant Document from "issuer_participant_document" or from a directory,
+accepts it under the same rules, and checks that the sending node is
+listed in "senders".
+
+A party that controls DNS, a directory, or the network cannot direct
+the envelope to a node of its choosing, or have its own envelope
+accepted in the name of a participant, unless an attestation issuer
+or certification authority that the relying party accepts binds its
+key to that participant's PID.  It can make a participant look
+absent, so that the seller uses another channel, and it can serve an
+older document that is still validly signed; attestations that cover
+compromised keys are revoked ({{attestations}}), so such a document
+is then no longer accepted.
+
+At first contact ITP does not protect against the following.  It
+does not check that the buyer that gave the tax identifier is
+entitled to use it: the envelope is delivered to the holder of the
+PID, so a wrong or misused identifier discloses the invoice to a third
+party and gives that party an invoice it did not order.  Pinning does
+not apply, because no document has been accepted before.  A key that
+an attestation issuer binds to a PID by mistake or fraud is flagged as
+recently bound for 72 hours ({{accepting}}) and is then accepted like
+any other key, so this rule protects only participants that watch
+transparency services, themselves or through a monitor
+({{monitoring}}).  Any legal entity with an accepted attestation,
+including a shell company, can deliver envelopes to a participant
+whose PID it knows; there is no step in which the recipient consents
+to a new sender.  Such envelopes verify, are reported as coming from a
+new issuer, and do not authorize payment ({{verification}}).
+Recipients match them against their own orders and supplier records,
+and payment details in them are handled as described in
+{{I-D.martinez-itp-lifecycle}}.
+
+## Tampering, Type Confusion, and Algorithm Confusion
+
+The envelope core, including the document digest, the list of
+signature algorithms, and payment details, is covered by the issuer
+signature.  Every signed object defined by ITP has a distinct "typ",
+and verifiers check it, so a signature made for one kind of object cannot
+be presented as another {{RFC8725}}.  "itp_role" is listed in "crit",
+so a generic JOSE library cannot silently ignore it.  Each key
+carries "alg", and verifiers do not take the algorithm from the
+message.  Keys embedded in headers are used only when they match an
+accepted "kid".  Extra signatures that fail are ignored, so they
+cannot be used to invalidate a valid envelope, and "sig_algs" makes
+the removal of a signature detectable.
+
+## Parser Differentials and Canonicalization
+
+Two JSON parsers can read the same text differently, for example
+when member names are duplicated, and this can make a signer and a
+verifier see different values.  ITP requires I-JSON and requires
+rejection of duplicate names and unpaired surrogates before any other
+processing.  Verification is done over the octets received, so
+differences between JCS implementations affect only the signer's
+ability to reproduce its own payload.  Non-integer numbers are
+excluded because their serialization is where JCS libraries differ
+most.  Documents are carried as octets.  XML documents bring their own
+risks, such as external entities and signature wrapping when XAdES is
+used; parsers are configured as required in {{core}}, and signatures
+inside documents are verified with the rules of their own format.
+
+## Delegated Keys and Misbehaving Operators
+
+An operator that holds delegated signing keys can sign envelopes for
+its participants.  It cannot change the participant's keys, senders,
+archive node, or pin, because Participant Documents are signed only with keys the
+participant holds.  New keys need the old key or a logged
+attestation, revocation is monotonic, and participants or their
+monitors can watch transparency services.  Participants that need
+stronger guarantees keep their own keys, for example in qualified
+signature creation devices.
+
+## Status Forgery and Divergent State
+
+Statuses can have legal and tax consequences, and several
+jurisdictions report them to the tax administration.  Without further rules, a receiving operator, or an attacker that compromises it, could sign them in a participant's name.  {{status}} therefore requires the
+signature of the party named in "by", and nodes can sign only
+"delivered" and "technical-rejected".  Both nodes keep and exchange
+the complete set of messages, and {{I-D.martinez-itp-lifecycle}}
+derives the state from that set, so that the two sides cannot end up
+with different states because messages arrived in a different order.
+
+## Evidence Stripping and Substitution
+
+"itp_evidence" is not signed by the issuer.  An intermediary can
+remove a stamp or a Receipt, or add a rendition.  "required_evidence"
+lets verifiers notice removal, renditions are accepted only from
+bridges accepted for the scheme, and conflicting renditions are reported to the user (see {{legal-original}}).
+
+## Replay and Duplicates
+
+Requests carry server-issued nonces and short validity periods.
+Envelopes and status messages carry identifiers, status messages are
+chained with "seq" and "prev", and receiving nodes detect duplicate
+envelopes by digest, also when they arrive from two authorized nodes
+or after the idempotency window ({{idempotency}}).
+
+## Copies for the Issuer
+
+Copies go only to the node named in "archive" of the issuer's
+accepted Participant Document, which only a non-delegated key of the
+participant can change ({{participant-document}}).  Content of an
+envelope, a directory, or DNS cannot direct copies to another node.
+The "copies" endpoint is covered by the HTTP Message Signature, so an
+intermediary cannot turn a delivery into a copy, which would leave
+the recipient without the envelope, or a copy into a delivery.  The
+archive node signs no status message about a copy and sends nothing
+to other nodes, so a copy is never counted as delivery, and the
+counterparty receives nothing from the archive node and is not told
+that a copy exists.  A participant that names an archive node run by
+another operator gives that operator the content of every document
+issued in its name; the "storage" member of that node's Node Document
+({{node-document}}) says where it keeps them.
+
+## Key Compromise and Back-Dating
+
+An attacker with a stolen key can sign envelopes with any stated
+date.  Validity is therefore judged against registration time in a
+transparency service or a trusted timestamp, and revocation records
+the time of compromise.  Envelopes signed with a compromised key and
+lacking earlier trusted time evidence are rejected.  Some risk remains
+for the interval between compromise and its detection.
+
+## Log Equivocation
+
+A transparency service could show different logs to different
+parties.  Witness cosigning and checked consistency proofs address
+this, as long as the witnesses do not collude with the log.  Verifiers
+that only check Receipts depend on the honesty of the transparency
+service.
+
+## Server-Side Request Forgery
+
+ITP objects contain URLs that a node retrieves.  The rules in
+{{transport}} restrict them to HTTPS, to the expected origins for
+documents, and to public addresses checked at connection time, which
+also covers DNS rebinding.
+
+## Untrusted Content
+
+Line descriptions, reason texts, and attachments are written by the
+counterparty.  Software that acts on invoices, including software
+agents, needs to keep such text apart from its own instructions;
+{{I-D.martinez-itp-agent-mandates}} discusses this for agents.
+
+A document can carry an image for people besides its structured
+data, as in hybrid PDF and XML formats, and attachments can include a
+PDF of the invoice.  The two can differ, for example in the payment
+account shown; in Germany, for example, the structured part prevails.
+Software that shows invoices to people is expected to show a
+rendering generated from the structured data of the verified
+document, or to mark an embedded image as not checked against it.
+
+## Denial of Service
+
+Nodes check size, nesting depth, and the number of signatures before
+canonicalization or cryptographic operations, verify the HTTP Message
+Signature before any signature check on the envelope ({{delivery}}), limit the retrievals caused
+by one request, and rate-limit by sending node.  Envelopes whose
+issuer has no accepted Participant Document are refused with
+"untrustedIssuer" ({{verification}}).  Where the law that applies to
+the recipient allows it to refuse invoices delivered through ITP, a
+receiving node MAY also refuse, with the same error, envelopes from
+issuers that do not meet a policy set by the recipient, for example
+issuers it has not listed or that hold no attestation of a given
+type.
+
+## Algorithm Lifetime
+
+Invoices and accounting records are retained for periods that can
+outlast the security of current signature algorithms if a large quantum computer is built.  ITP allows
+additional signatures with other algorithms on the same envelope, and
+"sig_algs" prevents those signatures from being stripped.  Evidence
+records can renew protection of archived envelopes.  A later revision
+is expected to say when envelopes with only classical signatures stop
+being accepted for new issuance.
+
+# Privacy Considerations {#privacy}
+
+This section follows {{?RFC6973}}.
+
+Data:
+: Invoices contain commercially sensitive data and, when a party is a
+  natural person, personal data.  The fact that two parties exchange
+  invoices is sensitive too.
+
+Public and non-public data:
+: Anyone can obtain, without authentication: the "_itp" record and
+  well-known resource of a domain; any Participant Document whose URL
+  or PID it knows, with the participant's PIDs, name, keys,
+  attestations, and the URLs of the nodes that receive, send, and keep copies for
+  it, which usually identify its operator; Node Documents, which do not
+  list participants; and the registrations in transparency services
+  described below, which do not identify recipients.  A party that
+  knows or guesses a PID can therefore learn whether that participant
+  uses ITP and through which operator.  ITP does not publish
+  envelopes, documents, attachments, status messages, payment details
+  or "payment-account" attestations, an operator's list of
+  participants, or a participant's counterparties.  Nodes return
+  envelopes and status messages only to the nodes of the parties
+  ({{node-document}}), and the inbox does not reveal whether a PID is
+  a participant to clients that fail authentication ({{delivery}}).
+
+Natural persons:
+: A sole trader's tax identifier is often a national identity number,
+  is derived from one, or encodes the holder's name and date of birth
+  (an Indonesian resident's NPWP is the national identity number, and
+  an Indian GSTIN contains the holder's PAN), so publishing it
+  discloses personal data.
+  Participants that are natural persons SHOULD NOT publish a PID in
+  DNS, SHOULD omit "name", and SHOULD be reachable only through
+  exact-match queries.  PIDs do not appear in URLs ({{node-document}}),
+  so they do not reach access logs.
+
+Enumeration:
+: Tax identifier spaces are small enough to enumerate.  Directories
+  answer only exact queries and rate-limit them ({{directories}}),
+  which slows enumeration by one client but does not prevent it by
+  many; a directory that answers only authenticated operators makes
+  bulk queries attributable.  PID digests of legal entities are
+  unkeyed hashes, so a reader of a transparency log can test every
+  identifier of a jurisdiction and learn which legal entities use ITP
+  and when their documents or attestations changed.  ITP therefore
+  does not keep confidential which legal entities use it, and an
+  operator's customer list can be rebuilt by querying directories for
+  those PIDs.  PID digests of natural persons are keyed
+  ({{transparency}}) to prevent this for them.
+
+Observers:
+: Resolvers see "_itp" queries, and directories and verification
+  services see who looks up whom.  Clients SHOULD fetch status lists whole and
+  cache them, and SHOULD verify locally.  They can also use encrypted
+  DNS transports {{?RFC7858}} {{?RFC8484}} and Oblivious HTTP
+  {{?RFC9458}} for third-party directories and verification services.  Retrieving a document from "href" tells its host when the
+  recipient processed it, which is one reason "content_b64" is
+  RECOMMENDED.
+
+Transparency:
+: In per-envelope mode the key thumbprint in "iss" links each
+  registration to the issuer's published keys, so readers of the log
+  learn how many envelopes each issuer registers and when; this can
+  reveal sales volume.  In batch mode they learn only per-node
+  volumes.  Registrations of Participant Documents and attestations
+  reveal that a given legal entity uses ITP.  Signed Statements MUST
+  NOT contain identifiers of natural persons in clear.
+
+Identifiers and correlation:
+: PIDs are stable public identifiers of legal entities and ITP does
+  not hide them.  UUIDv7 identifiers reveal their creation time.
+
+Confidentiality:
+: Nodes SHOULD encrypt stored envelopes.  Envelopes MAY also be
+  encrypted end to end to a recipient key with JWE {{?RFC7516}}; a
+  bridge that needs the content then acts on behalf of the party that
+  uses it.
+
+Retention and erasure:
+: Invoices are kept for the periods the law requires.  Data protection
+  laws commonly allow such retention, for example Article 17(3) of
+  {{GDPR}} in the European Union.  Many of them also restrict
+  transfers of personal data abroad or require a copy in the country.  Registering in a transparency service, querying
+  a directory, or using a node, bridge, or verification service in
+  another country can be such a transfer when a party is a natural
+  person.  Operators state where they process data, as nodes do in
+  "storage" ({{node-document}}).  Logs are append-only, so data that could identify a natural person is not registered in them, as recommended, for example, in {{EDPB-BC}}.  Each component (node,
+  directory, transparency service, verifier, attestation issuer,
+  bridge) needs a documented role under the data protection law that
+  applies to it.
+
+# Internationalization Considerations {#i18n}
+
+This section follows {{?RFC2277}} and {{?RFC6365}}.
+
+All ITP JSON texts are UTF-8.  Members that hold text for people
+(such as "name" in a Participant Document, "reason.text" in a status
+message, and "detail" in problem details and verification results)
+are not used for matching.  Their language is given by a "lang"
+member, a language tag {{RFC5646}}, in the same object, and their
+base direction by an optional "dir" member ("ltr", "rtl", or "auto");
+without "lang", the language is unknown.  A sender MAY provide the same text
+in several languages by using an array of objects, each with "lang",
+"text", and optional "dir", in place of a string, where a member's
+definition allows it.  Some jurisdictions require names and other text
+in a given language and allow a second one, for example Arabic with
+English.  Receivers display such text with its language and direction,
+each value in its own bidirectional isolate {{UAX9}} (for example between
+U+2068 FIRST STRONG ISOLATE and U+2069 POP DIRECTIONAL ISOLATE), so
+that right-to-left text does not reorder neighboring identifiers or
+amounts, and do not interpret it.  Text that nodes generate, such as "detail" in
+problem details, follows the Accept-Language field of the request when
+possible ({{status-http}}).
+
+Identifiers that are matched (PIDs, invoice numbers, URLs, codes) are
+restricted to ASCII or percent-encoded UTF-8 ({{pid}}), or are
+NFC strings under the PRECIS FreeformClass ({{text}}), so that matching does not
+depend on how text was entered.
+
+Documents carry their own language information, and
+"document_languages" in the core lets a recipient know, without
+parsing the document, in which languages it is written, for example
+where a jurisdiction requires a given language.
+
+Calendar dates are Gregorian "full-date" values.  Where a document
+uses another calendar, the core still carries the Gregorian date, and
+the document keeps its original date.
+
+# IANA Considerations {#iana}
+
+## Well-Known URI
+
+IANA is requested to register the following in the "Well-Known URIs"
+registry {{!RFC8615}}:
+
+URI Suffix:
+: itp
+
+Change Controller:
+: IETF
+
+Specification Document(s):
+: {{wellknown}} of this document
+
+Status:
+: permanent
+
+Related Information:
+: None
+
+## Underscored DNS Node Name
+
+IANA is requested to add the following to the "Underscored and
+Globally Scoped DNS Node Names" registry {{RFC8552}}:
+
+| RR Type | _NODE NAME | Reference |
+|---|---|---|
+| TXT | _itp | {{dns}} of this document |
+{: title="Underscored DNS node name"}
+
+## Media Types {#iana-media}
+
+IANA is requested to register the following media types in the
+"Media Types" registry, following {{!RFC6838}}:
+
+| Subtype name | Content | Section |
+|---|---|---|
+| itp-metadata+json | Well-known metadata | {{wellknown}} |
+| itp-commitment | 32-octet commitment | {{transparency}} |
+| itp-batch-head | 32-octet Merkle tree head | {{transparency}} |
+| itp-participant+jws | Participant Document | {{participant-document}} |
+| itp-node+jws | Node Document | {{node-document}} |
+| itp-trust-list+jws | Trust list | {{trust-lists}} |
+| itp-envelope+jws | Envelope | {{envelope}} |
+| itp-rendition+jws | Rendition | {{evidence}} |
+| itp-stamp+jws | Stamp | {{evidence}} |
+| itp-status+jws | Status message | {{status}} |
+| itp-verification+jws | Verification result | {{verification}} |
+| itp-attestation+sd-jwt | Attestation | {{attestations}} |
+{: title="Media types (type name: application)"}
+
+The values with the "+jws" or "+sd-jwt" suffix, without the
+"application/" prefix, are the "typ" values of the corresponding
+objects.  The registration template is the
+same for all of them, except where noted:
+
+Type name:
+: application
+
+Required parameters:
+: N/A
+
+Optional parameters:
+: N/A
+
+Encoding considerations:
+: binary.  The "+jws" types use the JWS JSON Serialization, which is
+  UTF-8 JSON; "itp-attestation+sd-jwt" uses the SD-JWT serialization;
+  "itp-metadata+json" is UTF-8 JSON; "itp-commitment" and
+  "itp-batch-head" are 32 octets.
+
+Security considerations:
+: The "+jws" and "+sd-jwt" types carry signed JSON.  They contain no
+  active content.  Integrity and origin come from the signatures, which
+  are checked as described in {{trust}} and {{verification}} of this
+  document; the content is otherwise untrusted.  Envelopes and status
+  messages can contain commercially sensitive and personal data and
+  are not to be cached by shared caches.  "itp-metadata+json" is
+  unsigned and carries no trust on its own.  "itp-commitment" reveals
+  nothing about the envelope without its salt.  See the Security and
+  Privacy Considerations sections of this document.
+
+Interoperability considerations:
+: N/A
+
+Published specification:
+: This document
+
+Applications that use this media type:
+: Implementations of the Invoice Trust Protocol
+
+Fragment identifier considerations:
+: For "itp-metadata+json", as for "application/json"; N/A for the
+  other types.
+
+Additional information:
+: Deprecated alias names: N/A; Magic number(s): N/A; File extension(s):
+  N/A; Macintosh file type code(s): N/A
+
+Person and email address to contact for further information:
+: IETF (iesg@ietf.org)
+
+Intended usage:
+: COMMON
+
+Restrictions on usage:
+: N/A
+
+Author:
+: Carlos Martinez Garcia-Villarrubia
+
+Change controller:
+: IETF
+
+## JSON Web Signature and Encryption Header Parameters
+
+IANA is requested to register the following in the "JSON Web
+Signature and Encryption Header Parameters" registry {{RFC7515}}:
+
+Header Parameter Name:
+: itp_role
+
+Header Parameter Description:
+: Role of the signer of an Invoice Trust Protocol object
+
+Header Parameter Usage Location(s):
+: JWS
+
+Change Controller:
+: IETF
+
+Specification Document(s):
+: {{sig-header}} of this document
+
+## URN Sub-namespace {#iana-urn}
+
+IANA is requested to register the following in the "IETF URN
+Sub-namespace for Registered Protocol Parameter Identifiers" registry
+{{!RFC3553}}:
+
+Registry name:
+: itp
+
+Specification:
+: This document
+
+Repository:
+: The ITP URN Values registry ({{iana-registries}}).  The values
+  "error" and "pid" are reserved there: URNs under
+  "urn:ietf:params:itp:error:" are assigned by the ITP Error Types
+  registry ({{iana-errors}}), and URNs under
+  "urn:ietf:params:itp:pid:" are formed from PIDs as described in
+  {{pid}}.
+
+Index value:
+: Values are assigned by the registries above.
+
+## ITP Error Types {#iana-errors}
+
+IANA is requested to create the "ITP Error Types" registry within a
+new "Invoice Trust Protocol (ITP)" registry group.  Registrations
+follow the "Specification Required" policy {{!RFC8126}}.  Each entry
+contains the type name (the last component of
+"urn:ietf:params:itp:error:"), the HTTP status code, a description,
+and a reference.  The initial contents are the rows of the table in
+{{errors}}, with this document as the reference.
+
+## Other ITP Registries {#iana-registries}
+
+IANA is requested to create the following registries in the "Invoice Trust Protocol (ITP)" registry group, each with the "Specification
+Required" policy:
+
+| Registry | Fields | Initial contents |
+|---|---|---|
+| ITP PID Schemes | name, normalization rule, issuing authority, jurisdiction of the identifiers or of each code where the scheme ties them to one, reference | {{pid}} |
+| ITP Tax Identifier Types | jurisdiction code, type, prefixes and suffixes used in documents, issuing authority, format and check digit, qualifiers, normalization, base identifier and relation to it, shared by several entities (yes/no), personal identifier (yes/no), reference | {{tax-id-types}} |
+| ITP Document Types | name, fiscal (yes/no), states an amount (yes/no), issued by the buyer in its own right (yes/no), reference | {{doc-types}} |
+| ITP Statuses | name, emitted by, final (yes, no, or conditional with the condition), reference | "delivered" (final: no) and "technical-rejected" (final: yes) ({{status}}) |
+| ITP Status Reason Codes | code, description, reference | none |
+| ITP Stamp Types | name, description, reference | {{evidence}} |
+| ITP Bridge Schemes | name, jurisdiction or network, description, reference | "rfc3161" ({{evidence}}) |
+| ITP Tax Schemes | name, jurisdiction, description, reference | "vat", "gst", "sales-tax" |
+| ITP Signer Roles | name, description, reference | {{sig-header}} |
+| ITP Trust List Roles | name, description, reference | {{trust-lists}} |
+| ITP Attestation Types | name, description, reference | {{attestations}} |
+| ITP Channel Types | name, description, members that identify the participant, reference | "itp", "peppol", and "network" ({{participant-document}}) |
+| ITP Profiles | identifier, jurisdiction or network, maintaining organization, reference | none |
+| ITP URN Values | URN suffix, description, reference | "error", "pid" (reserved, this document) |
+{: title="ITP registries"}
+
+The initial contents of the ITP Document Types registry are given in
+{{doc-types}}, with this document as the reference.
+
+| Name | Fiscal | States an amount | Issued by the buyer in its own right |
+|---|---|---|---|
+| invoice | yes | yes | no |
+| credit-note | yes | yes | no |
+| debit-note | yes | yes | no |
+| prepayment-invoice | yes | yes | no |
+| simplified-invoice | yes | yes | no |
+| consolidated-invoice | yes | yes | no |
+| sales-receipt | yes | yes | no |
+| payment-receipt | yes | yes | no |
+| withholding-certificate | yes | no | yes |
+| transport-document | yes | no | no |
+| correction-letter | yes | no | no |
+| proforma | no | yes | no |
+{: #doc-types title="Initial ITP document types"}
+
+Instructions to the designated experts:
+
+* A new value must not duplicate an existing one, and its meaning must
+  be defined precisely in a publicly available specification.
+
+* A PID scheme or tax identifier type must name the authority that
+  issues the identifiers, give a normalization rule that makes
+  comparison unambiguous, and point to a public description of the
+  format and check digits.  Types whose identifiers are commonly
+  derived from national identity numbers need a note on privacy.
+
+* A bridge scheme must name the jurisdiction or network, the authority
+  or organization that runs it, and the public specification of its
+  interface.
+
+* A status must say who emits it, whether it is final, and how it
+  maps to the statuses of existing networks where such a mapping
+  exists.
+
+* A signer role or attestation type affects security.  Its
+  specification must say what it may and may not substitute for and
+  what a relying party checks before accepting it, and must have
+  Security Considerations.  Experts are encouraged to seek review on
+  the mailing list where this document is discussed.
+
+* Experts are encouraged to consult the organizations responsible for
+  the network or jurisdiction concerned, such as OpenPeppol for
+  Peppol identifiers, the operators of other networks for their
+  identifiers, and the tax administration for national codes.
+
+* Identifier formats change.  Experts can approve updates to an
+  existing PID scheme or tax identifier type, such as a new format or
+  prefix, and keep the earlier rules in the entry while identifiers
+  issued under them can still appear in retained envelopes.
+
+--- back
+
+# Mapping to EN 16931 and Peppol PINT {#semantic-mapping}
+
+This appendix is informative.  Peppol PINT {{PEPPOL-PINT}} numbers its
+business terms as IBT-nnn with the same numbers as the BT-n terms of
+{{EN16931}}, so one table serves both.
+
+Other semantic models, such as national formats prescribed by tax
+authorities, ASC X12 810, and UN/EDIFACT INVOIC, map to the same
+members, and the profiles for the networks and jurisdictions that use
+them are expected to give those mappings.  This table is included
+because EN 16931 business terms are numbered and publicly listed.  It
+does not make EN 16931 the reference model for ITP.
+
+| Business term | Name | ITP |
+|---|---|---|
+| BT-1 | Invoice number | invoice_number |
+| BT-2 | Invoice issue date | issue_date |
+| BT-3 | Invoice type code | type_code |
+| BT-5 | Invoice currency code | currency |
+| BT-6 | VAT accounting currency code | tax_currency |
+| BT-7 | Value added tax point date | tax_point_date |
+| BT-10 | Buyer reference | references.buyer_reference |
+| BT-11 | Project reference | references.project |
+| BT-12 | Contract reference | references.contract |
+| BT-13 | Purchase order reference | references.order |
+| BT-15 | Receiving advice reference | references.receiving_advice |
+| BT-16 | Despatch advice reference | references.despatch_advice |
+| BT-23 | Business process type | document.profile |
+| BT-24 | Specification identifier | document.customization |
+| BG-3 | Preceding invoice reference | correction.corrects |
+| BG-14 | Invoicing period | invoice_period |
+| BG-23 | VAT breakdown | tax_summary |
+| BT-29, BT-46 | Seller and buyer identifier | party_ids ("eas" when the scheme identifier is a Peppol EAS code) |
+| BT-30, BT-47 | Seller and buyer legal registration identifier | party_ids ("eas" when the scheme identifier is a Peppol EAS code) |
+| BT-31, BT-48 | Seller and buyer VAT identifier | seller, buyer ("tax" of the type whose registry entry lists the prefix, prefix removed; without a prefix, the jurisdiction is the country in BT-40 or BT-55) |
+| BT-32 | Seller tax registration identifier | seller, or party_ids.seller when BT-31 is present ("tax") |
+| BT-63 | Seller tax representative VAT identifier | not mapped |
+| BT-34, BT-49 | Seller and buyer electronic address | seller, buyer ("eas") |
+| BT-112 | Invoice total amount with VAT | total_with_tax |
+| BT-115 | Amount due for payment | amount_due |
+| BG-24 | Additional supporting documents | attachments |
+{: title="Business term mapping"}
+
+Payment terms (BT-9, BG-10, BT-83, BT-84, BT-113) are mapped in
+{{I-D.martinez-itp-lifecycle}}.
+
+# Initial Tax Identifier Types {#tax-id-types}
+
+These are the initial entries of the ITP Tax Identifier Types
+registry.  "Prefixes" are those that documents and validation
+services put before the identifier; they are removed in the PID.
+Formats summarize the authority's rules and are not a substitute for
+its check-digit algorithms.  Entries whose identifier can be a
+personal identification number of a natural person are marked "P".
+
+| Jurisdiction | Type | Prefixes | Identifier in the PID |
+|---|---|---|---|
+| AT | vat | AT | "U" and 8 digits |
+| BE | vat | BE | 10 digits |
+| BG | vat | BG | 9 or 10 digits (P) |
+| CY | vat | CY | 8 digits and a letter |
+| CZ | vat | CZ | 8 to 10 digits (P) |
+| DE | vat | DE | 9 digits |
+| DK | vat | DK | 8 digits |
+| EE | vat | EE | 9 digits |
+| ES | vat | ES | 9 characters (P) |
+| FI | vat | FI | 8 digits |
+| FR | vat | FR | 2 characters and 9 digits |
+| GR | vat | EL | 9 digits |
+| HR | vat | HR | 11 digits (P) |
+| HU | vat | HU | 8 digits |
+| IE | vat | IE | 8 or 9 characters (P) |
+| IT | vat | IT | 11 digits |
+| LT | vat | LT | 9 or 12 digits |
+| LU | vat | LU | 8 digits |
+| LV | vat | LV | 11 digits (P) |
+| MT | vat | MT | 8 digits |
+| NL | vat | NL | 9 digits, "B", and 2 digits |
+| PL | vat | PL | 10 digits |
+| PT | vat | PT | 9 digits (P) |
+| RO | vat | RO | 2 to 10 digits |
+| SE | vat | SE | 12 digits (P) |
+| SI | vat | SI | 8 digits |
+| SK | vat | SK | 10 digits |
+| GB | vat | GB, XI | 9 digits, 12 digits (the last 3 identify a branch of the same registration), or "GD" or "HA" and 3 digits; "XI" for Northern Ireland |
+| CH | uid | none | "CHE" and 9 digits; the suffix MWST, TVA, or IVA is removed |
+| NO | orgnr | NO | 9 digits; the suffix MVA is removed |
+| MX | rfc | none | 12 characters, or 13 for natural persons (P) |
+| BR | cnpj | none | 14 characters; identifies an establishment, and the first 8 characters are the root of the legal entity |
+| JP | qualified-invoice | none | "T" and 13 digits |
+| IN | gstin | none | 15 characters, one per state |
+| AU | abn | none | 11 digits |
+| SA | vat | none | 15 digits |
+| AE | trn | none | 15 digits |
+| US | ein | none | 9 digits |
+| CA | bn | none | 9 digits |
+| CA | gst-hst | none | the "bn", "RT", and 4 digits |
+| CA-QC | qst | none | 10 digits, "TQ", and 4 digits |
+| CO | nit | none | the NIT (9 digits for legal persons) and its check digit (P) |
+| CL | rut | none | the number and its check digit, a digit or "K" (P) |
+| PE | ruc | none | 11 digits (P) |
+| AR | cuit | none | 11 digits (P) |
+| CN | uscc | none | 18 digits or uppercase letters |
+| KR | brn | none | 10 digits |
+| VN | mst | none | 10 digits, or for individuals and household businesses the 12-digit personal identification number (P) |
+| VN | mst-unit | none | the "mst" of the parent and 3 digits |
+| ID | npwp | none | 16 digits (P) |
+| ID | nitku | none | the "npwp" of the head office and 6 digits |
+| SG | gst | none | the UEN (9 or 10 characters), or "M" and 9 characters |
+| NZ | gst | none | 9 digits (P) |
+| TR | vkn | none | 10 digits, or 11 digits for citizens who are natural persons (P) |
+| IL | tin | none | 9 digits (P) |
+| EG | rin | none | 9 digits |
+| NG | tin | none | 13 digits (P) |
+| KE | pin | none | "A" (individuals) or "P" (others), 9 digits, and a letter (P) |
+| ZA | vat | none | 10 digits, the first of which is "4" |
+| any EU member state | oss | none (prefix kept) | "EU" and 9 characters |
+| any EU member state | ioss | none (prefix kept) | "IM" and 10 characters |
+{: title="Initial tax identifier types"}
+
+For every entry: the issuing authority is the tax administration of
+the jurisdiction; the format and check-digit reference is that
+administration's published specification; the normalization is the
+default of {{pid}} plus the prefix and suffix rules in the table;
+"personal identifier" is "yes" for entries marked "P" and "no"
+otherwise; and the reference is this document.
+
+Some entries need more detail.  "CN uscc" is the unified social credit
+code, which registration authorities assign to legal persons and
+other organizations; it replaced the codes that departments,
+including the tax administration, assigned separately.  An "SG gst"
+number is either the UEN, which the agency that registered the
+entity assigns, or a number that IRAS assigns, for example to a GST
+group, whose members then share it.  The "NZ gst" number is the IRD
+number; an IRD number of 8 digits is written with a leading "0".
+"NG tin" is the Tax ID that the Nigeria Revenue Service and the Joint
+Revenue Board issue jointly, which replaced earlier tax
+identification numbers from 1 January 2026.  In DIAN's electronic
+invoice the NIT is written without its check digit, which is carried
+in a separate attribute; the "CO nit" PID includes the check digit.  For natural persons, "CO nit", "CL
+rut", "PE ruc", "AR cuit", "TR vkn", "IL tin", "VN mst", and "ID npwp"
+are or contain a national identity number.  "CA gst-hst", "VN
+mst-unit", and "ID nitku" are derived from the base identifiers "CA
+bn", "VN mst", and "ID npwp".
+
+The table has more entries for the member states of the European
+Union because their VAT identification numbers share one structure
+and one validation service, which made them easy to check.  It sets
+no priority among jurisdictions, and entries for any jurisdiction are
+registered on the same terms ({{iana-registries}}).
+
+The jurisdiction of a "tax" PID is the one whose register the
+identifier belongs to, written with its {{ISO3166}} code: a Greek VAT
+number written "EL000000000" in a document is
+"tax:GR:vat:000000000".  VAT numbers that the Isle of Man issues in
+the register of the United Kingdom use "GB", and those that Monaco
+issues in the register of France use "FR".
+
+For the member states of the European Union, the "vat" type is the
+VAT identification number assigned under Article 214 of Directive
+2006/112/EC, written without its prefix.  Whether the number is valid
+in {{VIES}} at a given time is checked by a "tax-registration"
+attestation and does not change the PID.  Where the national tax
+identifier has the same value as the VAT identification number
+without its prefix, as in Spain or Portugal, the "vat" type is used
+for both, so that one entity has one PID.  National identifiers with
+another value, such as the German Steuernummer or the French SIREN,
+have types of their own.  "XI" identifies traders in Northern Ireland for supplies of goods
+under the Windsor Framework, with the same number as "GB".  "XI"
+numbers are validated by {{VIES}}; "GB" numbers are not.  Both
+spellings map to the same PID, so the PID does not say which prefix a
+document requires; software that writes a document from a PID takes
+the prefix from the transaction, and a "tax-registration" attestation
+for a trader in Northern Ireland records the "XI" check in "check".
+
+Identification numbers of the special schemes of the European Union
+for distance sales are issued by the member state of identification,
+whose {{ISO3166}} numeric code they contain: "EU" and 9 characters
+under the non-Union scheme and "IM" and 10 characters under the
+import scheme.  They are "tax" PIDs with that member state as
+jurisdiction and the types "oss" and "ioss", with the prefix kept in
+the identifier, for example "tax:IE:ioss:IM3720000000".  "EU" is not
+a jurisdiction code.  The Union scheme uses the "vat" PID of the
+trader.  {{VIES}} does not validate these numbers.
+
+# Test Vectors {#test-vectors}
+
+These values were computed with the program listed in Implementation
+Status and can be reproduced from the inputs given.  The first envelope core
+contains the required members, the members required for a fiscal
+document delivered through ITP and registered in a transparency
+service, and "type_code".  It omits "issuer_participant_document" and
+"issue_tz", which {{core}} recommends; a production envelope from an
+issuer in mainland Spain would carry "issue_tz" "Europe/Madrid".
+
+## Test Keys {#tv-keys}
+
+The issuer key is the Ed25519 key of Section 7.1 (TEST 1) of
+{{RFC8032}}.  The node key is TEST 2 of the same section.
+
+~~~
+NOTE: '\' line wrapping per RFC 8792
+
+Issuer private key (hex):
+9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60
+Issuer public key (hex):
+d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a
+Issuer JWK:
+{"alg":"Ed25519","crv":"Ed25519","kid":"kPrK_qmxVWaYVA9wwBF6Iuo3vV\
+zz7TxHCTwXBygrS4k","kty":"OKP","x":"11qYAYKxCrfVS_7TyWQHOg7hcvPapi\
+MlrwIaaPcHURo"}
+Issuer kid (JWK SHA-256 Thumbprint):
+kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k
+
+Node private key (hex):
+4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb
+Node public key (hex):
+3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c
+Node kid (JWK SHA-256 Thumbprint):
+FtIu-VbGrfe_KB6CH7GNwODB72MNxj_ml11dEvO-7kk
+~~~
+
+## Envelope Core and Digest
+
+The document octets are the 26 ASCII octets
+`<Invoice>example</Invoice>`.  They stand in for a real invoice so
+that the vectors stay short.
+The transparency salt is the octets 0x00 to 0x1f.  The JCS
+serialization of the core is:
+
+~~~
+NOTE: '\' line wrapping per RFC 8792
+
+{"amount_due":"300.00","buyer":"tax:IT:vat:00000000000","currency"\
+:"EUR","delivery_role":"primary","document":{"content_b64":"PEludm\
+9pY2U-ZXhhbXBsZTwvSW52b2ljZT4","digest":{"alg":"sha-256","value":"\
+6ZiIe1OpebitCF67KQnVf06-IzrttxbUipK7v8hX2yg"},"media_type":"applic\
+ation/xml"},"id":"01a18201-84a0-7b2a-9d41-6c1f0e8a5b77","invoice_n\
+umber":"F2026-000184","issue_date":"2026-10-28","issuer":"tax:ES:v\
+at:B00000000","issuer_node":"https://node.example.com/itp","issuer\
+_role":"seller","itp":"1","legal_original":"document","recipient":\
+"tax:IT:vat:00000000000","seller":"tax:ES:vat:B00000000","sig_algs\
+":["Ed25519"],"total_with_tax":"300.00","transparency_salt":"AAECA\
+wQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8","type":"invoice","type_cod\
+e":"380"}
+~~~
+
+The envelope digest (SHA-256 of the octets above, base64url) is:
+
+~~~
+tCMfh_UTadlM5gJmJ8Y5ofvUrCrSjeBSrnNJ7jd3I60
+~~~
+
+## Issuer Signature
+
+The JWS Protected Header, before base64url encoding, is:
+
+~~~
+NOTE: '\' line wrapping per RFC 8792
+
+{"alg":"Ed25519","crit":["itp_role"],"itp_role":"issuer","kid":"kP\
+rK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k","typ":"itp-envelope+jws\
+"}
+~~~
+
+The encoded protected header and the signature are:
+
+~~~
+NOTE: '\' line wrapping per RFC 8792
+
+protected:
+eyJhbGciOiJFZDI1NTE5IiwiY3JpdCI6WyJpdHBfcm9sZSJdLCJpdHBfcm9sZSI6Im\
+lzc3VlciIsImtpZCI6ImtQcktfcW14VldhWVZBOXd3QkY2SXVvM3ZWeno3VHhIQ1R3\
+WEJ5Z3JTNGsiLCJ0eXAiOiJpdHAtZW52ZWxvcGUrandzIn0
+
+signature:
+35u_aepY5agb9gPxHHk-hawtK6n9d6riRQEApwz8_G5wFw7Q3cVhBarDgiVmp2Js1S\
+2K3u1KNYdehcGAO93vCA
+~~~
+
+## Content-Digest and HTTP Message Signature
+
+The envelope is sent as the JCS serialization of the JWS General JSON
+Serialization object, with empty "itp_evidence" arrays (1365 octets).
+Its Content-Digest field value is:
+
+~~~
+sha-256=:tGM8fHYi3ZCow6CDlj142ehZqwBn0THA+Lw0u7U3zMc=:
+~~~
+
+The signature base, signed with the node key, is:
+
+~~~
+NOTE: '\' line wrapping per RFC 8792
+
+"@method": POST
+"@target-uri": https://node.example.net/itp/in
+"content-digest": sha-256=:tGM8fHYi3ZCow6CDlj142ehZqwBn0THA+Lw0u7U\
+3zMc=:
+"content-type": application/itp-envelope+jws
+"idempotency-key": "01a18201-84a0-7b2a-9d41-6c1f0e8a5b77"
+"@signature-params": ("@method" "@target-uri" "content-digest" "co\
+ntent-type" "idempotency-key");created=1793182503;expires=17931828\
+03;nonce="dG9rZW4tMDAx";keyid="FtIu-VbGrfe_KB6CH7GNwODB72MNxj_ml11\
+dEvO-7kk";tag="itp"
+~~~
+
+The resulting Signature field value is:
+
+~~~
+NOTE: '\' line wrapping per RFC 8792
+
+itp=:bOzCUemhJyw3eBk8Wy/00zxlzv773K0IBmEaFL5e6LkQqP2W8rDRdAK9uujlK\
+F8hzCc1KwTj57eziXc3ysvjDA==:
+~~~
+
+## Transparency Commitment
+
+With the salt above, the commitment HMAC-SHA256(salt, envelope digest
+octets), base64url-encoded, is:
+
+~~~
+Q-LudrMZas2xSKx7SNj9ZiJK4Da-nc8r7QPoOpF0Ooc
+~~~
+
+## Second Envelope
+
+This envelope tests a currency without minor unit and an issuer
+outside Europe.  The issuer key is TEST 3 of Section 7.1 of
+{{RFC8032}}; the node key and the HTTP request are not repeated.
+The document octets are the 28 ASCII octets
+`<Invoice>example 2</Invoice>`, and the transparency salt is the
+octets 0x20 to 0x3f.
+
+~~~
+NOTE: '\' line wrapping per RFC 8792
+
+Issuer private key (hex):
+c5aa8df43f9f837bedb7442f31dcb7b166d38535076f094b85ce3a2e0b4458f7
+Issuer public key (hex):
+fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025
+Issuer kid (JWK SHA-256 Thumbprint):
+FVV5umTuau890q59V-4Ga_R6qWb7ON_ivJc4EjvCwTM
+
+JCS serialization of the core:
+{"amount_due":"110000","buyer":"tax:JP:qualified-invoice:T00000000\
+00001","currency":"JPY","delivery_role":"primary","document":{"con\
+tent_b64":"PEludm9pY2U-ZXhhbXBsZSAyPC9JbnZvaWNlPg","digest":{"alg"\
+:"sha-256","value":"fbnyJCUK9dWDESGpFm-3y-CdrHSI4_4JnOg5pPXSE6Q"},\
+"media_type":"application/xml"},"id":"01a18201-9c40-7d3e-8f21-0a1b\
+2c3d4e5f","invoice_number":"INV-2026-000057","issue_date":"2026-10\
+-28","issue_tz":"Asia/Tokyo","issuer":"tax:JP:qualified-invoice:T0\
+000000000000","issuer_node":"https://node.example.com/itp","issuer\
+_participant_document":"https://node.example.com/p/2c81e4a7930f5db\
+6","issuer_role":"seller","itp":"1","legal_original":"document","r\
+ecipient":"tax:JP:qualified-invoice:T0000000000001","seller":"tax:\
+JP:qualified-invoice:T0000000000000","sig_algs":["Ed25519"],"total\
+_with_tax":"110000","transparency_salt":"ICEiIyQlJicoKSorLC0uLzAxM\
+jM0NTY3ODk6Ozw9Pj8","type":"invoice","type_code":"380"}
+
+Envelope digest:
+MCh55C_d9tpKjjPhLNxcFof7XY7aF_4cqfJog_Tqdp8
+
+JWS Protected Header:
+{"alg":"Ed25519","crit":["itp_role"],"itp_role":"issuer","kid":"FV\
+V5umTuau890q59V-4Ga_R6qWb7ON_ivJc4EjvCwTM","typ":"itp-envelope+jws\
+"}
+
+protected:
+eyJhbGciOiJFZDI1NTE5IiwiY3JpdCI6WyJpdHBfcm9sZSJdLCJpdHBfcm9sZSI6Im\
+lzc3VlciIsImtpZCI6IkZWVjV1bVR1YXU4OTBxNTlWLTRHYV9SNnFXYjdPTl9pdkpj\
+NEVqdkN3VE0iLCJ0eXAiOiJpdHAtZW52ZWxvcGUrandzIn0
+
+signature:
+fsn_hHpYonvn5YGp9CU2nLSg5pTVHMrxHv89ud9zH3Z2Y25fgXB0BG8B6nVyMhnqxc\
+V9MbidwVz2xln4_HMgCA
+
+Transparency commitment:
+n0AiEB_AxKljb-gPVkuRTs6_vBXDePBbQYIsNzJluL8
+~~~
+
+## Negative Test Cases {#negative-tests}
+
+Implementations are expected to produce the following results.  Each
+case starts from the first envelope of {{test-vectors}} and changes one
+thing.
+
+1. A second signature with a random 64-octet value and a valid
+   protected header is appended to "signatures".  The envelope is
+   valid; the extra signature is reported as failed and ignored
+   ({{sig-header}}).
+
+2. The protected header of the issuer signature omits "crit".  The
+   signature is rejected, and the envelope is invalid.
+
+3. The core lists "sig_algs" with the values "Ed25519" and "ML-DSA-65", only the
+   Ed25519 signature is present, and the verifier supports ML-DSA-65.
+   The envelope is invalid.  A verifier that does not support
+   ML-DSA-65 accepts it.
+
+4. The core contains "total_with_tax": "300.000" with "currency": "EUR".  The
+   envelope is invalid, because EUR has two decimals.  "1000" with
+   "JPY" and "1.000" with "KWD" are valid; "-0" and "-0.00" are invalid
+   in any currency.
+
+5. The core contains the member "total_with_tax" twice.  The envelope is
+   rejected before any signature check.
+
+6. The issuer signature has "itp_role" "issuer" but its key is listed in
+   "delegates" of the Participant Document.  The signature is rejected.
+
+7. A Participant Document with a greater "seq" omits a key that the
+   accepted document contained.  The new document is rejected.
+
+8. The same envelope is delivered twice with different "itp_evidence"
+   contents.  The second delivery receives the
+   original "delivered" status, and the new evidence is added to the
+   stored envelope.
+
+# Design Rationale
+
+## JOSE for Envelopes, COSE for Transparency {#design-jcs}
+
+Invoice software is built around JSON and HTTP, so envelopes use
+JOSE.  Transparency services standardized by SCITT use COSE, so
+commitments are registered as COSE Signed Statements.  JCS is used so
+that the signer can reproduce the envelope core for audit; verifiers
+do not depend on it, because they verify the octets received, and
+documents are carried as octets.  JCS is an Informational RFC, so a
+Standards Track successor of this document would need a downward
+reference or a different serialization.
+
+## Registered Media Types for Signed Objects {#design-typ}
+
+Explicit typing prevents cross-object substitution {{RFC8725}}.  The
+"typ" values are registered as media types with the "+jws" structured
+syntax suffix, as listed in the IANA "Structured Syntax Suffixes"
+registry with reference to {{RFC7515}}, so that each value has a single
+owner and meaning.
+
+## TXT Record
+
+{{?RFC5507}} discourages overloading TXT records.  ITP follows the
+precedent of MTA-STS {{RFC8461}}: the record signals presence and a
+version, plus a key thumbprint that is useful only with DNSSEC, and
+all other data is retrieved over HTTPS.  An SVCB record {{?RFC9460}}
+was considered and not used, because no connection parameters need to
+be conveyed.
+
+## An Opaque Inbox
+
+Earlier designs put the recipient's PID in the inbox URL.  The
+recipient is already in the signed core, and a PID in a URL ends up in
+access logs and can be altered by frameworks that decode
+percent-encoding, which would break HTTP Message Signatures.  The
+inbox is therefore one URL per node.
+
+## No Invoice Model of Its Own
+
+ITP does not define an invoice model, and does not make one
+mandatory.  Tax authorities prescribe the content and often the
+syntax of the legal original, and they change them more often than an
+Internet protocol can follow; a model of its own would compete with
+EN 16931, Peppol PINT, and the national formats instead of carrying
+them.  The envelope core holds only the members that transport,
+duplicate detection, and verification need, the way an email header
+does for its body.  UBL is the one syntax that every receiving node
+accepts, because it is the common base of Peppol, PINT, and several
+national formats.  Canonical models such as GOBL {{GOBL}} are useful
+for converting between formats and can be carried as documents or
+renditions, but a model maintained by one organization is not made
+mandatory.
+
+## One Scheme for Tax Identifiers
+
+A separate scheme for VAT identification numbers of the European
+Union was considered and not adopted, because it would treat one
+region as the default.  All tax identifiers use the
+"tax" scheme with the {{ISO3166}} code of the jurisdiction that issued
+them; prefixes such as "EL" or "XI" are presentation details recorded
+in the registry.
+
+## Generic Fiscal Members
+
+Tax regimes differ in what they require: identifiers assigned by the
+authority, signatures inside the document, hash chains, fiscal
+devices, contingency modes, several taxes on one invoice, currencies
+with zero or three decimals.  The core carries these as generic
+members ("fiscal_codes", "native_signature", "chain",
+"fiscal_device", "issuance_mode", "tax_summary") backed by registries,
+and leaves the rules of each regime to profiles.  As a result, no normative requirement names a country; examples do,
+and identifiers, codes, and rules specific to a jurisdiction are
+registry entries and profiles.
+
+## Why Not BDXL {#why-not-bdxl}
+
+BDXL {{BDXL}} resolves a hashed participant identifier in a DNS zone
+run by the network, which then points to an SMP.  This suits a network with a central register of participants.  ITP discovery is controlled by the participant from its own domain, without a central register, so it uses a record under that domain.  The two
+can coexist: a Participant Document can list a Peppol endpoint, and a
+BDXL zone could list ITP endpoints.
+
+## Why Not Signed Email
+
+Invoices sent by email can be signed with S/MIME {{?RFC8551}}, and
+DKIM {{?RFC6376}} lets a receiving mail system check the domain that
+sent a message.  A DKIM signature is checked when the message is
+received and binds the message to a sending domain, not to the legal
+entity named in the invoice.  S/MIME certificates identify a mailbox
+and, in some certificate profiles, an organization, and their
+discovery through DNS {{?RFC8162}} starts from an email address.
+Neither finds a receiving endpoint from a tax identifier, binds a
+payment account, or defines statuses.  An ITP envelope can be sent as
+an email attachment and verified like any other ({{verification}}).
+
+## Why Not Only an Existing Network
+
+Four-corner networks such as Peppol and the Digital Business Networks
+Alliance {{DBNA}}, exchange platforms that tax authorities run or
+designate, and EDI value-added networks provide addressing and
+transport among their admitted members.  ITP adds verification that
+does not depend on the delivering channel, transparency, and
+addressing for entities outside those networks.  ITP envelopes can
+travel over them, and the identifiers of a network that registers a
+PID scheme, such as Peppol identifiers, are ITP PIDs.
+
+In clearance regimes, the legal original often already carries a
+signature or seal of the issuer and a stamp of the tax authority that
+any holder can check, for example through a public verification
+service of the authority.  ITP carries those artifacts as renditions
+and stamps ({{evidence}}) and verifies them under the rules of their
+scheme.  It adds discovery, the binding of keys to legal entities
+across jurisdictions, attested payment accounts
+({{I-D.martinez-itp-lifecycle}}), and one verification procedure for
+invoices from different regimes.
+
+# Open Issues {#open-issues}
+
+1. Stream.  The registrations in {{iana}} assume the IETF stream.  On
+   the Independent Submission stream, the URN sub-namespace and the
+   standards-tree media types would have to change.
+2. Mandatory syntax.  This document requires receiving nodes to accept
+   UBL 2.1 or later.  Several regimes use other syntaxes, such as CFDI
+   in Mexico, NF-e and NFS-e in Brazil, DTE in Chile, FatturaPA in
+   Italy, the JSON schema INV-01 in India, and national XML schemas
+   in China, South Korea, Taiwan, Viet Nam, and Indonesia, and
+   invoicing between large trading partners in the United States
+   relies mostly on ASC X12 810.  Malaysia uses UBL 2.1 in XML or
+   JSON, so whether the UBL requirement covers the JSON syntax of UBL
+   is also open.  Options are a second mandatory syntax, or a rule
+   that a receiving node accepts the legal-original syntax of each
+   registered profile for a jurisdiction in which its participant
+   holds a "tax" PID.  This document takes the second option as a
+   SHOULD ({{conformance}}).
+3. Initial entries of the ITP Tax Identifier Types, Tax Schemes, and
+   Bridge Schemes registries, which need input from the authorities
+   concerned.
+4. Alignment of "kyb" attestations with SD-JWT VC types, verifiable
+   credentials {{W3C-VC}}, and the European Business Wallet {{EU-BW}}.
+5. Relationship with electronic transferable records
+   {{UNCITRAL-MLETR}} for invoices that are traded as receivables.
+6. Whether the transparency profile ({{transparency}}) should become a
+   separate document for the SCITT working group.
+7. Governance and funding of shared transparency services, witnesses,
+   and monitors.
+8. Event notifications to software that consumes a node, which this
+   version leaves out.
+
+# Acknowledgments
+{:numbered="false"}
+
+The author used AI-based tools while drafting and reviewing this
+document.  The author checked all text, references, and test vectors
+and is responsible for the content.
