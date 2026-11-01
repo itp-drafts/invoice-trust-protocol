@@ -1,0 +1,1399 @@
+
+
+
+
+Network Working Group                     C. Martínez García-Villarrubia
+Internet-Draft                             BeeL. (Honey Solutions, S.L.)
+Intended status: Experimental                            1 November 2026
+Expires: 5 May 2027
+
+
+ Invoice Trust Protocol (ITP): Lifecycle Status and Payment Information
+                  draft-martinez-itp-lifecycle-latest
+
+Abstract
+
+   This document extends the core of the Invoice Trust Protocol (ITP)
+   with commercial, tax, and payment statuses for invoices, a
+   deterministic way for both parties to derive the same state from the
+   status messages they exchange, payment information for the envelope
+   core, and attestations for payment accounts.  Informative appendices
+   relate ITP statuses to those of Peppol and of several national
+   systems.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at https://itp-
+   drafts.github.io/invoice-trust-protocol/draft-martinez-itp-
+   lifecycle.html.  Status information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-martinez-itp-lifecycle/.
+
+   Discussion of this document takes place on the DISPATCH Working Group
+   mailing list (mailto:dispatch@ietf.org), which is archived at
+   https://mailarchive.ietf.org/arch/browse/dispatch/.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/dispatch/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/itp-drafts/invoice-trust-protocol.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 5 May 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+     1.1.  The Experiment
+   2.  Conventions and Definitions
+   3.  Statuses
+     3.1.  Additional Members of Status Messages
+     3.2.  Status Values
+   4.  Deriving the State
+     4.1.  Signers
+     4.2.  Counted Messages
+     4.3.  State Properties
+   5.  Hooks for Jurisdiction Rules
+   6.  Payment Information
+   7.  Payment Account Attestations
+   8.  Application Considerations for Payment
+   9.  Implementation Status
+   10. Security Considerations
+   11. Privacy Considerations
+   12. Internationalization Considerations
+   13. IANA Considerations
+     13.1.  ITP Statuses
+     13.2.  ITP Status Reason Codes
+     13.3.  ITP Attestation Types and Stamp Types
+     13.4.  New Registries
+   14. References
+     14.1.  Normative References
+     14.2.  Informative References
+   Appendix A.  Models of Jurisdictions and Networks
+   Appendix B.  Status Mappings
+   Appendix C.  Mapping of Payment Terms
+   Appendix D.  State Derivation Examples
+   Appendix E.  Open Issues
+   Acknowledgments
+   Author's Address
+
+1.  Introduction
+
+   The core of the Invoice Trust Protocol (ITP) [I-D.martinez-itp-core]
+   delivers a signed invoice and returns a signed "delivered" status.
+   After delivery, the buyer may accept or reject the invoice, the tax
+   authority may need to be informed, the receivable may be assigned to
+   a factor, and the invoice is paid, possibly in installments or after
+   a credit note.  Several jurisdictions now require some of these
+   events to be reported, with deadlines, and give legal effect to the
+   absence of a response.
+
+   This document defines:
+
+   *  statuses for those events and who may sign each (Section 3);
+
+   *  how a node derives the state of an envelope from the set of status
+      messages, so that both parties reach the same result regardless of
+      the order in which messages arrived (Section 4);
+
+   *  hooks for jurisdiction rules on deadlines and cancellation
+      (Section 5);
+
+   *  the "payment" member of the envelope core (Section 6); and
+
+   *  an attestation type that binds a payment account to its holder
+      (Section 7).
+
+   The meaning of commercial statuses is already defined elsewhere, for
+   example by tax authorities and by networks such as Peppol, whose
+   Invoice Response [PEPPOL-IR] defines them.  ITP defines comparable
+   statuses, carries them in signed messages, and relates them to those
+   of several systems in Appendix B.  Software agents can sign some of
+   these statuses within the limits of a mandate
+   [I-D.martinez-itp-agent-mandates].
+
+1.1.  The Experiment
+
+   This document is Experimental.  The experiment is whether two
+   independent implementations derive the same state from the same set
+   of messages, including messages that arrive in different orders, and
+   whether the hooks in Section 5 are enough to express the rules of at
+   least three jurisdictions with different models.
+
+   Results will be reported on the mailing list where this document is
+   discussed and in later revisions of it.  The experiment ends 24
+   months after publication, together with that of
+   [I-D.martinez-itp-core].
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   Terms and conventions of [I-D.martinez-itp-core] apply, including
+   those for amounts, text, and language tags.  In addition:
+
+   Payee:  The party to which payment is due: the seller, a party named
+      as payee in the invoice, or the assignee after an assignment of
+      the receivable.
+
+3.  Statuses
+
+3.1.  Additional Members of Status Messages
+
+   Status messages have the format defined in [I-D.martinez-itp-core].
+   For the statuses in this document they can also contain:
+
+   amount, currency:  For partial acceptance, payment, credit, or
+      failure.  "currency" is an [ISO4217] code and defaults to the
+      invoice currency.
+
+   settled_amount, exchange_rate:  For a payment or a failure in a
+      currency other than the invoice currency: the amount in the
+      invoice currency that it settles, as stated by its signer, and the
+      rate applied, in the form of "exchange_rate" in the envelope core,
+      with "rate" giving the number of units of the invoice currency per
+      unit of "currency".
+
+   conditions (string), lang:  Text of conditions attached to an
+      acceptance.
+
+   refers_to (string):  The "id" of an earlier status message that this
+      one answers, such as the "payment-sent" that a "payment-failed"
+      concerns.
+
+   corrective (string):  For "credited", REQUIRED: the "id" of the
+      envelope of the corrective document.  For each corrective
+      document, only the counted "credited" with the lowest "id" is
+      summed in "amount_credited".
+
+   deadline (object):  For "deemed-accepted", "deemed-rejected", and
+      similar statuses: "from" (the "id" of the status message the
+      period starts from or, for a stamp, which has no "id", the
+      base64url SHA-256 digest of the stamp's JWS Payload), "days" or
+      "hours", "calendar" (a value from the ITP Calendars registry, such
+      as "calendar-days" or a "business-days-XX" calendar of Section 5),
+      and "until" (the date, or for periods in hours the "date-time",
+      computed under the profile).
+
+   effective_at (string):  The "date-time" of the event, in UTC as are
+      all ITP timestamps ([I-D.martinez-itp-core]), for statuses whose
+      period the profile counts in hours.  The period itself is computed
+      in the time zone that the profile names.  "effective_date" alone
+      cannot show that such a period was met, so these messages MUST
+      also carry in "itp_evidence" a "timestamp" stamp over the status
+      message digest; a message without one is not counted.  In
+      comparisons with a deadline or a window, the time of the earliest
+      such stamp is used in place of "effective_at".
+
+   due_date, remittance:  Payment details reported with an acceptance or
+      a payment.  "remittance" has the form of "remittance" in the
+      "payment" member (Section 6).
+
+   assignee (object):  For "assigned": "pid", "name", and "account", a
+      "payment-account" attestation (Section 7) that names the assignee.
+
+3.2.  Status Values
+
+   The statuses below are registered in the ITP Statuses registry
+   created by [I-D.martinez-itp-core].  "Signer" is the party named in
+   "by"; the status message is signed as the core document requires.
+
+    +========================+=================+=====================+
+    | Status                 | Signer          | Meaning             |
+    +========================+=================+=====================+
+    | registered             | Bridge          | Registration or     |
+    |                        |                 | clearance by the    |
+    |                        |                 | tax authority       |
+    |                        |                 | succeeded           |
+    +------------------------+-----------------+---------------------+
+    | registration-error     | Bridge          | Registration        |
+    |                        |                 | failed; the invoice |
+    |                        |                 | remains issued and  |
+    |                        |                 | the registration is |
+    |                        |                 | corrected and       |
+    |                        |                 | resubmitted         |
+    +------------------------+-----------------+---------------------+
+    | clearance-rejected     | Bridge          | Clearance failed;   |
+    |                        |                 | the invoice is      |
+    |                        |                 | treated as not      |
+    |                        |                 | issued              |
+    +------------------------+-----------------+---------------------+
+    | pending-authority      | Issuer or       | Issued in           |
+    |                        | bridge          | contingency or      |
+    |                        |                 | offline mode and    |
+    |                        |                 | not yet regularized |
+    |                        |                 | with the authority  |
+    +------------------------+-----------------+---------------------+
+    | received               | Recipient       | The recipient's     |
+    |                        |                 | system imported the |
+    |                        |                 | envelope            |
+    +------------------------+-----------------+---------------------+
+    | goods-received         | Recipient       | The recipient       |
+    |                        |                 | confirms receipt of |
+    |                        |                 | the goods or        |
+    |                        |                 | services            |
+    +------------------------+-----------------+---------------------+
+    | operation-unknown      | Recipient       | The recipient       |
+    |                        |                 | states that it does |
+    |                        |                 | not recognize the   |
+    |                        |                 | operation           |
+    +------------------------+-----------------+---------------------+
+    | accepted               | Recipient       | Commercial          |
+    |                        |                 | acceptance, full,   |
+    |                        |                 | partial ("amount"), |
+    |                        |                 | or with             |
+    |                        |                 | "conditions"        |
+    +------------------------+-----------------+---------------------+
+    | deemed-accepted        | Issuer or       | Acceptance presumed |
+    |                        | bridge          | under the           |
+    |                        |                 | applicable law      |
+    |                        |                 | after a period      |
+    |                        |                 | without rejection   |
+    +------------------------+-----------------+---------------------+
+    | deemed-rejected        | Issuer or       | Rejection presumed  |
+    |                        | bridge          | under the           |
+    |                        |                 | applicable law      |
+    |                        |                 | after a period      |
+    |                        |                 | without a response  |
+    +------------------------+-----------------+---------------------+
+    | rejected               | Recipient       | Commercial          |
+    |                        |                 | rejection, with a   |
+    |                        |                 | reason              |
+    +------------------------+-----------------+---------------------+
+    | disputed               | Recipient       | The recipient       |
+    |                        |                 | queries or suspends |
+    |                        |                 | the invoice         |
+    +------------------------+-----------------+---------------------+
+    | assigned               | Holder or       | The receivable was  |
+    |                        | bridge          | assigned to         |
+    |                        |                 | "assignee"          |
+    +------------------------+-----------------+---------------------+
+    | payment-sent           | Buyer           | Payment initiated,  |
+    |                        |                 | full or with        |
+    |                        |                 | "amount"            |
+    +------------------------+-----------------+---------------------+
+    | payment-failed         | Buyer or        | A payment reported  |
+    |                        | bridge, for a   | in "refers_to"      |
+    |                        | "payment-sent"; | failed or was       |
+    |                        | payee or        | returned            |
+    |                        | bridge, for a   |                     |
+    |                        | "paid"          |                     |
+    +------------------------+-----------------+---------------------+
+    | paid                   | Payee           | Payment received,   |
+    |                        |                 | full or with        |
+    |                        |                 | "amount"            |
+    +------------------------+-----------------+---------------------+
+    | cancellation-requested | Issuer          | The issuer asks to  |
+    |                        |                 | cancel the document |
+    +------------------------+-----------------+---------------------+
+    | cancellation-refused   | Recipient       | The recipient       |
+    |                        |                 | refuses a           |
+    |                        |                 | cancellation        |
+    |                        |                 | request             |
+    +------------------------+-----------------+---------------------+
+    | cancelled              | Issuer,         | The document is     |
+    |                        | recipient, or   | cancelled, as the   |
+    |                        | bridge          | profile allows      |
+    |                        |                 | (Section 5)         |
+    +------------------------+-----------------+---------------------+
+    | credited               | Issuer          | A corrective        |
+    |                        |                 | document reduces or |
+    |                        |                 | cancels the amount, |
+    |                        |                 | in full or for      |
+    |                        |                 | "amount"            |
+    +------------------------+-----------------+---------------------+
+
+                Table 1: Statuses defined in this document
+
+   In self-billing, the buyer issues the document and the seller is the
+   recipient, so the seller signs "accepted" or "rejected" of the self-
+   billed invoice, while "payment-sent" is still signed by the buyer.
+
+   Initial reason codes, registered in the ITP Status Reason Codes
+   registry, are:
+
+         +====================+=================================+
+         | Code               | Description                     |
+         +====================+=================================+
+         | order-mismatch     | The order reference does not    |
+         |                    | match an order of the recipient |
+         +--------------------+---------------------------------+
+         | price-mismatch     | Prices differ from those agreed |
+         +--------------------+---------------------------------+
+         | quantity-mismatch  | Quantities differ from those    |
+         |                    | ordered or received             |
+         +--------------------+---------------------------------+
+         | duplicate          | The document duplicates one     |
+         |                    | already received                |
+         +--------------------+---------------------------------+
+         | not-ordered        | The goods or services were not  |
+         |                    | ordered                         |
+         +--------------------+---------------------------------+
+         | tax-error          | Tax amounts, rates, or          |
+         |                    | identifiers are wrong           |
+         +--------------------+---------------------------------+
+         | wrong-recipient    | The recipient is not the buyer  |
+         |                    | or the addressee                |
+         +--------------------+---------------------------------+
+         | goods-not-received | The goods or services have not  |
+         |                    | been received                   |
+         +--------------------+---------------------------------+
+         | other              | Another reason, given in "text" |
+         +--------------------+---------------------------------+
+
+                   Table 2: Initial status reason codes
+
+   A receiver that does not know a reason code shows the text and treats
+   the code as "other".  A node that does not know a status stores and
+   returns the message and treats it as information only.
+
+4.  Deriving the State
+
+   Both nodes keep every status message for an envelope whose signature
+   is valid, and exchange them ([I-D.martinez-itp-core]).  The state is
+   a function of that set and of the envelope, not of the order in which
+   messages arrived or of the time at which a node received them.  Only
+   signed content and signed evidence are used.
+
+4.1.  Signers
+
+   The signer roles in Section 3 are bound to the envelope core as
+   follows, comparing "by" with each PID after the normalization of its
+   scheme.  A participant with several PIDs signs with the PID that the
+   envelope core or "assignee" names; its messages under other PIDs form
+   other chains and have no role.  "Issuer" is "issuer".  "Recipient" is
+   "recipient", or if it is absent, "buyer" ("seller" in self-billing).
+   "Seller" and "Buyer" are "seller" and "buyer".  "Holder" is
+   determined by the holder sequence in "assignee" (Section 4.3) and is
+   not checked when an "assigned" message is counted: an "assigned"
+   message is counted if it is validly signed by a participant or a
+   bridge and continues its signer's chain, and only the messages that
+   the sequence considers have effect.  "Payee" is "payment.payee.pid"
+   if present, otherwise "seller", and in addition the "assignee.pid" of
+   any considered "assigned" message (Section 4.3).  "Bridge" is a trust
+   list entry accepted for a scheme named by a profile in "profiles", or
+   for the scheme of a "tax-registration", "tax-clearance", "tax-
+   report", or "receivable-registration" stamp, or of a rendition, that
+   the same bridge signed for this envelope.  A bridge for the "rfc3161"
+   scheme, or one that signed only "timestamp" or "network-ack" stamps,
+   is not a signer of any status in this document.  "delivered" and
+   "technical-rejected" are counted only if "by" is a node listed in
+   "inbound" of the recipient's Participant Document.
+
+4.2.  Counted Messages
+
+   A message is counted if its signature is valid for its signer and
+   status, its "seq" and "prev" continue the signer's chain for that
+   envelope without gaps, where the chain consists of all of the
+   signer's messages with a valid signature, counted or not, and it does
+   not break the rules below when compared with earlier messages in the
+   same signer's chain.  Two different messages with the same signer and
+   "seq" stop that signer's chain at that point; both are reported.  As
+   an exception, so that a signer cannot withdraw a message that others
+   have relied on by signing a conflicting one, exactly one of the
+   conflicting messages remains counted, and the chain continues from
+   it, if it alone is named in "refers_to" or "deadline.from" by a
+   message of another signer whose signature is valid and that is linked
+   through "prev" digests to that signer's message with "seq" 1, or,
+   failing that, if it alone carries a valid "timestamp" stamp earlier
+   than any timestamp stamp of the others.  Apart from the "refers_to"
+   and "deadline.from" references, rules are never evaluated against
+   messages of other signers; conflicts between signers are resolved
+   only by the definitions in Section 4.3.  Other messages are stored,
+   returned, and reported, but not counted.  Where this document orders
+   messages by "id" or takes the lowest "id", ids are compared as
+   128-bit unsigned integers.
+
+   Rules within one signer's chain:
+
+   *  The recipient cannot send "rejected" after its own "accepted", or
+      "accepted" after its own "rejected".
+
+   *  "cancellation-refused", "payment-failed", and a "cancelled" signed
+      by the recipient MUST carry "refers_to" naming a counted message
+      ("cancellation-requested"; "payment-sent" or "paid"; and
+      "cancellation-requested", respectively).
+
+   *  "deemed-accepted" and "deemed-rejected" MUST carry "deadline", and
+      "effective_at" when the period is in hours.  They are counted only
+      if a profile in "profiles" provides that presumption (Section 5);
+      "deadline.from" names a counted status message, or an accepted
+      stamp, in the set; "deadline.until" is earlier than their
+      "effective_date" (or "effective_at"); and "deadline.until" is not
+      earlier than the start of the period plus "days" calendar days (or
+      plus "hours").  The start is the "effective_date" (or
+      "effective_at") of the message, or the "issued_at" of the stamp,
+      named in "deadline.from".  For a period in hours, a message named
+      in "deadline.from" starts it only if it carries "effective_at" and
+      a "timestamp" stamp; otherwise the deemed status is not counted.
+      The bound needs no knowledge of the calendar, because excluded
+      days only lengthen a period.  A verifier that knows the calendar
+      recomputes "until" from "deadline.from", "days" or "hours", and
+      "calendar", and reports a mismatch; beyond the bound above, the
+      mismatch does not affect counting.
+
+   "received", "goods-received", and "operation-unknown" are recorded
+   for information and affect no property.
+
+4.3.  State Properties
+
+   The state is the following set of properties.  Some belong to a
+   track, and the definition of a final value names the tracks that it
+   ends.
+
+   fiscal (fiscal track):  "clearance-rejected" if a counted "clearance-
+      rejected" exists; otherwise "registered" if a counted "registered"
+      exists; otherwise "registration-error" if one exists; otherwise
+      "pending-authority" if one exists; otherwise "none".  "clearance-
+      rejected" is final for every track.
+
+   delivery (delivery track):  "technical-rejected" if a counted
+      "technical-rejected" exists; otherwise "delivered" if a counted
+      "delivered" exists; otherwise "none".  "technical-rejected" is
+      final for the delivery and acceptance tracks; the fiscal track
+      continues.
+
+   acceptance (acceptance track):  Let D be the earliest
+      "deadline.until" among counted "deemed-accepted" messages, and R
+      the earliest among counted "deemed-rejected" messages.  A counted
+      "rejected" is void if D exists and the message is later than D; a
+      counted "accepted" is void if R exists and the message is later
+      than R.  When the deadline is a date, the message's
+      "effective_date" is compared with it.  When it is a "date-time",
+      the message's "effective_at" is compared as an instant, or, if the
+      message has none, its "effective_date" is compared with the date
+      of the deadline in the time zone that the profile names.  Where
+      "effective_at" is present, "effective_date" MUST be its date in
+      the time zone that the profile names.  Then: "rejected" if a
+      counted "rejected" that is not void exists; otherwise "accepted"
+      if a counted "accepted" that is not void exists; otherwise, if D
+      and R both exist, "deemed-accepted" if D is earlier than R and
+      "deemed-rejected" otherwise, and the conflict is reported;
+      otherwise "deemed-accepted" if D exists; otherwise "deemed-
+      rejected" if R exists; otherwise "pending".  "rejected" and
+      "deemed-rejected" are final for this track.
+
+   dispute_open:  True if the last counted message in the recipient's
+      chain among "accepted", "disputed", and "rejected" is "disputed".
+
+   assignee:  The considered "assigned" messages are, where a profile
+      names an assignment registry, the counted ones signed by that
+      registry's bridge, in the order of its chain; otherwise those that
+      the holder sequence selects: starting with the seller as holder,
+      the first counted "assigned" in the holder's chain that has not
+      yet been considered is considered, and its assignee becomes the
+      holder; this repeats until the holder's chain has no further
+      "assigned".  A holder's later "assigned" messages are therefore
+      considered only after the receivable has come back to it, and a
+      second assignment by the same holder is reported and has no
+      effect.  The chain of an assignee is followed only where
+      reassignment is allowed (Section 5).  A message whose
+      "effective_date" is earlier than that of the message that made its
+      signer holder is skipped: it is never considered, and the sequence
+      continues with the next counted "assigned" in the holder's chain.
+      A signer is the holder when its "by" equals, after normalization,
+      the seller or the "assignee.pid" concerned.  "assignee" is the
+      "assignee.pid" of the last considered message whose
+      "effective_date" is not later than the "effective_date" of the
+      first counted "paid", in order of "effective_date" and then "id",
+      at which the running sum of the "paid" amounts that "amount_paid"
+      includes, less what counted "payment-failed" messages subtract
+      from them, plus "amount_credited", reaches "amount_due".  If there
+      is no such "paid", it is the "assignee.pid" of the last considered
+      message; if there is none, none.
+
+   amount_sent, amount_paid, amount_credited (payment track):  Sums with
+      exact decimal arithmetic.  "amount_sent" is the sum of counted
+      "payment-sent" amounts; "amount_paid" is the sum of counted "paid"
+      amounts whose signer was payee at the message's "effective_date":
+      the seller, or "payment.payee.pid" if present, before the first
+      considered "assigned", and afterwards the assignee of the last
+      considered "assigned" whose "effective_date" is not later;
+      "amount_credited" is the sum of counted "credited" amounts.  Each
+      counted "payment-failed" subtracts the smaller of its amount and
+      the referenced amount, both in the invoice currency (its own
+      "settled_amount" where its currency differs, and, for a failure
+      without "amount" or without "settled_amount", the amount that the
+      referenced message added), from "amount_sent" (if it refers to a
+      "payment-sent") or "amount_paid" (if it refers to a "paid"); only
+      the "payment-failed" with the lowest "id" counts for each
+      referenced message.  A message without "amount" counts as the full
+      "amount_due" (for payments) or "total_with_tax" (for credits).  A
+      message in a currency other than the invoice currency is summed
+      using its "settled_amount"; without "settled_amount" it is
+      reported and not summed.
+
+   cancellation:  "none" if "assignee" is set and a considered
+      "assigned" has an "effective_date" that is not later than that of
+      every counted "cancelled"; an assignment dated after a counted
+      "cancelled" is reported and does not change this property.
+      Otherwise "cancelled" if a counted "cancelled" exists that the
+      cancellation policy allows (Section 5): under "none", none; under
+      "window", one signed by the issuer or a bridge whose
+      "effective_at" (or "effective_date") is within the window counted
+      from the stamp that the profile names; under "request", one signed
+      by the recipient that refers to a counted "cancellation-
+      requested", or by a bridge; under "consent", as under "request",
+      or one signed by the issuer or a bridge that carries "deadline"
+      from a counted "cancellation-requested", meets the conditions on
+      "deadline" in Section 4.2, and to which no counted "cancellation-
+      refused" with an "effective_date" not later than "deadline.until"
+      refers, or that meets an exemption the profile states as a
+      condition on the envelope core; otherwise "requested" if the
+      cancellation policy is "request" or "consent" and the issuer's
+      last cancellation message is "cancellation-requested" and no
+      counted "cancellation-refused" refers to it; otherwise "none".
+      "cancelled" is final for every track except the fiscal track.
+
+   final:  True if "fiscal" is "clearance-rejected", "delivery" is
+      "technical-rejected", "acceptance" is "rejected" or "deemed-
+      rejected", "cancellation" is "cancelled", or "amount_credited" is
+      at least "total_with_tax".  A final value does not stop messages
+      from being counted or change how other properties are computed.
+
+   settled:  True when "amount_paid" plus "amount_credited" is at least
+      "amount_due".  Being settled does not stop other messages from
+      being counted; its only effect on other properties is the cut-off
+      in "assignee".
+
+   Two nodes compute the same properties when they hold the same
+   envelope, the same set of messages with their evidence, and the same
+   inputs that are not in that set: the accepted trust lists and
+   Participant Documents, which decide whether a signer is a bridge,
+   whether a key is valid, and whether a node is listed in "inbound",
+   and the definitions of the profiles named in "profiles".  For
+   deriving the state, the time of a "timestamp" stamp is used only if
+   its time-stamping authority is accepted through a trust list, because
+   an authority accepted by local configuration alone would let nodes
+   compute different states.  A node that does not know a profile named
+   in "profiles" reports the acceptance, cancellation, and assignee
+   properties, "dispute_open", "amount_paid", and "settled" as not
+   derived, and "final" as not derived unless one of its other
+   conditions holds, and does not apply the defaults of Section 5.  When
+   "profiles" names several profiles that set the same parameter
+   differently, the first in the array that sets it applies.  Software
+   that needs a single label for display can derive one, for example by
+   taking the first of final, cancellation, acceptance, delivery that is
+   not empty; that label is not exchanged.
+
+   A node MAY refuse to accept a new message from a client that would
+   not be counted, with "invalidTransition".  That is a local admission
+   check: a message that another node has already stored is still stored
+   and returned, and the definitions above decide its effect.  These
+   rules are meant to be a superset of the response rules of networks
+   and platforms, such as Peppol Invoice Response [PEPPOL-IR] and the
+   status flows of tax authority platforms (Appendix B); a bridge to any
+   of them maps only the transitions that it allows.
+
+    fiscal:      none -> registration-error -> registered
+                 none -> pending-authority  -> registered
+                 none -> clearance-rejected (final, all tracks)
+    delivery:    none -> delivered | technical-rejected (final)
+    acceptance:  pending -> accepted | deemed-accepted | rejected
+                         | deemed-rejected
+                 (rejected and deemed-rejected final for this track)
+    cancellation: none -> requested -> cancelled (final except fiscal)
+    payments:    payment-sent -> paid, payment-failed
+    assignment:  assigned (before full payment)
+    corrections: credited (partial or full; full is final)
+
+                  Figure 1: Tracks of the state (informal)
+
+5.  Hooks for Jurisdiction Rules
+
+   The "profiles" member of the envelope core names the profiles that
+   apply.  A profile expresses the rules of a jurisdiction or network
+   through the following parameters.  When "profiles" names no profile
+   registered in the ITP Profiles registry, the cancellation policy is
+   "none", "deemed-accepted" and "deemed-rejected" messages are not
+   counted, no response window or assignment registry applies, and
+   reassignment is allowed.  "none" is the default because in many tax
+   regimes an issued invoice cannot be cancelled and is corrected by
+   another document.
+
+   Cancellation policy:  One of "none" (documents cannot be cancelled;
+      corrections use credit notes), "window" (the issuer can cancel
+      within a period given in the profile, which can be counted in
+      hours from the registration or validation time in an accepted
+      stamp), "request" (the issuer requests and the recipient answers),
+      or "consent" (as "request", but some cases need no answer, as the
+      profile lists).
+
+   Time zone:  The time zone name from the IANA Time Zone Database in
+      which dates are compared and days are counted.  The default is
+      UTC.
+
+   Deadlines:  For each status that the law requires within a period,
+      the event the period starts from, its length, and its calendar.
+      Calendars are registered in the ITP Calendars registry.  The
+      pattern "business-days-XX", where XX is an [ISO3166] alpha-2 code
+      or an [ISO3166-2] subdivision code (for example "business-days-MY-
+      01"), names a calendar whose definition states the weekly rest
+      days and the public holidays it excludes.  Weekly rest days are
+      not Saturday and Sunday everywhere, and holidays can differ
+      between the regions of one country.  Days are counted in the time
+      zone that the profile names.  Unless the profile says otherwise,
+      the first day counted is the day after the event, "until" is the
+      last day of the period, and a period in hours is elapsed time to
+      which no calendar applies.  Holidays that are fixed by
+      announcement shortly before they occur, as lunar holidays often
+      are, are applied as announced; a verifier that recomputes "until"
+      reports a mismatch caused by a later announcement without treating
+      it as an error.  A verifier that does not know a calendar does not
+      recompute deadlines that use it.
+
+   Deemed acceptance or rejection:  Whether acceptance, or in some
+      regimes rejection, is presumed after a deadline, and its legal
+      effect, for example that the invoice becomes enforceable as a
+      negotiable instrument.
+
+   Response windows:  For each recipient status, such as "rejected", the
+      period after which the recipient can no longer send it, with no
+      presumption attached.  The window starts from an event that the
+      profile names and that is in the set, such as the "effective_date"
+      of "delivered" or the "issued_at" of an accepted stamp, and is
+      counted in calendar days or in hours, so that every node can
+      compute its end.  A message whose "effective_date" (or
+      "effective_at") is after the end of its window is not counted.  A
+      window that the law counts in business days is expressed through a
+      deemed status with "deadline", or is only reported, and does not
+      affect counting.  Declining a rejection, which some regimes allow
+      the issuer, has no ITP status in this version.
+
+   Preconditions:  Whether delivery requires a prior "registered"
+      status, as in clearance regimes.
+
+   Numbering:  The scope in which "invoice_number" is unique, for
+      duplicate detection, for example per tax identifier and fiscal
+      year, per establishment, or per document type and point of sale.
+
+   Assignment registries:  Where assignments of receivables are recorded
+      by an official registry, the bridge records the assignment and
+      adds a "receivable-registration" stamp to the envelope.
+
+   Reassignment:  Whether an assignee can assign the receivable again.
+      Where no registered profile in "profiles" says otherwise,
+      reassignment is allowed.
+
+6.  Payment Information
+
+   The optional "payment" member of the envelope core
+   [I-D.martinez-itp-core] contains:
+
+   payee (optional, object):  "pid" and "name" of the payee when it is
+      not the seller, for example a factor named in the invoice.
+
+   due_date (optional, string):  The payment due date.
+
+   schedule (optional, array):  Installments, each with "due_date" and
+      "amount".
+
+   prepaid_amount (optional, string):  The amount paid in advance, for
+      example as a prepayment.
+
+   methods (optional, array):  Objects with "type" from the ITP Payment
+      Method Types registry.  The initial type is "credit-transfer",
+      whose object contains "account", a "payment-account" attestation
+      (Section 7) that names the payee, and optionally "rails", values
+      from the ITP Payment Rails registry over which the payee accepts
+      payment to that account (for example "sepa-sct", "ach", "fednow",
+      "spei", "pix", "upi", "paynow", or "mpesa").  The account scheme
+      says how the account is identified; the rail says how the money
+      moves, and one account is often reachable over several rails.  A
+      payer that does not support a method ignores it.
+
+      Accounts addressed through an alias that a central directory
+      resolves at payment time, such as a PIX key, a UPI address, or a
+      mobile number on a proxy-addressed instant payment system, can be
+      re-pointed by their holder.  An attestation of such an alias shows
+      the binding at the time it was issued; payers resolve the alias
+      again and compare the holder before paying.  For mobile money, the
+      scheme is "mobile-money", and its value names the provider and
+      country as well as the identifier (an E.164 number, or a merchant
+      short code with an account number).  "msisdn" is used for a mobile
+      number registered as an alias on a proxy-addressed instant payment
+      system; other aliases of such systems, such as a business
+      registration number, are registered as their own schemes.
+
+   remittance (optional, object):  "creditor_reference", a creditor
+      reference in a format the rail defines, such as [ISO11649] (at
+      most 25 characters), a Swiss QR reference, or a Norwegian KID
+      number, and "unstructured", free text to be placed in the
+      remittance information of the payment, for example in an
+      [ISO20022] message.  Length limits are those of the rail and
+      differ widely: 140 characters in SEPA, 210 in Russian payment
+      orders, 12 in some mobile money references.  A "credit-transfer"
+      method MAY carry its own "remittance", which applies to payments
+      over its rails in place of this one.  If neither is given, payers
+      use the envelope id where the rail allows 36 characters, and
+      otherwise "invoice_number" cut to the rail's limit.  A payment
+      that settles several invoices carries a reference per invoice
+      where the rail allows it, or a separate remittance advice.
+
+   A relying party MUST NOT treat payment details as verified while the
+   key that signed the envelope, or the key that signed an "assigned"
+   message, is "recently bound" ([I-D.martinez-itp-core]).  A receiving
+   node that interprets the document, where "methods" is present, and
+   finds in the document a payment account that is not equal to an
+   account attested in "methods" rejects the envelope with
+   "inconsistentCore".
+
+   An "assigned" status MUST be signed, with "itp_role" "issuer" or
+   "delegated-issuer" and not with a node key, by the current holder of
+   the receivable: the seller or, where the applicable law lets a
+   receivable be assigned again, the assignee of the last considered
+   "assigned" message.  Where a profile names an assignment registry,
+   the registry's bridge signs "assigned" with "itp_role" "bridge" once
+   the registry records the assignment.  Every "assigned" status MUST
+   carry in "assignee" a "payment-account" attestation that names the
+   assignee.  Assignment can be subject to the law of the place of the
+   assignor; the United Nations Convention on the Assignment of
+   Receivables in International Trade [UN-ASSIGN] is one framework.
+   "assigned" records only who is entitled to payment.  It does not
+   imply a sale or a discount.
+
+7.  Payment Account Attestations
+
+   This document registers the attestation type "payment-account" in the
+   ITP Attestation Types registry.  It binds an account to its holder.
+   Its claims are:
+
+   account:  An object with "scheme", from the ITP Account Schemes
+      registry, and "value", the account identifier in the format of
+      that scheme, for example an [ISO13616] IBAN for "iban", which is
+      used inside and outside SEPA, or a sort code and account number
+      for "gb-sortcode".
+
+   holder_name, lang:  The holder's name as the account-servicing
+      institution records it, as a string or as an array of objects with
+      "lang" and "text" when the institution records it in more than one
+      script.  Institutions can record names in a reduced character set,
+      such as half-width katakana in Japan, or transliterated, so
+      software compares the holder name with the payee's name only
+      through the payee verification service of the rail, not by string
+      comparison.
+
+   checked_by (optional):  The name of the payee verification service
+      that was queried, if the attestation issuer obtained the result
+      from one (see Section 8).
+
+   The holder is the subject of the attestation, given in "sub".  It is
+   issued by the institution that services the account, or by a service
+   that queries that institution, and its validity period is at most 90
+   days.  When the attestation is carried in "payment.methods" or in
+   "assignee", the disclosure of "account" MUST be included, and "sub"
+   MUST be the URN of "payment.payee.pid" (or, if "payment.payee" is
+   absent, of the seller) or of "assignee.pid", respectively.  A
+   "payment-account" attestation MUST NOT be listed in "attestations" of
+   a Participant Document, which anyone can retrieve.
+
+8.  Application Considerations for Payment
+
+   This section is advice to software that pays invoices on the basis of
+   ITP data; it does not constrain the protocol.  Such software is
+   expected:
+
+   *  not to pay automatically to an account that is not covered by a
+      valid "payment-account" attestation naming the payee, and to check
+      the status of that attestation when it initiates the payment;
+
+   *  where the payer's institution or the payment system offers
+      verification of the payee, for example Verification of Payee in
+      the European Union ([EU-IPR], [EPC-VOP]), Confirmation of Payee
+      for "gb-sortcode" accounts, or the name that proxy-addressed and
+      mobile money systems show before the payer confirms, not to
+      proceed automatically on a result other than a full match, and not
+      to rely on an opt-out from that verification for the first payment
+      to an account; and
+
+   *  to ask a person to approve the first payment to an account not
+      used before for the same payee, and the first payment after an
+      "assigned" status.
+
+   Payment details that are not verified because a key is recently bound
+   are not used automatically.  Nodes that also initiate payments or
+   access payment accounts do so under the rules that apply to those
+   activities.
+
+9.  Implementation Status
+
+   Note to the RFC Editor: please remove this section before
+   publication, as described in [RFC7942].
+
+   Organization: BeeL. (Honey Solutions, S.L.).  Description: support
+   for this document in the reference implementation listed in
+   [I-D.martinez-itp-core].  Maturity: in development.  License: Apache
+   License 2.0 (intended).  Contact: the author.
+
+   No independent implementation is known at the time of writing.
+
+10.  Security Considerations
+
+   The security considerations of [I-D.martinez-itp-core] apply.
+
+   Statuses can have legal and tax effects: an acceptance can make an
+   invoice enforceable, and some jurisdictions report acceptance,
+   rejection, and payment to the tax authority.  This document therefore
+   binds each status to the party entitled to sign it.  Nodes can sign
+   commercial statuses only with "delegated-issuer" keys that the
+   participant has listed.  The state is derived from the set of
+   messages, so an attacker that delays or reorders messages cannot make
+   the two parties see different states once they have exchanged the
+   same messages, although it can delay them.
+
+   Fraud based on notifying changed bank details is addressed by binding
+   accounts to attestations from the institutions that service them, by
+   payee verification at payment time, by human approval of new accounts
+   and of the first payment after an assignment, and by the 72-hour rule
+   of the core document.  A forged "assigned" status redirects payment
+   in the same way, so it needs the holder's own key and an attestation
+   for the assignee's account.  These controls do not stop a seller
+   whose own systems are compromised.
+
+   Deemed acceptance depends on dates.  The "effective_date" of a
+   rejection is chosen by its signer, so a recipient could back-date it,
+   and the "deadline.until" of a deemed acceptance is chosen by its
+   signer too.  Verifiers recompute deadlines when they know the
+   calendar, and profiles where timing has legal effect can require a
+   timestamp stamp in the "itp_evidence" of status messages
+   ([I-D.martinez-itp-core]).  Local receipt times are never used,
+   because the two nodes would compute different states.
+
+11.  Privacy Considerations
+
+   Status messages reveal the commercial relationship and payment
+   behavior of the parties, and payment-account attestations reveal
+   account details.  Status messages are exchanged only between the
+   nodes of the parties, are not registered in transparency services,
+   and are stored under the same protections as envelopes
+   ([I-D.martinez-itp-core]).  Payment-account attestations are
+   registered as the core document requires for all attestations.  The
+   log does not learn the account, but for a legal entity the PID digest
+   can be reversed by testing identifiers and the Signed Statement
+   identifies the attestation issuer, so a reader of the log can learn
+   that a given institution attested an account of that legal entity,
+   and when.
+
+   Account identifiers such as mobile numbers, UPI addresses, and PIX
+   keys that are telephone numbers, e-mail addresses, or tax identifiers
+   are personal data when the holder is a natural person, and
+   "holder_name" then names that person.  "account" and "holder_name"
+   are selectively disclosable, and the payee discloses them only in
+   envelopes and status messages addressed to the payer.
+
+12.  Internationalization Considerations
+
+   The considerations of [I-D.martinez-itp-core] apply.  "reason.text",
+   "conditions", and "holder_name" are human-readable and carry "lang".
+   Business-day calendars depend on weekly rest days and on national and
+   regional holidays, some fixed by lunar calendars, and are defined by
+   profiles, not by this document.
+
+13.  IANA Considerations
+
+13.1.  ITP Statuses
+
+   IANA is requested to add the statuses in Section 3 to the ITP
+   Statuses registry, with this document as the reference.  The "final"
+   field is "conditional" for "rejected" (final for the acceptance track
+   unless void because it is later than a deemed acceptance), "deemed-
+   rejected" (final for the acceptance track unless an "accepted" not
+   later than its deadline is counted or a deemed acceptance has an
+   earlier deadline), "credited" (final when "amount_credited" reaches
+   "total_with_tax"), and "cancelled" (final except for the fiscal
+   track, unless an earlier assignment applies); "yes" for "clearance-
+   rejected"; and "no" for the others, including "paid".  IANA is also
+   requested to change the "final" field of "technical-rejected" to
+   "conditional" (final for the delivery and acceptance tracks), adding
+   this document as a reference.
+
+13.2.  ITP Status Reason Codes
+
+   IANA is requested to add the reason codes in Section 3 to the ITP
+   Status Reason Codes registry, with this document as the reference.
+
+13.3.  ITP Attestation Types and Stamp Types
+
+   IANA is requested to add "payment-account" (Section 7) to the ITP
+   Attestation Types registry and "receivable-registration" (Section 5)
+   to the ITP Stamp Types registry.
+
+13.4.  New Registries
+
+   IANA is requested to create the following registries in the "Invoice
+   Trust Protocol (ITP)" registry group, with the "Specification
+   Required" policy [RFC8126]:
+
+   +==============+================================+===================+
+   | Registry     | Fields                         | Initial contents  |
+   +==============+================================+===================+
+   | ITP Payment  | name, description, reference   | "credit-transfer" |
+   | Method       |                                |                   |
+   | Types        |                                |                   |
+   +--------------+--------------------------------+-------------------+
+   | ITP Account  | name, account format, payee    | Table 4           |
+   | Schemes      | verification service if any,   |                   |
+   |              | reference                      |                   |
+   +--------------+--------------------------------+-------------------+
+   | ITP Payment  | name, operator, region,        | Table 5           |
+   | Rails        | reference                      |                   |
+   +--------------+--------------------------------+-------------------+
+   | ITP          | name, jurisdiction, weekly     | "calendar-days"   |
+   | Calendars    | rest days, source of public    | (every day        |
+   |              | holidays, time zone, reference | counts)           |
+   +--------------+--------------------------------+-------------------+
+
+                Table 3: Registries created by this document
+
+   +==============+===================+===============================+
+   | Name         | Account format    | Payee verification            |
+   +==============+===================+===============================+
+   | iban         | IBAN [ISO13616]   | The service of the country or |
+   |              |                   | payment area of the account   |
+   |              |                   | where one is offered, for     |
+   |              |                   | example Verification of Payee |
+   |              |                   | in SEPA ([EPC-VOP])           |
+   +--------------+-------------------+-------------------------------+
+   | gb-sortcode  | 6-digit sort code | Confirmation of Payee         |
+   |              | and 8-digit       |                               |
+   |              | account number    |                               |
+   +--------------+-------------------+-------------------------------+
+   | us-aba       | 9-digit ABA       | none defined                  |
+   |              | routing number    |                               |
+   |              | and account       |                               |
+   |              | number            |                               |
+   +--------------+-------------------+-------------------------------+
+   | mx-clabe     | 18-digit CLABE    | none defined                  |
+   +--------------+-------------------+-------------------------------+
+   | br-account   | Bank code,        | none defined                  |
+   |              | branch, and       |                               |
+   |              | account number    |                               |
+   +--------------+-------------------+-------------------------------+
+   | pix-key      | PIX key: tax      | Key directory of the payment  |
+   |              | identifier,       | system                        |
+   |              | e-mail address,   |                               |
+   |              | telephone number, |                               |
+   |              | or random key     |                               |
+   +--------------+-------------------+-------------------------------+
+   | upi-vpa      | UPI virtual       | Name shown by the payer's UPI |
+   |              | payment address   | application                   |
+   +--------------+-------------------+-------------------------------+
+   | mobile-money | Provider,         | Name shown by the provider    |
+   |              | country, and      | before the payer confirms     |
+   |              | E.164 number, or  |                               |
+   |              | merchant code and |                               |
+   |              | account number    |                               |
+   +--------------+-------------------+-------------------------------+
+   | msisdn       | E.164 number      | Name shown by the payment     |
+   |              | registered as an  | system before the payer       |
+   |              | alias on a proxy- | confirms                      |
+   |              | addressed instant |                               |
+   |              | payment system    |                               |
+   +--------------+-------------------+-------------------------------+
+
+                   Table 4: Initial ITP account schemes
+
+           +===========+==========================+============+
+           | Name      | Operator                 | Region     |
+           +===========+==========================+============+
+           | sepa-sct  | European Payments        | SEPA       |
+           |           | Council (scheme manager) |            |
+           +-----------+--------------------------+------------+
+           | sepa-inst | European Payments        | SEPA       |
+           |           | Council (scheme manager) |            |
+           +-----------+--------------------------+------------+
+           | fps-gb    | Pay.UK                   | GB         |
+           +-----------+--------------------------+------------+
+           | ach       | Nacha (rules             | US         |
+           |           | administrator)           |            |
+           +-----------+--------------------------+------------+
+           | fedwire   | Federal Reserve Banks    | US         |
+           +-----------+--------------------------+------------+
+           | fednow    | Federal Reserve Banks    | US         |
+           +-----------+--------------------------+------------+
+           | rtp       | The Clearing House       | US         |
+           +-----------+--------------------------+------------+
+           | spei      | Banco de Mexico          | MX         |
+           +-----------+--------------------------+------------+
+           | pix       | Banco Central do Brasil  | BR         |
+           +-----------+--------------------------+------------+
+           | upi       | National Payments        | IN         |
+           |           | Corporation of India     |            |
+           +-----------+--------------------------+------------+
+           | paynow    | Association of Banks in  | SG         |
+           |           | Singapore                |            |
+           +-----------+--------------------------+------------+
+           | duitnow   | Payments Network         | MY         |
+           |           | Malaysia                 |            |
+           +-----------+--------------------------+------------+
+           | promptpay | National ITMX            | TH         |
+           +-----------+--------------------------+------------+
+           | mpesa     | Safaricom, Vodacom, and  | KE, TZ,    |
+           |           | other licensees          | and others |
+           +-----------+--------------------------+------------+
+
+                     Table 5: Initial ITP payment rails
+
+   The reference for each entry is this document.  Remittance reference
+   formats and lengths are those published by the operator of each rail.
+   Names of the form "business-days-XX", where XX is an [ISO3166]
+   alpha-2 code or an [ISO3166-2] subdivision code, are reserved for
+   business-day calendars of that jurisdiction.  Each such calendar is
+   registered individually, and a name of that form that is not
+   registered is an unknown calendar (Section 5).
+
+   Designated experts check that an account scheme names the authority
+   or network that defines the account format and how a payer can verify
+   the payee, and that a calendar names the authority whose holidays it
+   follows.  The guidance of [I-D.martinez-itp-core] on security-
+   relevant values applies to payment method types.  A registration in
+   the ITP Profiles registry that applies this document states every
+   parameter of Section 5, with "none" where a parameter does not apply,
+   and designated experts check that it does.
+
+14.  References
+
+14.1.  Normative References
+
+   [I-D.martinez-itp-core]
+              Martínez García-Villarrubia, C., "Invoice Trust Protocol
+              (ITP): Discovery, Delivery, and Verification of Electronic
+              Invoices", Work in Progress, Internet-Draft, draft-
+              martinez-itp-core-00, October 2026,
+              <https://datatracker.ietf.org/doc/html/draft-martinez-itp-
+              core-00>.
+
+   [ISO3166]  ISO, "Codes for the representation of names of countries
+              and their subdivisions - Part 1: Country code",
+              ISO 3166-1:2020, 2020.
+
+   [ISO3166-2]
+              ISO, "Codes for the representation of names of countries
+              and their subdivisions - Part 2: Country subdivision
+              code", ISO 3166-2:2020, 2020.
+
+   [ISO4217]  ISO, "Codes for the representation of currencies",
+              ISO 4217:2015, 2015.
+
+   [ISO11649] ISO, "Financial services - Core banking - Structured
+              creditor reference to remittance information",
+              ISO 11649:2009, 2009.
+
+   [ISO13616] ISO, "Financial services - International bank account
+              number (IBAN) - Part 1: Structure of the IBAN",
+              ISO 13616-1:2020, 2020.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/rfc/rfc8126>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+14.2.  Informative References
+
+   [EN16931]  European Committee for Standardization (CEN), "Electronic
+              invoicing - Part 1: Semantic data model of the core
+              elements of an electronic invoice", EN 16931-1:2026, 2026.
+
+   [EPC-VOP]  European Payments Council, "Verification Of Payee Scheme
+              Rulebook, EPC218-23", 2024,
+              <https://www.europeanpaymentscouncil.eu/document-
+              library/rulebooks/verification-payee-scheme-rulebook>.
+
+   [EU-IPR]   European Parliament and Council of the European Union,
+              "Regulation (EU) 2024/886 amending Regulations (EU) No
+              260/2012 and (EU) 2021/1230 and Directives 98/26/EC and
+              (EU) 2015/2366 as regards instant credit transfers in
+              euro", 13 March 2024,
+              <https://eur-lex.europa.eu/eli/reg/2024/886/oj/eng>.
+
+   [I-D.martinez-itp-agent-mandates]
+              Martínez García-Villarrubia, C., "Invoice Trust Protocol
+              (ITP): Agent Mandates", Work in Progress, Internet-Draft,
+              draft-martinez-itp-agent-mandates-00, October 2026,
+              <https://datatracker.ietf.org/doc/html/draft-martinez-itp-
+              agent-mandates-00>.
+
+   [ISO20022] ISO, "Financial services - Universal financial industry
+              message scheme", ISO 20022, n.d..
+
+   [PEPPOL-IR]
+              OpenPeppol AISBL, "Peppol BIS Invoice Response 3.2", n.d.,
+              <https://docs.peppol.eu/poacc/upgrade-3/
+              profiles/63-invoiceresponse/>.
+
+   [PEPPOL-PINT]
+              OpenPeppol AISBL, "Peppol Specifications for PINT", n.d.,
+              <https://docs.peppol.eu/poac/pint/>.
+
+   [RFC7942]  Sheffer, Y. and A. Farrel, "Improving Awareness of Running
+              Code: The Implementation Status Section", BCP 205,
+              RFC 7942, DOI 10.17487/RFC7942, July 2016,
+              <https://www.rfc-editor.org/rfc/rfc7942>.
+
+   [UN-ASSIGN]
+              United Nations, "United Nations Convention on the
+              Assignment of Receivables in International Trade", 2001,
+              <https://uncitral.un.org/en/texts/securityinterests/
+              conventions/receivables>.
+
+Appendix A.  Models of Jurisdictions and Networks
+
+   This appendix is informative.  It shows which ITP members, stamps,
+   and statuses each common model uses.  Profiles for individual regimes
+   are expected to come from the bodies responsible for them, and notes
+   on individual jurisdictions are kept outside this document.
+
+    +=============+=================+=================================+
+    | Model       | Examples        | ITP features used               |
+    +=============+=================+=================================+
+    | Four-corner | Peppol,         | the network's PID scheme ("eas" |
+    | network     | DBNAlliance     | for Peppol), its channel type   |
+    |             |                 | ("peppol" for Peppol, otherwise |
+    |             |                 | "network"), Appendix B          |
+    +-------------+-----------------+---------------------------------+
+    | EDI value-  | Trading-partner | a registered PID scheme and     |
+    | added       | EDI in ASC X12  | channel type, or "network";     |
+    | network     | or UN/EDIFACT   | "accepts" with "application/    |
+    |             |                 | EDI-X12" or "application/       |
+    |             |                 | EDIFACT"; "network-ack" stamp   |
+    +-------------+-----------------+---------------------------------+
+    | Exchange    | France, Spain   | "tax-report" stamp, deadlines,  |
+    | through     |                 | "deemed-accepted"               |
+    | platforms   |                 |                                 |
+    | with        |                 |                                 |
+    | reporting   |                 |                                 |
+    +-------------+-----------------+---------------------------------+
+    | Clearance   | Italy, Mexico,  | "tax-clearance" stamp,          |
+    | before      | Brazil, Saudi   | "clearance-rejected",           |
+    | delivery    | Arabia, India   | "references.replaces"           |
+    +-------------+-----------------+---------------------------------+
+    | Platform    | China           | "legal_original" "rendition",   |
+    | issues the  |                 | "fiscal_codes" assigned by the  |
+    | invoice     |                 | authority, "delivery_role"      |
+    |             |                 | "copy"                          |
+    +-------------+-----------------+---------------------------------+
+    | Reporting   | South Korea     | "tax-report" or "tax-           |
+    | after       |                 | registration" stamp             |
+    | issuance    |                 |                                 |
+    +-------------+-----------------+---------------------------------+
+    | Fiscal      | Kenya, Uganda   | "fiscal_device", "fiscal-       |
+    | devices     |                 | device-signature" stamp,        |
+    |             |                 | "issuance_mode" "offline"       |
+    +-------------+-----------------+---------------------------------+
+    | Negotiable  | Colombia, Chile | "assigned", "receivable-        |
+    | or          |                 | registration" stamp             |
+    | registered  |                 |                                 |
+    | receivables |                 |                                 |
+    +-------------+-----------------+---------------------------------+
+    | Deemed      | Serbia, Turkiye | "deemed-accepted", "deemed-     |
+    | outcomes    |                 | rejected", response windows     |
+    | and         |                 |                                 |
+    | response    |                 |                                 |
+    | windows     |                 |                                 |
+    +-------------+-----------------+---------------------------------+
+
+               Table 6: Models and the ITP features they use
+
+Appendix B.  Status Mappings
+
+   This appendix is informative.  The mappings have not yet been
+   confirmed against each specification.  The columns are examples.
+   Profiles for other networks and jurisdictions give their own
+   mappings, and no column is the reference for ITP statuses.
+
+    +========================+============+=======+======+============+
+    | ITP                    |Peppol IR   |France |Brazil|Mexico CFDI |
+    |                        |            |       |NF-e  |            |
+    +========================+============+=======+======+============+
+    | delivered              |n/a         |202,   |n/a   |n/a         |
+    |                        |            |203    |      |            |
+    +------------------------+------------+-------+------+------------+
+    | received               |AB, IP      |204    |210210|n/a         |
+    +------------------------+------------+-------+------+------------+
+    | accepted               |AP; CA with |205;   |210200|n/a         |
+    |                        |"conditions"|206 if |      |            |
+    |                        |            |partial|      |            |
+    +------------------------+------------+-------+------+------------+
+    | deemed-accepted        |n/a         |n/a    |n/a   |n/a         |
+    +------------------------+------------+-------+------+------------+
+    | deemed-rejected        |n/a         |n/a    |n/a   |n/a         |
+    +------------------------+------------+-------+------+------------+
+    | operation-unknown      |n/a         |n/a    |210220|n/a         |
+    +------------------------+------------+-------+------+------------+
+    | rejected               |RE          |210    |210240|n/a         |
+    +------------------------+------------+-------+------+------------+
+    | disputed               |UQ          |207,   |n/a   |n/a         |
+    |                        |            |208    |      |            |
+    +------------------------+------------+-------+------+------------+
+    | technical-rejected     |n/a         |213    |n/a   |n/a         |
+    +------------------------+------------+-------+------+------------+
+    | payment-sent           |PD (reason  |211    |n/a   |n/a         |
+    |                        |PPD if      |       |      |            |
+    |                        |partial)    |       |      |            |
+    +------------------------+------------+-------+------+------------+
+    | paid                   |n/a         |212    |n/a   |payment     |
+    |                        |            |       |      |receipt     |
+    |                        |            |       |      |document    |
+    +------------------------+------------+-------+------+------------+
+    | cancellation-requested |n/a         |n/a    |n/a   |cancellation|
+    |                        |            |       |      |request     |
+    +------------------------+------------+-------+------+------------+
+    | cancellation-refused   |n/a         |n/a    |n/a   |refusal of  |
+    |                        |            |       |      |cancellation|
+    +------------------------+------------+-------+------+------------+
+    | cancelled              |n/a         |n/a    |110111|cancellation|
+    |                        |            |       |      |accepted    |
+    +------------------------+------------+-------+------+------------+
+    | credited               |n/a         |n/a    |n/a   |credit note |
+    |                        |            |       |      |(egreso)    |
+    +------------------------+------------+-------+------+------------+
+
+                          Table 7: Status mappings
+
+   French status 209 (completed) has no ITP equivalent; it follows a
+   suspension once the missing information is provided.
+
+Appendix C.  Mapping of Payment Terms
+
+   This appendix is informative.  It maps the "payment" member to the
+   business terms of [EN16931], which Peppol PINT [PEPPOL-PINT] numbers
+   in the same way.
+
+    +===============+========================+========================+
+    | Business term | Name                   | ITP                    |
+    +===============+========================+========================+
+    | BT-9          | Payment due date       | payment.due_date       |
+    +---------------+------------------------+------------------------+
+    | BG-10         | Payee                  | payment.payee          |
+    +---------------+------------------------+------------------------+
+    | BT-83         | Remittance information | payment.remittance     |
+    +---------------+------------------------+------------------------+
+    | BT-84         | Payment account        | "payment-account"      |
+    |               | identifier             | attestation            |
+    +---------------+------------------------+------------------------+
+    | BT-113        | Paid amount            | payment.prepaid_amount |
+    +---------------+------------------------+------------------------+
+
+             Table 8: Payment term mapping to EN 16931 and PINT
+
+   This appendix is informative.  The table maps EN 16931 because its
+   business terms are numbered and publicly listed.  Payment terms in
+   other syntaxes, such as ASC X12 810 and national formats, map to the
+   same members, and profiles give those mappings.
+
+Appendix D.  State Derivation Examples
+
+   Implementations are expected to compute the following properties.
+   "R" is the recipient, "I" the issuer, and "B" a bridge.  Each set of
+   messages gives the same result in any order of arrival.  In examples
+   2 and 7, the set also contains a counted "delivered" that
+   "deadline.from" names, and the deadline meets the conditions in
+   Section 4.2.
+
+   1.  R: "accepted" (seq 1), then R: "disputed" (seq 2).  acceptance is
+       "accepted" and dispute_open is true.
+
+   2.  Under a profile with deemed acceptance, I: "deemed-accepted" with
+       "deadline.until" 2026-11-03 and "effective_date" 2026-11-04; R:
+       "rejected" with "effective_date" 2026-11-05.  The rejection is
+       void; acceptance is "deemed-accepted".  With a rejection dated
+       2026-11-02 instead, the rejection counts and acceptance is
+       "rejected".
+
+   3.  R (the buyer): "payment-sent" for 100.00 and for 200.00 on an
+       invoice with "amount_due" 300.00; then a "payment-failed" signed
+       by the buyer that refers to the first.  amount_sent is 200.00.
+
+   4.  Two different messages from R with "seq" 2, neither referenced by
+       another signer's message and neither carrying a "timestamp"
+       stamp.  R's chain stops at seq 1; both messages are reported and
+       neither counts.
+
+   5.  B: "registered"; then R: "rejected".  fiscal is "registered" and
+       acceptance is "rejected", so final is already true; an I:
+       "credited" for the total still counts, and amount_credited equals
+       "total_with_tax".
+
+   6.  Under a profile with the cancellation policy "request", I (the
+       seller): "assigned" to a factor; then I: "cancellation-
+       requested". cancellation stays "none" instead of "requested",
+       because the receivable was assigned.
+
+   7.  Under a profile with deemed rejection, I: "deemed-rejected" with
+       "deadline.until" 2026-11-10 and "effective_date" 2026-11-11; R:
+       "accepted" with "effective_date" 2026-11-12.  The acceptance is
+       void, and acceptance is "deemed-rejected".
+
+   8.  I (the seller): "assigned" to factor F1 (seq 1); F1: "assigned"
+       to F2 (seq 1 in F1's chain), under a profile that allows
+       reassignment and names no registry.  assignee is F2.
+
+Appendix E.  Open Issues
+
+   1.  Whether the lifecycle statuses, which mirror business processes
+       defined by networks such as Peppol and by tax authorities, belong
+       in an IETF document, or should be a vocabulary maintained
+       elsewhere that ITP messages refer to.
+
+   2.  Initial entries of the ITP Calendars, Account Schemes, and
+       Payment Rails registries.
+
+   3.  Alignment of reason codes with Peppol and national codes.
+
+   4.  Whether status messages whose timing has legal effect should
+       always carry a timestamp stamp.
+
+Acknowledgments
+
+   The author used AI-based tools while drafting and reviewing this
+   document.  The author checked all text and references and is
+   responsible for the content.
+
+Author's Address
+
+   Carlos Martínez García-Villarrubia
+   BeeL. (Honey Solutions, S.L.)
+   Tarragona
+   Spain
+   Email: carlos@martinezgv.com

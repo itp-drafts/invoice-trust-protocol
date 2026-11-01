@@ -1,0 +1,3021 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Invoice Trust Protocol (ITP): Lifecycle Status and Payment Information</title>
+<meta content="Carlos Martínez García-Villarrubia" name="author">
+<meta content="
+       This document extends the core of the Invoice Trust Protocol (ITP)
+with commercial, tax, and payment statuses for invoices, a deterministic way
+for both parties to derive the same state from the status messages
+they exchange, payment information for the envelope core, and
+attestations for payment accounts.  Informative appendices relate ITP
+statuses to those of Peppol and of several national systems. 
+    " name="description">
+<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="electronic invoicing" name="keyword">
+<meta content="invoice status" name="keyword">
+<meta content="payment" name="keyword">
+<meta content="draft-martinez-itp-lifecycle-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.13.4
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.9.2
+-->
+<link href="draft-martinez-itp-lifecycle.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">ITP Lifecycle and Payment</td>
+<td class="right">November 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Garcia-Villarrubia</td>
+<td class="center">Expires 5 May 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Network Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-martinez-itp-lifecycle-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-11-01" class="published">1 November 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Experimental</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-05-05">5 May 2027</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">C. Martínez García-Villarrubia</div>
+<div class="org">BeeL. (Honey Solutions, S.L.)</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Invoice Trust Protocol (ITP): Lifecycle Status and Payment Information</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document extends the core of the Invoice Trust Protocol (ITP)
+with commercial, tax, and payment statuses for invoices, a deterministic way
+for both parties to derive the same state from the status messages
+they exchange, payment information for the envelope core, and
+attestations for payment accounts.  Informative appendices relate ITP
+statuses to those of Peppol and of several national systems.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-lifecycle.html">https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-lifecycle.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-martinez-itp-lifecycle/">https://datatracker.ietf.org/doc/draft-martinez-itp-lifecycle/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        DISPATCH Working Group mailing list (<span><a href="mailto:dispatch@ietf.org">mailto:dispatch@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/dispatch/">https://mailarchive.ietf.org/arch/browse/dispatch/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/dispatch/">https://www.ietf.org/mailman/listinfo/dispatch/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/itp-drafts/invoice-trust-protocol">https://github.com/itp-drafts/invoice-trust-protocol</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 5 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-the-experiment" class="internal xref">The Experiment</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-statuses" class="internal xref">Statuses</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-additional-members-of-statu" class="internal xref">Additional Members of Status Messages</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-status-values" class="internal xref">Status Values</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-deriving-the-state" class="internal xref">Deriving the State</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-signers" class="internal xref">Signers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-counted-messages" class="internal xref">Counted Messages</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-state-properties" class="internal xref">State Properties</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-hooks-for-jurisdiction-rule" class="internal xref">Hooks for Jurisdiction Rules</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-payment-information" class="internal xref">Payment Information</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-payment-account-attestation" class="internal xref">Payment Account Attestations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-application-considerations-" class="internal xref">Application Considerations for Payment</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-implementation-status" class="internal xref">Implementation Status</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-internationalization-consid" class="internal xref">Internationalization Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#section-13.1" class="auto internal xref">13.1</a>.  <a href="#name-itp-statuses" class="internal xref">ITP Statuses</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#section-13.2" class="auto internal xref">13.2</a>.  <a href="#name-itp-status-reason-codes" class="internal xref">ITP Status Reason Codes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.3">
+                <p id="section-toc.1-1.13.2.3.1"><a href="#section-13.3" class="auto internal xref">13.3</a>.  <a href="#name-itp-attestation-types-and-s" class="internal xref">ITP Attestation Types and Stamp Types</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4">
+                <p id="section-toc.1-1.13.2.4.1"><a href="#section-13.4" class="auto internal xref">13.4</a>.  <a href="#name-new-registries" class="internal xref">New Registries</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#section-14" class="auto internal xref">14</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
+                <p id="section-toc.1-1.14.2.1.1"><a href="#section-14.1" class="auto internal xref">14.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
+                <p id="section-toc.1-1.14.2.2.1"><a href="#section-14.2" class="auto internal xref">14.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-models-of-jurisdictions-and" class="internal xref">Models of Jurisdictions and Networks</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
+            <p id="section-toc.1-1.16.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-status-mappings" class="internal xref">Status Mappings</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17">
+            <p id="section-toc.1-1.17.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-mapping-of-payment-terms" class="internal xref">Mapping of Payment Terms</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18">
+            <p id="section-toc.1-1.18.1"><a href="#appendix-D" class="auto internal xref">Appendix D</a>.  <a href="#name-state-derivation-examples" class="internal xref">State Derivation Examples</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.19">
+            <p id="section-toc.1-1.19.1"><a href="#appendix-E" class="auto internal xref">Appendix E</a>.  <a href="#name-open-issues" class="internal xref">Open Issues</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.20">
+            <p id="section-toc.1-1.20.1"><a href="#appendix-F" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.21">
+            <p id="section-toc.1-1.21.1"><a href="#appendix-G" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">The core of the Invoice Trust Protocol (ITP) <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span> delivers a signed invoice
+and returns a signed "delivered" status.  After delivery, the buyer may accept or reject the invoice, the tax authority may need to be informed, the receivable may be assigned to a factor, and the invoice is paid, possibly in installments or after a credit note.
+Several jurisdictions now require some of these events to be reported,
+with deadlines, and give legal effect to the absence of a response.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document defines:<a href="#section-1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-3.1">
+          <p id="section-1-3.1.1">statuses for those events and who may sign each (<a href="#statuses" class="auto internal xref">Section 3</a>);<a href="#section-1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-3.2">
+          <p id="section-1-3.2.1">how a node derives the state of an envelope from the set of status
+messages, so that both parties reach the same result regardless of
+the order in which messages arrived (<a href="#state" class="auto internal xref">Section 4</a>);<a href="#section-1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-3.3">
+          <p id="section-1-3.3.1">hooks for jurisdiction rules on deadlines and cancellation
+(<a href="#profile-hooks" class="auto internal xref">Section 5</a>);<a href="#section-1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-3.4">
+          <p id="section-1-3.4.1">the "payment" member of the envelope core (<a href="#payment" class="auto internal xref">Section 6</a>); and<a href="#section-1-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-3.5">
+          <p id="section-1-3.5.1">an attestation type that binds a payment account to its holder
+(<a href="#payment-account" class="auto internal xref">Section 7</a>).<a href="#section-1-3.5.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-4">The meaning of commercial statuses is already defined elsewhere, for
+example by tax authorities and by networks such as Peppol, whose
+Invoice Response <span>[<a href="#PEPPOL-IR" class="cite xref">PEPPOL-IR</a>]</span> defines them.  ITP defines
+comparable statuses, carries them in signed messages, and relates them
+to those of several systems in <a href="#mappings" class="auto internal xref">Appendix B</a>.
+Software agents can sign some of these statuses within the limits of a
+mandate <span>[<a href="#I-D.martinez-itp-agent-mandates" class="cite xref">I-D.martinez-itp-agent-mandates</a>]</span>.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<div id="the-experiment">
+<section id="section-1.1">
+        <h3 id="name-the-experiment">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-the-experiment" class="section-name selfRef">The Experiment</a>
+        </h3>
+<p id="section-1.1-1">This document is Experimental.  The experiment is whether two
+independent implementations derive the same state from the same set
+of messages, including messages that arrive in different orders, and
+whether the hooks in <a href="#profile-hooks" class="auto internal xref">Section 5</a> are enough to express the rules
+of at least three jurisdictions with different models.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">Results will be reported on the mailing list where this document is
+discussed and in later revisions of it.  The experiment ends 24 months
+after publication, together with that of <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Terms and conventions of <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span> apply, including
+those for amounts, text, and language tags.  In addition:<a href="#section-2-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-3">
+        <dt id="section-2-3.1">Payee:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-3.2">
+          <p id="section-2-3.2.1">The party to which payment is due: the seller, a party named as
+payee in the invoice, or the assignee after an assignment of the
+receivable.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="statuses">
+<section id="section-3">
+      <h2 id="name-statuses">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-statuses" class="section-name selfRef">Statuses</a>
+      </h2>
+<div id="additional-members-of-status-messages">
+<section id="section-3.1">
+        <h3 id="name-additional-members-of-statu">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-additional-members-of-statu" class="section-name selfRef">Additional Members of Status Messages</a>
+        </h3>
+<p id="section-3.1-1">Status messages have the format defined in <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>.
+For the statuses in this document they can also contain:<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-3.1-2">
+          <dt id="section-3.1-2.1">amount, currency:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.2">
+            <p id="section-3.1-2.2.1">For partial acceptance, payment, credit, or failure.  "currency" is
+an <span>[<a href="#ISO4217" class="cite xref">ISO4217</a>]</span> code and defaults to the invoice currency.<a href="#section-3.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.3">settled_amount, exchange_rate:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.4">
+            <p id="section-3.1-2.4.1">For a payment or a failure in a currency other than the invoice
+currency: the amount in the invoice currency that it settles, as
+stated by its signer, and the rate applied, in the form of
+"exchange_rate" in the envelope core, with "rate" giving the number
+of units of the invoice currency per unit of "currency".<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.5">conditions (string), lang:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.6">
+            <p id="section-3.1-2.6.1">Text of conditions attached to an acceptance.<a href="#section-3.1-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.7">refers_to (string):</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.8">
+            <p id="section-3.1-2.8.1">The "id" of an earlier status message that this one answers, such
+as the "payment-sent" that a "payment-failed" concerns.<a href="#section-3.1-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.9">corrective (string):</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.10">
+            <p id="section-3.1-2.10.1">For "credited", <span class="bcp14">REQUIRED</span>: the "id" of the envelope of the corrective
+document.  For each corrective document, only the counted
+"credited" with the lowest "id" is summed in "amount_credited".<a href="#section-3.1-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.11">deadline (object):</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.12">
+            <p id="section-3.1-2.12.1">For "deemed-accepted", "deemed-rejected", and similar statuses:
+"from" (the "id" of the status message the period starts from or,
+for a stamp, which has no "id", the base64url SHA-256 digest of the
+stamp's JWS Payload), "days" or "hours", "calendar" (a value from the ITP Calendars
+registry, such as "calendar-days" or a "business-days-XX" calendar of
+<a href="#profile-hooks" class="auto internal xref">Section 5</a>), and
+"until" (the date, or for periods in hours the "date-time", computed
+under the profile).<a href="#section-3.1-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.13">effective_at (string):</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.14">
+            <p id="section-3.1-2.14.1">The "date-time" of the event, in UTC as are all ITP timestamps
+(<span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>), for statuses whose period the profile
+counts in hours.  The period itself is computed in the time zone
+that the profile names.  "effective_date" alone
+cannot show that such a period was met, so these messages <span class="bcp14">MUST</span> also
+carry in "itp_evidence" a "timestamp" stamp over the status message
+digest; a message without one is not counted.  In comparisons with a
+deadline or a window, the time of the earliest such stamp is used in
+place of "effective_at".<a href="#section-3.1-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.15">due_date, remittance:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.16">
+            <p id="section-3.1-2.16.1">Payment details reported with an acceptance or a payment.  "remittance"
+has the form of "remittance" in the "payment" member (<a href="#payment" class="auto internal xref">Section 6</a>).<a href="#section-3.1-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.17">assignee (object):</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.18">
+            <p id="section-3.1-2.18.1">For "assigned": "pid", "name", and "account", a "payment-account"
+attestation (<a href="#payment-account" class="auto internal xref">Section 7</a>) that names the assignee.<a href="#section-3.1-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="status-values">
+<section id="section-3.2">
+        <h3 id="name-status-values">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-status-values" class="section-name selfRef">Status Values</a>
+        </h3>
+<p id="section-3.2-1">The statuses below are registered in the ITP Statuses registry
+created by <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>.  "Signer" is the party named in
+"by"; the status message is signed as the core document requires.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<span id="name-statuses-defined-in-this-do"></span><table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-statuses-defined-in-this-do" class="selfRef">Statuses defined in this document</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Status</th>
+              <th class="text-left" rowspan="1" colspan="1">Signer</th>
+              <th class="text-left" rowspan="1" colspan="1">Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">registered</td>
+              <td class="text-left" rowspan="1" colspan="1">Bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">Registration or clearance by the tax authority succeeded</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">registration-error</td>
+              <td class="text-left" rowspan="1" colspan="1">Bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">Registration failed; the invoice remains issued and the registration is corrected and resubmitted</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">clearance-rejected</td>
+              <td class="text-left" rowspan="1" colspan="1">Bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">Clearance failed; the invoice is treated as not issued</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">pending-authority</td>
+              <td class="text-left" rowspan="1" colspan="1">Issuer or bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">Issued in contingency or offline mode and not yet regularized with the authority</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">received</td>
+              <td class="text-left" rowspan="1" colspan="1">Recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">The recipient's system imported the envelope</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">goods-received</td>
+              <td class="text-left" rowspan="1" colspan="1">Recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">The recipient confirms receipt of the goods or services</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">operation-unknown</td>
+              <td class="text-left" rowspan="1" colspan="1">Recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">The recipient states that it does not recognize the operation</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">accepted</td>
+              <td class="text-left" rowspan="1" colspan="1">Recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">Commercial acceptance, full, partial ("amount"), or with "conditions"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">deemed-accepted</td>
+              <td class="text-left" rowspan="1" colspan="1">Issuer or bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">Acceptance presumed under the applicable law after a period without rejection</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">deemed-rejected</td>
+              <td class="text-left" rowspan="1" colspan="1">Issuer or bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">Rejection presumed under the applicable law after a period without a response</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">rejected</td>
+              <td class="text-left" rowspan="1" colspan="1">Recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">Commercial rejection, with a reason</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">disputed</td>
+              <td class="text-left" rowspan="1" colspan="1">Recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">The recipient queries or suspends the invoice</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">assigned</td>
+              <td class="text-left" rowspan="1" colspan="1">Holder or bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">The receivable was assigned to "assignee"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">payment-sent</td>
+              <td class="text-left" rowspan="1" colspan="1">Buyer</td>
+              <td class="text-left" rowspan="1" colspan="1">Payment initiated, full or with "amount"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">payment-failed</td>
+              <td class="text-left" rowspan="1" colspan="1">Buyer or bridge, for a "payment-sent"; payee or bridge, for a "paid"</td>
+              <td class="text-left" rowspan="1" colspan="1">A payment reported in "refers_to" failed or was returned</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">paid</td>
+              <td class="text-left" rowspan="1" colspan="1">Payee</td>
+              <td class="text-left" rowspan="1" colspan="1">Payment received, full or with "amount"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">cancellation-requested</td>
+              <td class="text-left" rowspan="1" colspan="1">Issuer</td>
+              <td class="text-left" rowspan="1" colspan="1">The issuer asks to cancel the document</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">cancellation-refused</td>
+              <td class="text-left" rowspan="1" colspan="1">Recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">The recipient refuses a cancellation request</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">cancelled</td>
+              <td class="text-left" rowspan="1" colspan="1">Issuer, recipient, or bridge</td>
+              <td class="text-left" rowspan="1" colspan="1">The document is cancelled, as the profile allows (<a href="#profile-hooks" class="auto internal xref">Section 5</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">credited</td>
+              <td class="text-left" rowspan="1" colspan="1">Issuer</td>
+              <td class="text-left" rowspan="1" colspan="1">A corrective document reduces or cancels the amount, in full or for "amount"</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-3.2-3">In self-billing, the buyer issues the document and the seller is the
+recipient, so the seller signs "accepted" or "rejected" of the
+self-billed invoice, while "payment-sent" is still signed by the
+buyer.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2-4">Initial reason codes, registered in the ITP Status Reason Codes
+registry, are:<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<span id="name-initial-status-reason-codes"></span><table class="center" id="table-2">
+          <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-initial-status-reason-codes" class="selfRef">Initial status reason codes</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Code</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">order-mismatch</td>
+              <td class="text-left" rowspan="1" colspan="1">The order reference does not match an order of the recipient</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">price-mismatch</td>
+              <td class="text-left" rowspan="1" colspan="1">Prices differ from those agreed</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">quantity-mismatch</td>
+              <td class="text-left" rowspan="1" colspan="1">Quantities differ from those ordered or received</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">duplicate</td>
+              <td class="text-left" rowspan="1" colspan="1">The document duplicates one already received</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">not-ordered</td>
+              <td class="text-left" rowspan="1" colspan="1">The goods or services were not ordered</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">tax-error</td>
+              <td class="text-left" rowspan="1" colspan="1">Tax amounts, rates, or identifiers are wrong</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">wrong-recipient</td>
+              <td class="text-left" rowspan="1" colspan="1">The recipient is not the buyer or the addressee</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">goods-not-received</td>
+              <td class="text-left" rowspan="1" colspan="1">The goods or services have not been received</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">other</td>
+              <td class="text-left" rowspan="1" colspan="1">Another reason, given in "text"</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-3.2-6">A receiver that does not know a reason code shows the text
+and treats the code as "other".  A node that does not know a status
+stores and returns the message and treats it as information only.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="state">
+<section id="section-4">
+      <h2 id="name-deriving-the-state">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-deriving-the-state" class="section-name selfRef">Deriving the State</a>
+      </h2>
+<p id="section-4-1">Both nodes keep every status message for an envelope whose signature
+is valid, and exchange them (<span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>).
+The state is a function of that set and of the envelope, not of the
+order in which messages arrived or of the time at which a node
+received them.  Only signed content and signed evidence are used.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="signers">
+<section id="section-4.1">
+        <h3 id="name-signers">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-signers" class="section-name selfRef">Signers</a>
+        </h3>
+<p id="section-4.1-1">The signer roles in <a href="#statuses" class="auto internal xref">Section 3</a> are bound to the envelope core as
+follows, comparing "by" with each PID after the normalization of
+its scheme.  A participant with several PIDs signs with the PID that
+the envelope core or "assignee" names; its messages under other PIDs
+form other chains and have no role.  "Issuer" is "issuer".  "Recipient" is "recipient", or if it
+is absent, "buyer" ("seller" in self-billing).  "Seller" and "Buyer"
+are "seller" and "buyer".  "Holder" is determined by the holder
+sequence in "assignee" (<a href="#props" class="auto internal xref">Section 4.3</a>) and is not checked when an
+"assigned" message is counted: an
+"assigned" message is counted if it is validly signed by a
+participant or a bridge and continues its signer's chain, and only
+the messages that the sequence considers have effect.  "Payee" is
+"payment.payee.pid" if present, otherwise "seller", and in addition
+the "assignee.pid" of any considered "assigned" message
+(<a href="#props" class="auto internal xref">Section 4.3</a>).  "Bridge" is a trust list
+entry accepted for a scheme named by a profile in "profiles", or for
+the scheme of a "tax-registration", "tax-clearance", "tax-report", or
+"receivable-registration" stamp, or of a rendition, that the same
+bridge signed for this envelope.  A bridge for the "rfc3161" scheme,
+or one that signed only "timestamp" or "network-ack" stamps, is not a
+signer of any status in this document.  "delivered" and "technical-rejected" are counted only if
+"by" is a node listed in "inbound" of the recipient's Participant
+Document.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="counted">
+<section id="section-4.2">
+        <h3 id="name-counted-messages">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-counted-messages" class="section-name selfRef">Counted Messages</a>
+        </h3>
+<p id="section-4.2-1">A message is counted if its signature is valid for its signer and
+status, its "seq" and "prev" continue the signer's chain for that
+envelope without gaps, where the chain consists of all of the
+signer's messages with a valid signature, counted or not, and it does not break the rules below when
+compared with earlier messages in the same signer's chain.  Two
+different messages with the same signer and "seq" stop that signer's
+chain at that point; both are reported.  As an exception, so that a
+signer cannot withdraw a message that others have relied on by
+signing a conflicting one, exactly one of the conflicting messages
+remains counted, and the chain continues from it, if it alone is
+named in "refers_to" or "deadline.from" by a message of another
+signer whose signature is valid and that is linked through "prev"
+digests to that signer's message with "seq" 1, or, failing that, if it alone carries a valid
+"timestamp" stamp earlier than any timestamp stamp of the others.  Apart from the "refers_to" and "deadline.from" references, rules are
+never evaluated against messages of other signers; conflicts between signers are
+resolved only by the definitions in <a href="#props" class="auto internal xref">Section 4.3</a>.  Other messages are
+stored, returned, and reported, but not counted.  Where this
+document orders messages by "id" or takes the lowest "id", ids are
+compared as 128-bit unsigned integers.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">Rules within one signer's chain:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2-3.1">
+            <p id="section-4.2-3.1.1">The recipient cannot send "rejected" after its own "accepted", or
+"accepted" after its own "rejected".<a href="#section-4.2-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.2-3.2">
+            <p id="section-4.2-3.2.1">"cancellation-refused", "payment-failed", and a "cancelled" signed
+by the recipient <span class="bcp14">MUST</span> carry "refers_to" naming a counted message
+("cancellation-requested"; "payment-sent" or "paid"; and
+"cancellation-requested", respectively).<a href="#section-4.2-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.2-3.3">
+            <p id="section-4.2-3.3.1">"deemed-accepted" and "deemed-rejected" <span class="bcp14">MUST</span> carry "deadline", and
+"effective_at" when the period is in hours.  They are counted only
+if a profile in "profiles" provides that presumption
+(<a href="#profile-hooks" class="auto internal xref">Section 5</a>); "deadline.from" names a counted status message,
+or an accepted stamp, in the set; "deadline.until" is earlier than
+their "effective_date" (or "effective_at"); and "deadline.until" is
+not earlier than the start of the period plus "days" calendar days
+(or plus "hours").  The start is the "effective_date" (or
+"effective_at") of the message, or the "issued_at" of the stamp,
+named in "deadline.from".  For a period in hours, a message named in "deadline.from"
+starts it only if it carries "effective_at" and a "timestamp" stamp;
+otherwise the deemed status is not counted.  The bound needs no knowledge of the
+calendar, because excluded days only lengthen a period.  A verifier
+that knows the calendar recomputes "until" from "deadline.from",
+"days" or "hours", and "calendar", and reports a mismatch; beyond the
+bound above, the mismatch does not affect counting.<a href="#section-4.2-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.2-4">"received", "goods-received", and "operation-unknown" are recorded for
+information and affect no property.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="props">
+<section id="section-4.3">
+        <h3 id="name-state-properties">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-state-properties" class="section-name selfRef">State Properties</a>
+        </h3>
+<p id="section-4.3-1">The state is the following set of properties.  Some belong to a
+track, and the definition of a final value names the tracks that it
+ends.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-4.3-2">
+          <dt id="section-4.3-2.1">fiscal (fiscal track):</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.2">
+            <p id="section-4.3-2.2.1">"clearance-rejected" if a counted "clearance-rejected" exists;
+otherwise "registered" if a counted "registered" exists; otherwise
+"registration-error" if one exists; otherwise "pending-authority"
+if one exists; otherwise "none".  "clearance-rejected" is final for
+every track.<a href="#section-4.3-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.3">delivery (delivery track):</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.4">
+            <p id="section-4.3-2.4.1">"technical-rejected" if a counted "technical-rejected" exists;
+otherwise "delivered" if a counted "delivered" exists; otherwise
+"none".  "technical-rejected" is final for the delivery and
+acceptance tracks; the fiscal track continues.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.5">acceptance (acceptance track):</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.6">
+            <p id="section-4.3-2.6.1">Let D be the earliest "deadline.until" among counted
+"deemed-accepted" messages, and R the earliest among counted
+"deemed-rejected" messages.  A counted "rejected" is void if D
+exists and the message is later than D; a counted "accepted" is
+void if R exists and the message is later than R.  When the deadline
+is a date, the message's "effective_date" is compared with it.  When
+it is a "date-time", the message's "effective_at" is compared as an
+instant, or, if the message has none, its "effective_date" is
+compared with the date of the deadline in the time zone that the
+profile names.  Where "effective_at" is present, "effective_date"
+<span class="bcp14">MUST</span> be its date in the time zone that the profile names.  Then: "rejected" if a counted "rejected" that is not void
+exists; otherwise "accepted" if a counted "accepted" that is not
+void exists; otherwise, if D and R both exist, "deemed-accepted" if D is
+earlier than R and "deemed-rejected" otherwise, and the conflict is
+reported; otherwise "deemed-accepted" if D exists; otherwise
+"deemed-rejected" if R exists; otherwise "pending".  "rejected" and
+"deemed-rejected" are final for this track.<a href="#section-4.3-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.7">dispute_open:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.8">
+            <p id="section-4.3-2.8.1">True if the last counted message in the recipient's chain among
+"accepted", "disputed", and "rejected" is "disputed".<a href="#section-4.3-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.9">assignee:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.10">
+            <p id="section-4.3-2.10.1">The considered "assigned" messages are, where a profile names an
+assignment registry, the counted ones signed by that registry's
+bridge, in the order of its chain; otherwise those that the holder
+sequence selects: starting with the seller as holder, the first
+counted "assigned" in the holder's chain that has not yet been
+considered is considered, and its assignee becomes the holder; this
+repeats until the holder's chain has no further "assigned".  A
+holder's later "assigned" messages are therefore considered only
+after the receivable has come back to it, and a second assignment
+by the same holder is reported and has no effect.  The chain of an
+assignee is followed only where reassignment is allowed
+(<a href="#profile-hooks" class="auto internal xref">Section 5</a>).  A message whose "effective_date" is earlier
+than that of the message that made its signer holder is skipped: it
+is never considered, and the sequence continues with the next
+counted "assigned" in the holder's chain.  A signer is the holder when its "by" equals, after
+normalization, the seller or the "assignee.pid" concerned.  "assignee" is the
+"assignee.pid" of the last considered message whose
+"effective_date" is not later than the "effective_date" of the first
+counted "paid", in order of "effective_date" and then "id", at which
+the running sum of the "paid" amounts that "amount_paid" includes,
+less what counted "payment-failed" messages subtract from them, plus
+"amount_credited",
+reaches "amount_due".  If there is no such "paid",
+it is the "assignee.pid" of the last considered message; if there is
+none, none.<a href="#section-4.3-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.11">amount_sent, amount_paid, amount_credited (payment track):</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.12">
+            <p id="section-4.3-2.12.1">Sums with exact decimal arithmetic.  "amount_sent" is the sum of
+counted "payment-sent" amounts; "amount_paid" is the sum of counted
+"paid" amounts whose signer was payee at the message's
+"effective_date": the seller, or "payment.payee.pid" if present,
+before the first considered "assigned", and afterwards the assignee
+of the last considered "assigned" whose "effective_date" is not
+later; "amount_credited" is the sum of counted "credited"
+amounts.  Each counted "payment-failed" subtracts the smaller of its
+amount and the referenced amount, both in the invoice currency (its
+own "settled_amount" where its currency differs, and, for a failure
+without "amount" or without "settled_amount", the amount that the
+referenced message added), from "amount_sent" (if it refers to
+a "payment-sent") or "amount_paid" (if it refers to a "paid"); only
+the "payment-failed" with the lowest "id" counts for each referenced
+message.  A message without "amount" counts as the full
+"amount_due" (for payments) or "total_with_tax" (for credits).  A message in a
+currency other than the invoice currency is summed using its
+"settled_amount"; without "settled_amount" it is reported and not
+summed.<a href="#section-4.3-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.13">cancellation:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.14">
+            <p id="section-4.3-2.14.1">"none" if "assignee" is set and a considered "assigned" has an
+"effective_date" that is not later than that of every counted
+"cancelled"; an assignment dated after a counted "cancelled" is
+reported and does not change this property.  Otherwise "cancelled" if a counted
+"cancelled" exists that the cancellation policy allows
+(<a href="#profile-hooks" class="auto internal xref">Section 5</a>): under "none", none; under "window", one signed
+by the issuer or a bridge whose "effective_at" (or "effective_date")
+is within the window counted from the stamp that the profile names;
+under "request", one signed by the recipient that refers to a
+counted "cancellation-requested", or by a bridge; under "consent",
+as under "request", or one signed by the issuer or a bridge that
+carries "deadline" from a counted "cancellation-requested", meets
+the conditions on "deadline" in <a href="#counted" class="auto internal xref">Section 4.2</a>, and to which no counted
+"cancellation-refused" with an "effective_date" not later than
+"deadline.until" refers, or that meets an exemption
+the profile states as a condition on the envelope core; otherwise "requested" if the cancellation policy is "request" or
+"consent" and the issuer's last cancellation message is
+"cancellation-requested" and no counted
+"cancellation-refused" refers to it; otherwise "none".
+"cancelled" is final for every track except the fiscal track.<a href="#section-4.3-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.15">final:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.16">
+            <p id="section-4.3-2.16.1">True if "fiscal" is "clearance-rejected", "delivery" is
+"technical-rejected", "acceptance" is "rejected" or
+"deemed-rejected", "cancellation" is "cancelled", or
+"amount_credited" is at least "total_with_tax".  A final value does
+not stop messages from being counted or change how other properties
+are computed.<a href="#section-4.3-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-2.17">settled:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.18">
+            <p id="section-4.3-2.18.1">True when "amount_paid" plus
+"amount_credited" is at least "amount_due".  Being settled does not
+stop other messages from being counted; its only effect on other
+properties is the cut-off in "assignee".<a href="#section-4.3-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-4.3-3">Two nodes compute the same properties when they hold the same
+envelope, the same set of messages with their evidence, and the same
+inputs that are not in that set: the accepted trust lists and
+Participant Documents, which decide whether a signer is a bridge,
+whether a key is valid, and whether a node is listed in "inbound",
+and the definitions of the profiles named in "profiles".  For
+deriving the state, the time of a "timestamp" stamp is used only if
+its time-stamping authority is accepted through a trust list, because
+an authority accepted by local configuration alone would let nodes
+compute different states.  A node that
+does not know a profile named in "profiles" reports the acceptance,
+cancellation, and assignee properties, "dispute_open", "amount_paid",
+and "settled" as not derived, and "final" as not derived unless one
+of its other conditions holds, and does not apply the
+defaults of <a href="#profile-hooks" class="auto internal xref">Section 5</a>.  When "profiles" names several
+profiles that set the same parameter differently, the first in the
+array that sets it applies.  Software that needs a single label for display
+can derive one, for example by taking the first of final,
+cancellation, acceptance, delivery that is not empty; that label is
+not exchanged.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4">A node <span class="bcp14">MAY</span> refuse to accept a new message from a client that would not
+be counted, with "invalidTransition".  That is a local admission
+check: a message that another node has already stored is still
+stored and returned, and the definitions above decide its effect.
+These rules are meant to be a superset of the response rules of
+networks and platforms, such as Peppol Invoice Response <span>[<a href="#PEPPOL-IR" class="cite xref">PEPPOL-IR</a>]</span>
+and the status flows of tax authority platforms (<a href="#mappings" class="auto internal xref">Appendix B</a>); a
+bridge to any of them maps only the transitions that it allows.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<span id="name-tracks-of-the-state-informa"></span><div id="fig-tracks">
+<figure id="figure-1">
+          <div class="alignLeft art-ascii-art art-text artwork" id="section-4.3-5.1">
+<pre>
+ fiscal:      none -&gt; registration-error -&gt; registered
+              none -&gt; pending-authority  -&gt; registered
+              none -&gt; clearance-rejected (final, all tracks)
+ delivery:    none -&gt; delivered | technical-rejected (final)
+ acceptance:  pending -&gt; accepted | deemed-accepted | rejected
+                      | deemed-rejected
+              (rejected and deemed-rejected final for this track)
+ cancellation: none -&gt; requested -&gt; cancelled (final except fiscal)
+ payments:    payment-sent -&gt; paid, payment-failed
+ assignment:  assigned (before full payment)
+ corrections: credited (partial or full; full is final)
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-tracks-of-the-state-informa" class="selfRef">Tracks of the state (informal)</a>
+          </figcaption></figure>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="profile-hooks">
+<section id="section-5">
+      <h2 id="name-hooks-for-jurisdiction-rule">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-hooks-for-jurisdiction-rule" class="section-name selfRef">Hooks for Jurisdiction Rules</a>
+      </h2>
+<p id="section-5-1">The "profiles" member of the envelope core names the profiles that
+apply.  A profile expresses the rules of a jurisdiction or network through the following parameters.  When "profiles" names
+no profile registered in the ITP Profiles registry, the cancellation
+policy is "none", "deemed-accepted" and "deemed-rejected" messages
+are not counted, no response window or assignment registry
+applies, and reassignment is allowed.  "none" is the default
+because in many tax regimes an issued invoice cannot be cancelled and
+is corrected by another document.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5-2">
+        <dt id="section-5-2.1">Cancellation policy:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.2">
+          <p id="section-5-2.2.1">One of "none" (documents cannot be cancelled; corrections use
+credit notes), "window" (the issuer can cancel within a period given
+in the profile, which can be counted in hours from the registration
+or validation time in an accepted stamp), "request" (the issuer requests and the recipient
+answers), or "consent" (as "request", but some cases need no
+answer, as the profile lists).<a href="#section-5-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.3">Time zone:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.4">
+          <p id="section-5-2.4.1">The time zone name from the IANA Time Zone Database in which dates
+are compared and days are counted.  The default is UTC.<a href="#section-5-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.5">Deadlines:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.6">
+          <p id="section-5-2.6.1">For each status that the law requires within a period, the event
+the period starts from, its length, and its calendar.  Calendars are
+registered in the ITP Calendars registry.  The pattern
+"business-days-XX", where XX is an <span>[<a href="#ISO3166" class="cite xref">ISO3166</a>]</span> alpha-2 code or an
+<span>[<a href="#ISO3166-2" class="cite xref">ISO3166-2</a>]</span> subdivision code (for example "business-days-MY-01"),
+names a calendar whose definition states the weekly rest days and
+the public holidays it excludes.  Weekly rest days are not Saturday
+and Sunday everywhere, and holidays can differ between the regions
+of one country.  Days are counted in the time zone that the profile
+names.  Unless the profile says otherwise, the first day counted is
+the day after the event, "until" is the last day of the period, and
+a period in hours is elapsed time to which no calendar applies.  Holidays that are fixed by announcement shortly before they
+occur, as lunar holidays often are, are applied as announced; a
+verifier that recomputes "until" reports a mismatch caused by a
+later announcement without treating it as an error.  A verifier
+that does not know a calendar does not recompute deadlines that use
+it.<a href="#section-5-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.7">Deemed acceptance or rejection:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.8">
+          <p id="section-5-2.8.1">Whether acceptance, or in some regimes rejection, is presumed after
+a deadline, and its legal effect, for example that the invoice
+becomes enforceable as a negotiable instrument.<a href="#section-5-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.9">Response windows:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.10">
+          <p id="section-5-2.10.1">For each recipient status, such as "rejected", the period after
+which the recipient can no longer send it, with no presumption
+attached.  The window starts from an event that the profile names and
+that is in the set, such as the "effective_date" of "delivered" or
+the "issued_at" of an accepted stamp, and is counted in calendar
+days or in hours, so that every node can compute its end.  A message
+whose "effective_date" (or "effective_at") is after the end of its
+window is not counted.  A window that the law counts in business
+days is expressed through a deemed status with "deadline", or is
+only reported, and does not affect counting.  Declining a rejection,
+which some regimes allow the issuer, has no ITP status in this
+version.<a href="#section-5-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.11">Preconditions:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.12">
+          <p id="section-5-2.12.1">Whether delivery requires a prior "registered" status, as in
+clearance regimes.<a href="#section-5-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.13">Numbering:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.14">
+          <p id="section-5-2.14.1">The scope in which "invoice_number" is unique, for duplicate
+detection, for example per tax identifier and fiscal year, per
+establishment, or per document type and point of sale.<a href="#section-5-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.15">Assignment registries:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.16">
+          <p id="section-5-2.16.1">Where assignments of receivables are recorded by an official
+registry, the bridge records the assignment and adds a
+"receivable-registration" stamp to the envelope.<a href="#section-5-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-5-2.17">Reassignment:</dt>
+        <dd style="margin-left: 1.5em" id="section-5-2.18">
+          <p id="section-5-2.18.1">Whether an assignee can assign the receivable again.  Where no
+registered profile in "profiles" says otherwise, reassignment is
+allowed.<a href="#section-5-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="payment">
+<section id="section-6">
+      <h2 id="name-payment-information">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-payment-information" class="section-name selfRef">Payment Information</a>
+      </h2>
+<p id="section-6-1">The optional "payment" member of the envelope core
+<span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span> contains:<a href="#section-6-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-6-2">
+        <dt id="section-6-2.1">payee (optional, object):</dt>
+        <dd style="margin-left: 1.5em" id="section-6-2.2">
+          <p id="section-6-2.2.1">"pid" and "name" of the payee when it is not the seller, for
+example a factor named in the invoice.<a href="#section-6-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-6-2.3">due_date (optional, string):</dt>
+        <dd style="margin-left: 1.5em" id="section-6-2.4">
+          <p id="section-6-2.4.1">The payment due date.<a href="#section-6-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-6-2.5">schedule (optional, array):</dt>
+        <dd style="margin-left: 1.5em" id="section-6-2.6">
+          <p id="section-6-2.6.1">Installments, each with "due_date" and "amount".<a href="#section-6-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-6-2.7">prepaid_amount (optional, string):</dt>
+        <dd style="margin-left: 1.5em" id="section-6-2.8">
+          <p id="section-6-2.8.1">The amount paid in advance, for example as a prepayment.<a href="#section-6-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-6-2.9">methods (optional, array):</dt>
+        <dd style="margin-left: 1.5em" id="section-6-2.10">
+          <p id="section-6-2.10.1">Objects with "type" from the ITP Payment Method Types registry.  The
+initial type is "credit-transfer", whose object contains "account",
+a "payment-account" attestation (<a href="#payment-account" class="auto internal xref">Section 7</a>) that names the
+payee, and optionally "rails", values from the ITP Payment Rails
+registry over which the payee accepts payment to that account (for
+example "sepa-sct", "ach", "fednow", "spei", "pix", "upi",
+"paynow", or "mpesa").  The account scheme says how the account is
+identified; the rail says how the money moves, and one account is
+often reachable over several rails.  A payer that does not support
+a method ignores it.<a href="#section-6-2.10.1" class="pilcrow">¶</a></p>
+<p id="section-6-2.10.2">Accounts addressed through an alias that a central directory
+resolves at payment time, such as a PIX key, a UPI address, or a
+mobile number on a proxy-addressed instant payment system, can be
+re-pointed by their holder.  An attestation of such an alias shows
+the binding at the time it was issued; payers resolve the alias
+again and compare the holder before paying.  For mobile money, the scheme is
+"mobile-money", and its value names the provider and country as well
+as the identifier (an E.164 number, or a merchant short code with an
+account number).  "msisdn" is used for a mobile number registered as
+an alias on a proxy-addressed instant payment system; other aliases
+of such systems, such as a business registration number, are
+registered as their own schemes.<a href="#section-6-2.10.2" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-6-2.11">remittance (optional, object):</dt>
+        <dd style="margin-left: 1.5em" id="section-6-2.12">
+          <p id="section-6-2.12.1">"creditor_reference", a creditor reference in a format the rail defines,
+such as <span>[<a href="#ISO11649" class="cite xref">ISO11649</a>]</span> (at most 25 characters), a Swiss QR reference,
+or a Norwegian KID number, and "unstructured", free text to be
+placed in the remittance information of the payment, for example in
+an <span>[<a href="#ISO20022" class="cite xref">ISO20022</a>]</span> message.  Length limits are those of the rail and
+differ widely: 140 characters in SEPA, 210 in Russian payment
+orders, 12 in some mobile money references.  A "credit-transfer" method <span class="bcp14">MAY</span> carry its own "remittance", which
+applies to payments over its rails in place of this one.  If neither
+is given, payers use the envelope id where the rail allows 36
+characters, and otherwise "invoice_number" cut to the rail's limit.  A payment that settles several
+invoices carries a reference per invoice where the rail allows it,
+or a separate remittance advice.<a href="#section-6-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-6-3">A relying party <span class="bcp14">MUST NOT</span> treat payment details as verified while the
+key that signed the envelope, or the key that signed an "assigned"
+message, is "recently bound" (<span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>).  A receiving node that
+interprets the document, where "methods" is present, and finds in
+the document a payment account that is not equal to an account
+attested in "methods" rejects the envelope with
+"inconsistentCore".<a href="#section-6-3" class="pilcrow">¶</a></p>
+<p id="section-6-4">An "assigned" status <span class="bcp14">MUST</span> be signed, with "itp_role" "issuer" or
+"delegated-issuer" and not with a node key, by the current holder of
+the receivable: the seller or, where the applicable law lets a
+receivable be assigned again, the assignee of the last considered
+"assigned" message.  Where a profile names an assignment registry,
+the registry's bridge signs "assigned" with "itp_role" "bridge" once
+the registry records the assignment.  Every "assigned" status <span class="bcp14">MUST</span>
+carry in "assignee" a "payment-account" attestation that names the
+assignee.  Assignment can be subject to the law of the place of
+the assignor; the United Nations Convention on the Assignment of
+Receivables in International Trade <span>[<a href="#UN-ASSIGN" class="cite xref">UN-ASSIGN</a>]</span> is one framework.
+"assigned" records only who is entitled to payment.  It does not
+imply a sale or a discount.<a href="#section-6-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="payment-account">
+<section id="section-7">
+      <h2 id="name-payment-account-attestation">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-payment-account-attestation" class="section-name selfRef">Payment Account Attestations</a>
+      </h2>
+<p id="section-7-1">This document registers the attestation type "payment-account" in the
+ITP Attestation Types registry.  It binds an account to its holder.
+Its claims are:<a href="#section-7-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-7-2">
+        <dt id="section-7-2.1">account:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.2">
+          <p id="section-7-2.2.1">An object with "scheme", from the ITP Account Schemes registry, and
+"value", the account identifier in the format of that scheme, for
+example an <span>[<a href="#ISO13616" class="cite xref">ISO13616</a>]</span> IBAN for "iban", which is used inside and
+outside SEPA, or a sort code and account number for "gb-sortcode".<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-2.3">holder_name, lang:</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.4">
+          <p id="section-7-2.4.1">The holder's name as the account-servicing institution records it,
+as a string or as an array of objects with "lang" and "text" when
+the institution records it in more than one script.  Institutions
+can record names in a reduced character set, such as half-width
+katakana in Japan, or transliterated, so software compares the
+holder name with the payee's name only through the payee
+verification service of the rail, not by string comparison.<a href="#section-7-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-7-2.5">checked_by (optional):</dt>
+        <dd style="margin-left: 1.5em" id="section-7-2.6">
+          <p id="section-7-2.6.1">The name of the payee verification service that was queried, if
+the attestation issuer obtained the result from one (see
+<a href="#payee-verification" class="auto internal xref">Section 8</a>).<a href="#section-7-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-7-3">The holder is the subject of the attestation, given in "sub".  It is
+issued by the institution that services the account, or by a
+service that queries that institution, and its validity period is at
+most 90 days.  When the attestation is carried in "payment.methods" or
+in "assignee", the disclosure of "account" <span class="bcp14">MUST</span> be included, and "sub"
+<span class="bcp14">MUST</span> be the URN of "payment.payee.pid" (or, if "payment.payee" is
+absent, of the seller) or of "assignee.pid", respectively.
+A "payment-account" attestation <span class="bcp14">MUST NOT</span> be listed in "attestations"
+of a Participant Document, which anyone can retrieve.<a href="#section-7-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="payee-verification">
+<section id="section-8">
+      <h2 id="name-application-considerations-">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-application-considerations-" class="section-name selfRef">Application Considerations for Payment</a>
+      </h2>
+<p id="section-8-1">This section is advice to software that pays invoices on the basis of
+ITP data; it does not constrain the protocol.  Such software is
+expected:<a href="#section-8-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8-2.1">
+          <p id="section-8-2.1.1">not to pay automatically to an account that is not covered by a
+valid "payment-account" attestation naming the payee, and to check
+the status of that attestation when it initiates the payment;<a href="#section-8-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-2.2">
+          <p id="section-8-2.2.1">where the payer's institution or the payment system offers
+verification of the payee, for example Verification of Payee in the
+European Union (<span>[<a href="#EU-IPR" class="cite xref">EU-IPR</a>]</span>, <span>[<a href="#EPC-VOP" class="cite xref">EPC-VOP</a>]</span>), Confirmation of Payee for
+"gb-sortcode" accounts, or the name that
+proxy-addressed and mobile money systems show before the payer
+confirms, not to proceed automatically on a result other than a
+full match, and not to rely on an opt-out from that
+verification for the first payment to an account; and<a href="#section-8-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-2.3">
+          <p id="section-8-2.3.1">to ask a person to approve the first payment to an account not used
+before for the same payee, and the first payment after an "assigned"
+status.<a href="#section-8-2.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-3">Payment details that are not verified because a key is recently bound
+are not used automatically.
+Nodes that also initiate payments or access payment accounts do so
+under the rules that apply to those activities.<a href="#section-8-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="implementation-status">
+<section id="section-9">
+      <h2 id="name-implementation-status">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-implementation-status" class="section-name selfRef">Implementation Status</a>
+      </h2>
+<p id="section-9-1">Note to the RFC Editor: please remove this section before
+publication, as described in <span>[<a href="#RFC7942" class="cite xref">RFC7942</a>]</span>.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">Organization: BeeL. (Honey Solutions, S.L.).  Description: support for
+this document in the reference implementation listed in
+<span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>.  Maturity: in development.  License:
+Apache License 2.0 (intended).  Contact: the author.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-3">No independent implementation is known at the time of writing.<a href="#section-9-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-10">
+      <h2 id="name-security-considerations">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-10-1">The security considerations of <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span> apply.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">Statuses can have legal and tax effects: an acceptance can make an
+invoice enforceable, and some jurisdictions report acceptance,
+rejection, and payment to the tax authority.  This document therefore
+binds each status to the party entitled to sign it.  Nodes can sign
+commercial statuses only with "delegated-issuer" keys that the
+participant has listed.  The state is derived from the set
+of messages, so an attacker that delays or reorders messages cannot
+make the two parties see different states once they have exchanged
+the same messages, although it can delay them.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-3">Fraud based on notifying changed bank details is addressed by
+binding accounts to attestations from the institutions that service
+them, by payee verification at payment time, by human approval of new
+accounts and of the first payment after an assignment, and by the
+72-hour rule of the core document.  A forged "assigned" status
+redirects payment in the same way, so it needs the holder's own key
+and an attestation for the assignee's account.  These controls do not
+stop a seller whose own systems are compromised.<a href="#section-10-3" class="pilcrow">¶</a></p>
+<p id="section-10-4">Deemed acceptance depends on dates.  The "effective_date" of a
+rejection is chosen by its signer, so a recipient could back-date it,
+and the "deadline.until" of a deemed acceptance is chosen by its
+signer too.  Verifiers recompute deadlines when they know the
+calendar, and profiles where timing has legal effect can require a
+timestamp stamp in the "itp_evidence" of status messages
+(<span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>).  Local receipt times are never used,
+because the two nodes would compute different states.<a href="#section-10-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="privacy-considerations">
+<section id="section-11">
+      <h2 id="name-privacy-considerations">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+      </h2>
+<p id="section-11-1">Status messages reveal the commercial relationship and payment
+behavior of the parties, and payment-account attestations reveal
+account details.  Status messages are exchanged only between the
+nodes of the parties, are not registered in transparency services,
+and are stored under the same protections as envelopes
+(<span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span>).  Payment-account attestations are
+registered as the core document requires for all attestations.  The
+log does not learn the account, but for a legal entity the PID digest
+can be reversed by testing identifiers and the Signed Statement
+identifies the attestation issuer, so a reader of the log can learn
+that a given institution attested an account of that legal entity,
+and when.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">Account identifiers such as mobile numbers, UPI addresses, and PIX
+keys that are telephone numbers, e-mail addresses, or tax identifiers
+are personal data when the holder is a natural person, and
+"holder_name" then names that person.  "account" and "holder_name"
+are selectively disclosable, and the payee discloses them only in
+envelopes and status messages addressed to the payer.<a href="#section-11-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="internationalization-considerations">
+<section id="section-12">
+      <h2 id="name-internationalization-consid">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-internationalization-consid" class="section-name selfRef">Internationalization Considerations</a>
+      </h2>
+<p id="section-12-1">The considerations of <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span> apply.  "reason.text",
+"conditions", and "holder_name" are human-readable and carry "lang".
+Business-day calendars depend on weekly rest days and on national and
+regional holidays, some fixed by lunar calendars, and are defined by
+profiles, not by this document.<a href="#section-12-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-13">
+      <h2 id="name-iana-considerations">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<div id="itp-statuses">
+<section id="section-13.1">
+        <h3 id="name-itp-statuses">
+<a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-itp-statuses" class="section-name selfRef">ITP Statuses</a>
+        </h3>
+<p id="section-13.1-1">IANA is requested to add the statuses in <a href="#statuses" class="auto internal xref">Section 3</a> to the ITP
+Statuses registry, with this document as the reference.  The "final"
+field is "conditional" for "rejected" (final for the acceptance track
+unless void because it is later than a deemed acceptance),
+"deemed-rejected" (final for the acceptance track unless an
+"accepted" not later than its deadline is counted or a deemed
+acceptance has an earlier deadline), "credited" (final
+when "amount_credited" reaches "total_with_tax"), and "cancelled" (final
+except for the fiscal track, unless an earlier assignment applies);
+"yes" for "clearance-rejected"; and "no" for the others, including
+"paid".  IANA is also requested to change the "final" field of
+"technical-rejected" to "conditional" (final for the delivery and
+acceptance tracks), adding this document as a reference.<a href="#section-13.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="itp-status-reason-codes">
+<section id="section-13.2">
+        <h3 id="name-itp-status-reason-codes">
+<a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-itp-status-reason-codes" class="section-name selfRef">ITP Status Reason Codes</a>
+        </h3>
+<p id="section-13.2-1">IANA is requested to add the reason codes in <a href="#statuses" class="auto internal xref">Section 3</a> to the ITP
+Status Reason Codes registry, with this document as the reference.<a href="#section-13.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="itp-attestation-types-and-stamp-types">
+<section id="section-13.3">
+        <h3 id="name-itp-attestation-types-and-s">
+<a href="#section-13.3" class="section-number selfRef">13.3. </a><a href="#name-itp-attestation-types-and-s" class="section-name selfRef">ITP Attestation Types and Stamp Types</a>
+        </h3>
+<p id="section-13.3-1">IANA is requested to add "payment-account" (<a href="#payment-account" class="auto internal xref">Section 7</a>) to the
+ITP Attestation Types registry and "receivable-registration"
+(<a href="#profile-hooks" class="auto internal xref">Section 5</a>) to the ITP Stamp Types registry.<a href="#section-13.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="new-registries">
+<section id="section-13.4">
+        <h3 id="name-new-registries">
+<a href="#section-13.4" class="section-number selfRef">13.4. </a><a href="#name-new-registries" class="section-name selfRef">New Registries</a>
+        </h3>
+<p id="section-13.4-1">IANA is requested to create the following registries in the "Invoice Trust Protocol (ITP)" registry group, with the "Specification
+Required" policy <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>:<a href="#section-13.4-1" class="pilcrow">¶</a></p>
+<span id="name-registries-created-by-this-"></span><table class="center" id="table-3">
+          <caption>
+<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#name-registries-created-by-this-" class="selfRef">Registries created by this document</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Registry</th>
+              <th class="text-left" rowspan="1" colspan="1">Fields</th>
+              <th class="text-left" rowspan="1" colspan="1">Initial contents</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ITP Payment Method Types</td>
+              <td class="text-left" rowspan="1" colspan="1">name, description, reference</td>
+              <td class="text-left" rowspan="1" colspan="1">"credit-transfer"</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ITP Account Schemes</td>
+              <td class="text-left" rowspan="1" colspan="1">name, account format, payee verification service if any, reference</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <a href="#account-schemes" class="auto internal xref">Table 4</a>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ITP Payment Rails</td>
+              <td class="text-left" rowspan="1" colspan="1">name, operator, region, reference</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <a href="#payment-rails" class="auto internal xref">Table 5</a>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ITP Calendars</td>
+              <td class="text-left" rowspan="1" colspan="1">name, jurisdiction, weekly rest days, source of public holidays, time zone, reference</td>
+              <td class="text-left" rowspan="1" colspan="1">"calendar-days" (every day counts)</td>
+            </tr>
+          </tbody>
+        </table>
+<span id="name-initial-itp-account-schemes"></span><div id="account-schemes">
+<table class="center" id="table-4">
+          <caption>
+<a href="#table-4" class="selfRef">Table 4</a>:
+<a href="#name-initial-itp-account-schemes" class="selfRef">Initial ITP account schemes</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+              <th class="text-left" rowspan="1" colspan="1">Account format</th>
+              <th class="text-left" rowspan="1" colspan="1">Payee verification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">iban</td>
+              <td class="text-left" rowspan="1" colspan="1">IBAN <span>[<a href="#ISO13616" class="cite xref">ISO13616</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">The service of the country or payment area of the account where one is offered, for example Verification of Payee in SEPA (<span>[<a href="#EPC-VOP" class="cite xref">EPC-VOP</a>]</span>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">gb-sortcode</td>
+              <td class="text-left" rowspan="1" colspan="1">6-digit sort code and 8-digit account number</td>
+              <td class="text-left" rowspan="1" colspan="1">Confirmation of Payee</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">us-aba</td>
+              <td class="text-left" rowspan="1" colspan="1">9-digit ABA routing number and account number</td>
+              <td class="text-left" rowspan="1" colspan="1">none defined</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">mx-clabe</td>
+              <td class="text-left" rowspan="1" colspan="1">18-digit CLABE</td>
+              <td class="text-left" rowspan="1" colspan="1">none defined</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">br-account</td>
+              <td class="text-left" rowspan="1" colspan="1">Bank code, branch, and account number</td>
+              <td class="text-left" rowspan="1" colspan="1">none defined</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">pix-key</td>
+              <td class="text-left" rowspan="1" colspan="1">PIX key: tax identifier, e-mail address, telephone number, or random key</td>
+              <td class="text-left" rowspan="1" colspan="1">Key directory of the payment system</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">upi-vpa</td>
+              <td class="text-left" rowspan="1" colspan="1">UPI virtual payment address</td>
+              <td class="text-left" rowspan="1" colspan="1">Name shown by the payer's UPI application</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">mobile-money</td>
+              <td class="text-left" rowspan="1" colspan="1">Provider, country, and E.164 number, or merchant code and account number</td>
+              <td class="text-left" rowspan="1" colspan="1">Name shown by the provider before the payer confirms</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">msisdn</td>
+              <td class="text-left" rowspan="1" colspan="1">E.164 number registered as an alias on a proxy-addressed instant payment system</td>
+              <td class="text-left" rowspan="1" colspan="1">Name shown by the payment system before the payer confirms</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<span id="name-initial-itp-payment-rails"></span><div id="payment-rails">
+<table class="center" id="table-5">
+          <caption>
+<a href="#table-5" class="selfRef">Table 5</a>:
+<a href="#name-initial-itp-payment-rails" class="selfRef">Initial ITP payment rails</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+              <th class="text-left" rowspan="1" colspan="1">Operator</th>
+              <th class="text-left" rowspan="1" colspan="1">Region</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">sepa-sct</td>
+              <td class="text-left" rowspan="1" colspan="1">European Payments Council (scheme manager)</td>
+              <td class="text-left" rowspan="1" colspan="1">SEPA</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">sepa-inst</td>
+              <td class="text-left" rowspan="1" colspan="1">European Payments Council (scheme manager)</td>
+              <td class="text-left" rowspan="1" colspan="1">SEPA</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">fps-gb</td>
+              <td class="text-left" rowspan="1" colspan="1">Pay.UK</td>
+              <td class="text-left" rowspan="1" colspan="1">GB</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ach</td>
+              <td class="text-left" rowspan="1" colspan="1">Nacha (rules administrator)</td>
+              <td class="text-left" rowspan="1" colspan="1">US</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">fedwire</td>
+              <td class="text-left" rowspan="1" colspan="1">Federal Reserve Banks</td>
+              <td class="text-left" rowspan="1" colspan="1">US</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">fednow</td>
+              <td class="text-left" rowspan="1" colspan="1">Federal Reserve Banks</td>
+              <td class="text-left" rowspan="1" colspan="1">US</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">rtp</td>
+              <td class="text-left" rowspan="1" colspan="1">The Clearing House</td>
+              <td class="text-left" rowspan="1" colspan="1">US</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">spei</td>
+              <td class="text-left" rowspan="1" colspan="1">Banco de Mexico</td>
+              <td class="text-left" rowspan="1" colspan="1">MX</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">pix</td>
+              <td class="text-left" rowspan="1" colspan="1">Banco Central do Brasil</td>
+              <td class="text-left" rowspan="1" colspan="1">BR</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">upi</td>
+              <td class="text-left" rowspan="1" colspan="1">National Payments Corporation of India</td>
+              <td class="text-left" rowspan="1" colspan="1">IN</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">paynow</td>
+              <td class="text-left" rowspan="1" colspan="1">Association of Banks in Singapore</td>
+              <td class="text-left" rowspan="1" colspan="1">SG</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">duitnow</td>
+              <td class="text-left" rowspan="1" colspan="1">Payments Network Malaysia</td>
+              <td class="text-left" rowspan="1" colspan="1">MY</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">promptpay</td>
+              <td class="text-left" rowspan="1" colspan="1">National ITMX</td>
+              <td class="text-left" rowspan="1" colspan="1">TH</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">mpesa</td>
+              <td class="text-left" rowspan="1" colspan="1">Safaricom, Vodacom, and other licensees</td>
+              <td class="text-left" rowspan="1" colspan="1">KE, TZ, and others</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-13.4-5">The reference for each entry is this document.  Remittance reference
+formats and lengths are those published by the operator of each rail.
+Names of the form "business-days-XX", where XX is an <span>[<a href="#ISO3166" class="cite xref">ISO3166</a>]</span>
+alpha-2 code or an <span>[<a href="#ISO3166-2" class="cite xref">ISO3166-2</a>]</span> subdivision code, are reserved for
+business-day calendars of that jurisdiction.  Each such calendar is
+registered individually, and a name of that form that is not
+registered is an unknown calendar (<a href="#profile-hooks" class="auto internal xref">Section 5</a>).<a href="#section-13.4-5" class="pilcrow">¶</a></p>
+<p id="section-13.4-6">Designated experts check that an account scheme names the
+authority or network that defines the account format and how a payer
+can verify the payee, and that a calendar names the authority whose
+holidays it follows.  The guidance of <span>[<a href="#I-D.martinez-itp-core" class="cite xref">I-D.martinez-itp-core</a>]</span> on
+security-relevant values applies to payment method types.  A registration in the ITP Profiles registry that applies this
+document states every parameter of <a href="#profile-hooks" class="auto internal xref">Section 5</a>, with "none"
+where a parameter does not apply, and designated experts check that
+it does.<a href="#section-13.4-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-14">
+      <h2 id="name-references">
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-14.1">
+        <h3 id="name-normative-references">
+<a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.martinez-itp-core">[I-D.martinez-itp-core]</dt>
+        <dd>
+<span class="refAuthor">Martínez García-Villarrubia, C.</span>, <span class="refTitle">"Invoice Trust Protocol (ITP): Discovery, Delivery, and Verification of Electronic Invoices"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-martinez-itp-core-00</span>, <time datetime="2026-10" class="refDate">October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-martinez-itp-core-00">https://datatracker.ietf.org/doc/html/draft-martinez-itp-core-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ISO3166">[ISO3166]</dt>
+        <dd>
+<span class="refAuthor">ISO</span>, <span class="refTitle">"Codes for the representation of names of countries and their subdivisions - Part 1: Country code"</span>, <span class="seriesInfo">ISO 3166-1:2020</span>, <time datetime="2020" class="refDate">2020</time>. </dd>
+<dd class="break"></dd>
+<dt id="ISO3166-2">[ISO3166-2]</dt>
+        <dd>
+<span class="refAuthor">ISO</span>, <span class="refTitle">"Codes for the representation of names of countries and their subdivisions - Part 2: Country subdivision code"</span>, <span class="seriesInfo">ISO 3166-2:2020</span>, <time datetime="2020" class="refDate">2020</time>. </dd>
+<dd class="break"></dd>
+<dt id="ISO4217">[ISO4217]</dt>
+        <dd>
+<span class="refAuthor">ISO</span>, <span class="refTitle">"Codes for the representation of currencies"</span>, <span class="seriesInfo">ISO 4217:2015</span>, <time datetime="2015" class="refDate">2015</time>. </dd>
+<dd class="break"></dd>
+<dt id="ISO11649">[ISO11649]</dt>
+        <dd>
+<span class="refAuthor">ISO</span>, <span class="refTitle">"Financial services - Core banking - Structured creditor reference to remittance information"</span>, <span class="seriesInfo">ISO 11649:2009</span>, <time datetime="2009" class="refDate">2009</time>. </dd>
+<dd class="break"></dd>
+<dt id="ISO13616">[ISO13616]</dt>
+        <dd>
+<span class="refAuthor">ISO</span>, <span class="refTitle">"Financial services - International bank account number (IBAN) - Part 1: Structure of the IBAN"</span>, <span class="seriesInfo">ISO 13616-1:2020</span>, <time datetime="2020" class="refDate">2020</time>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8126">[RFC8126]</dt>
+        <dd>
+<span class="refAuthor">Cotton, M.</span>, <span class="refAuthor">Leiba, B.</span>, and <span class="refAuthor">T. Narten</span>, <span class="refTitle">"Guidelines for Writing an IANA Considerations Section in RFCs"</span>, <span class="seriesInfo">BCP 26</span>, <span class="seriesInfo">RFC 8126</span>, <span class="seriesInfo">DOI 10.17487/RFC8126</span>, <time datetime="2017-06" class="refDate">June 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8126">https://www.rfc-editor.org/rfc/rfc8126</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-14.2">
+        <h3 id="name-informative-references">
+<a href="#section-14.2" class="section-number selfRef">14.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="EN16931">[EN16931]</dt>
+        <dd>
+<span class="refAuthor">European Committee for Standardization (CEN)</span>, <span class="refTitle">"Electronic invoicing - Part 1: Semantic data model of the core elements of an electronic invoice"</span>, <span class="seriesInfo">EN 16931-1:2026</span>, <time datetime="2026" class="refDate">2026</time>. </dd>
+<dd class="break"></dd>
+<dt id="EPC-VOP">[EPC-VOP]</dt>
+        <dd>
+<span class="refAuthor">European Payments Council</span>, <span class="refTitle">"Verification Of Payee Scheme Rulebook, EPC218-23"</span>, <time datetime="2024" class="refDate">2024</time>, <span>&lt;<a href="https://www.europeanpaymentscouncil.eu/document-library/rulebooks/verification-payee-scheme-rulebook">https://www.europeanpaymentscouncil.eu/document-library/rulebooks/verification-payee-scheme-rulebook</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="EU-IPR">[EU-IPR]</dt>
+        <dd>
+<span class="refAuthor">European Parliament and Council of the European Union</span>, <span class="refTitle">"Regulation (EU) 2024/886 amending Regulations (EU) No 260/2012 and (EU) 2021/1230 and Directives 98/26/EC and (EU) 2015/2366 as regards instant credit transfers in euro"</span>, <time datetime="2024-03-13" class="refDate">13 March 2024</time>, <span>&lt;<a href="https://eur-lex.europa.eu/eli/reg/2024/886/oj/eng">https://eur-lex.europa.eu/eli/reg/2024/886/oj/eng</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.martinez-itp-agent-mandates">[I-D.martinez-itp-agent-mandates]</dt>
+        <dd>
+<span class="refAuthor">Martínez García-Villarrubia, C.</span>, <span class="refTitle">"Invoice Trust Protocol (ITP): Agent Mandates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-martinez-itp-agent-mandates-00</span>, <time datetime="2026-10" class="refDate">October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-martinez-itp-agent-mandates-00">https://datatracker.ietf.org/doc/html/draft-martinez-itp-agent-mandates-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ISO20022">[ISO20022]</dt>
+        <dd>
+<span class="refAuthor">ISO</span>, <span class="refTitle">"Financial services - Universal financial industry message scheme"</span>, <span class="seriesInfo">ISO 20022</span>, <span>n.d.</span>. </dd>
+<dd class="break"></dd>
+<dt id="PEPPOL-IR">[PEPPOL-IR]</dt>
+        <dd>
+<span class="refAuthor">OpenPeppol AISBL</span>, <span class="refTitle">"Peppol BIS Invoice Response 3.2"</span>, <span>n.d.</span>, <span>&lt;<a href="https://docs.peppol.eu/poacc/upgrade-3/profiles/63-invoiceresponse/">https://docs.peppol.eu/poacc/upgrade-3/profiles/63-invoiceresponse/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PEPPOL-PINT">[PEPPOL-PINT]</dt>
+        <dd>
+<span class="refAuthor">OpenPeppol AISBL</span>, <span class="refTitle">"Peppol Specifications for PINT"</span>, <span>n.d.</span>, <span>&lt;<a href="https://docs.peppol.eu/poac/pint/">https://docs.peppol.eu/poac/pint/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7942">[RFC7942]</dt>
+        <dd>
+<span class="refAuthor">Sheffer, Y.</span> and <span class="refAuthor">A. Farrel</span>, <span class="refTitle">"Improving Awareness of Running Code: The Implementation Status Section"</span>, <span class="seriesInfo">BCP 205</span>, <span class="seriesInfo">RFC 7942</span>, <span class="seriesInfo">DOI 10.17487/RFC7942</span>, <time datetime="2016-07" class="refDate">July 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7942">https://www.rfc-editor.org/rfc/rfc7942</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="UN-ASSIGN">[UN-ASSIGN]</dt>
+      <dd>
+<span class="refAuthor">United Nations</span>, <span class="refTitle">"United Nations Convention on the Assignment of Receivables in International Trade"</span>, <time datetime="2001" class="refDate">2001</time>, <span>&lt;<a href="https://uncitral.un.org/en/texts/securityinterests/conventions/receivables">https://uncitral.un.org/en/texts/securityinterests/conventions/receivables</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="profiles">
+<section id="appendix-A">
+      <h2 id="name-models-of-jurisdictions-and">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-models-of-jurisdictions-and" class="section-name selfRef">Models of Jurisdictions and Networks</a>
+      </h2>
+<p id="appendix-A-1">This appendix is informative.  It shows which ITP members, stamps,
+and statuses each common model uses.  Profiles for individual regimes
+are expected to come from the bodies responsible for them, and notes
+on individual jurisdictions are kept outside this document.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<span id="name-models-and-the-itp-features"></span><table class="center" id="table-6">
+        <caption>
+<a href="#table-6" class="selfRef">Table 6</a>:
+<a href="#name-models-and-the-itp-features" class="selfRef">Models and the ITP features they use</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Model</th>
+            <th class="text-left" rowspan="1" colspan="1">Examples</th>
+            <th class="text-left" rowspan="1" colspan="1">ITP features used</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Four-corner network</td>
+            <td class="text-left" rowspan="1" colspan="1">Peppol, DBNAlliance</td>
+            <td class="text-left" rowspan="1" colspan="1">the network's PID scheme ("eas" for Peppol), its channel type ("peppol" for Peppol, otherwise "network"), <a href="#mappings" class="auto internal xref">Appendix B</a>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">EDI value-added network</td>
+            <td class="text-left" rowspan="1" colspan="1">Trading-partner EDI in ASC X12 or UN/EDIFACT</td>
+            <td class="text-left" rowspan="1" colspan="1">a registered PID scheme and channel type, or "network"; "accepts" with "application/EDI-X12" or "application/EDIFACT"; "network-ack" stamp</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Exchange through platforms with reporting</td>
+            <td class="text-left" rowspan="1" colspan="1">France, Spain</td>
+            <td class="text-left" rowspan="1" colspan="1">"tax-report" stamp, deadlines, "deemed-accepted"</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Clearance before delivery</td>
+            <td class="text-left" rowspan="1" colspan="1">Italy, Mexico, Brazil, Saudi Arabia, India</td>
+            <td class="text-left" rowspan="1" colspan="1">"tax-clearance" stamp, "clearance-rejected", "references.replaces"</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Platform issues the invoice</td>
+            <td class="text-left" rowspan="1" colspan="1">China</td>
+            <td class="text-left" rowspan="1" colspan="1">"legal_original" "rendition", "fiscal_codes" assigned by the authority, "delivery_role" "copy"</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Reporting after issuance</td>
+            <td class="text-left" rowspan="1" colspan="1">South Korea</td>
+            <td class="text-left" rowspan="1" colspan="1">"tax-report" or "tax-registration" stamp</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Fiscal devices</td>
+            <td class="text-left" rowspan="1" colspan="1">Kenya, Uganda</td>
+            <td class="text-left" rowspan="1" colspan="1">"fiscal_device", "fiscal-device-signature" stamp, "issuance_mode" "offline"</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Negotiable or registered receivables</td>
+            <td class="text-left" rowspan="1" colspan="1">Colombia, Chile</td>
+            <td class="text-left" rowspan="1" colspan="1">"assigned", "receivable-registration" stamp</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Deemed outcomes and response windows</td>
+            <td class="text-left" rowspan="1" colspan="1">Serbia, Turkiye</td>
+            <td class="text-left" rowspan="1" colspan="1">"deemed-accepted", "deemed-rejected", response windows</td>
+          </tr>
+        </tbody>
+      </table>
+</section>
+</div>
+<div id="mappings">
+<section id="appendix-B">
+      <h2 id="name-status-mappings">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-status-mappings" class="section-name selfRef">Status Mappings</a>
+      </h2>
+<p id="appendix-B-1">This appendix is informative.  The mappings have not yet been confirmed against each specification.  The columns are examples.  Profiles for other networks and
+jurisdictions give their own mappings, and no column is the reference
+for ITP statuses.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<span id="name-status-mappings-2"></span><table class="center" id="table-7">
+        <caption>
+<a href="#table-7" class="selfRef">Table 7</a>:
+<a href="#name-status-mappings-2" class="selfRef">Status mappings</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">ITP</th>
+            <th class="text-left" rowspan="1" colspan="1">Peppol IR</th>
+            <th class="text-left" rowspan="1" colspan="1">France</th>
+            <th class="text-left" rowspan="1" colspan="1">Brazil NF-e</th>
+            <th class="text-left" rowspan="1" colspan="1">Mexico CFDI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">delivered</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">202, 203</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">received</td>
+            <td class="text-left" rowspan="1" colspan="1">AB, IP</td>
+            <td class="text-left" rowspan="1" colspan="1">204</td>
+            <td class="text-left" rowspan="1" colspan="1">210210</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">accepted</td>
+            <td class="text-left" rowspan="1" colspan="1">AP; CA with "conditions"</td>
+            <td class="text-left" rowspan="1" colspan="1">205; 206 if partial</td>
+            <td class="text-left" rowspan="1" colspan="1">210200</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">deemed-accepted</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">deemed-rejected</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">operation-unknown</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">210220</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">rejected</td>
+            <td class="text-left" rowspan="1" colspan="1">RE</td>
+            <td class="text-left" rowspan="1" colspan="1">210</td>
+            <td class="text-left" rowspan="1" colspan="1">210240</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">disputed</td>
+            <td class="text-left" rowspan="1" colspan="1">UQ</td>
+            <td class="text-left" rowspan="1" colspan="1">207, 208</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">technical-rejected</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">213</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">payment-sent</td>
+            <td class="text-left" rowspan="1" colspan="1">PD (reason PPD if partial)</td>
+            <td class="text-left" rowspan="1" colspan="1">211</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">paid</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">212</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">payment receipt document</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">cancellation-requested</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">cancellation request</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">cancellation-refused</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">refusal of cancellation</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">cancelled</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">110111</td>
+            <td class="text-left" rowspan="1" colspan="1">cancellation accepted</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">credited</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">credit note (egreso)</td>
+          </tr>
+        </tbody>
+      </table>
+<p id="appendix-B-3">French status 209 (completed) has no ITP equivalent; it follows a
+suspension once the missing information is provided.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="payment-mapping">
+<section id="appendix-C">
+      <h2 id="name-mapping-of-payment-terms">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-mapping-of-payment-terms" class="section-name selfRef">Mapping of Payment Terms</a>
+      </h2>
+<p id="appendix-C-1">This appendix is informative.  It maps the "payment" member to the business terms of <span>[<a href="#EN16931" class="cite xref">EN16931</a>]</span>, which Peppol PINT <span>[<a href="#PEPPOL-PINT" class="cite xref">PEPPOL-PINT</a>]</span> numbers in the same way.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<span id="name-payment-term-mapping-to-en-"></span><table class="center" id="table-8">
+        <caption>
+<a href="#table-8" class="selfRef">Table 8</a>:
+<a href="#name-payment-term-mapping-to-en-" class="selfRef">Payment term mapping to EN 16931 and PINT</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Business term</th>
+            <th class="text-left" rowspan="1" colspan="1">Name</th>
+            <th class="text-left" rowspan="1" colspan="1">ITP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">BT-9</td>
+            <td class="text-left" rowspan="1" colspan="1">Payment due date</td>
+            <td class="text-left" rowspan="1" colspan="1">payment.due_date</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">BG-10</td>
+            <td class="text-left" rowspan="1" colspan="1">Payee</td>
+            <td class="text-left" rowspan="1" colspan="1">payment.payee</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">BT-83</td>
+            <td class="text-left" rowspan="1" colspan="1">Remittance information</td>
+            <td class="text-left" rowspan="1" colspan="1">payment.remittance</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">BT-84</td>
+            <td class="text-left" rowspan="1" colspan="1">Payment account identifier</td>
+            <td class="text-left" rowspan="1" colspan="1">"payment-account" attestation</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">BT-113</td>
+            <td class="text-left" rowspan="1" colspan="1">Paid amount</td>
+            <td class="text-left" rowspan="1" colspan="1">payment.prepaid_amount</td>
+          </tr>
+        </tbody>
+      </table>
+<p id="appendix-C-3">This appendix is informative.  The table maps EN 16931 because its
+business terms are numbered and publicly listed.  Payment terms in
+other syntaxes, such as ASC X12 810 and national formats, map to the
+same members, and profiles give those mappings.<a href="#appendix-C-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="state-examples">
+<section id="appendix-D">
+      <h2 id="name-state-derivation-examples">
+<a href="#appendix-D" class="section-number selfRef">Appendix D. </a><a href="#name-state-derivation-examples" class="section-name selfRef">State Derivation Examples</a>
+      </h2>
+<p id="appendix-D-1">Implementations are expected to compute the following properties.
+"R" is the recipient, "I" the issuer, and "B" a bridge.  Each set of
+messages gives the same result in any order of arrival.  In examples 2 and 7, the set also contains a counted "delivered"
+that "deadline.from" names, and the deadline meets the conditions in
+<a href="#counted" class="auto internal xref">Section 4.2</a>.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="appendix-D-2">
+<li id="appendix-D-2.1">
+          <p id="appendix-D-2.1.1">R: "accepted" (seq 1), then R: "disputed" (seq 2).  acceptance is
+"accepted" and dispute_open is true.<a href="#appendix-D-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-D-2.2">
+          <p id="appendix-D-2.2.1">Under a profile with deemed acceptance, I: "deemed-accepted"
+with "deadline.until" 2026-11-03 and
+"effective_date" 2026-11-04; R: "rejected" with "effective_date"
+2026-11-05.  The rejection is void; acceptance is
+"deemed-accepted".  With a rejection dated 2026-11-02 instead, the
+rejection counts and acceptance is "rejected".<a href="#appendix-D-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-D-2.3">
+          <p id="appendix-D-2.3.1">R (the buyer): "payment-sent" for 100.00 and for 200.00 on an invoice with
+"amount_due" 300.00; then a "payment-failed" signed by the buyer
+that refers to the first.  amount_sent is 200.00.<a href="#appendix-D-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-D-2.4">
+          <p id="appendix-D-2.4.1">Two different messages from R with "seq" 2, neither referenced by
+another signer's message and neither carrying a "timestamp" stamp.
+R's chain stops at seq 1; both messages are reported and neither
+counts.<a href="#appendix-D-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-D-2.5">
+          <p id="appendix-D-2.5.1">B: "registered"; then R: "rejected".  fiscal is "registered" and
+acceptance is "rejected", so final is already true; an I:
+"credited" for the total still counts, and amount_credited equals
+"total_with_tax".<a href="#appendix-D-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-D-2.6">
+          <p id="appendix-D-2.6.1">Under a profile with the cancellation policy "request", I (the
+seller): "assigned" to a factor; then I: "cancellation-requested".
+cancellation stays "none" instead of "requested", because the
+receivable was assigned.<a href="#appendix-D-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-D-2.7">
+          <p id="appendix-D-2.7.1">Under a profile with deemed rejection, I: "deemed-rejected" with
+"deadline.until" 2026-11-10 and "effective_date" 2026-11-11; R:
+"accepted" with "effective_date" 2026-11-12.  The acceptance is
+void, and acceptance is "deemed-rejected".<a href="#appendix-D-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-D-2.8">
+          <p id="appendix-D-2.8.1">I (the seller): "assigned" to factor F1 (seq 1); F1: "assigned" to F2 (seq 1 in
+F1's chain), under a profile that allows reassignment and names no
+registry.  assignee is F2.<a href="#appendix-D-2.8.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+</section>
+</div>
+<div id="open-issues">
+<section id="appendix-E">
+      <h2 id="name-open-issues">
+<a href="#appendix-E" class="section-number selfRef">Appendix E. </a><a href="#name-open-issues" class="section-name selfRef">Open Issues</a>
+      </h2>
+<ol start="1" type="1" class="normal type-1" id="appendix-E-1">
+<li id="appendix-E-1.1">
+          <p id="appendix-E-1.1.1">Whether the lifecycle statuses, which mirror business processes
+defined by networks such as Peppol and by tax authorities, belong in an IETF
+document, or should be a vocabulary maintained elsewhere that ITP
+messages refer to.<a href="#appendix-E-1.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-E-1.2">
+          <p id="appendix-E-1.2.1">Initial entries of the ITP Calendars, Account Schemes, and Payment
+Rails registries.<a href="#appendix-E-1.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-E-1.3">
+          <p id="appendix-E-1.3.1">Alignment of reason codes with Peppol and national codes.<a href="#appendix-E-1.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-E-1.4">
+          <p id="appendix-E-1.4.1">Whether status messages whose timing has legal effect should
+always carry a timestamp stamp.<a href="#appendix-E-1.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-F">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-F-1">The author used AI-based tools while drafting and reviewing this
+document.  The author checked all text and references and is
+responsible for the content.<a href="#appendix-F-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-G">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Carlos Martínez García-Villarrubia</span></div>
+<div dir="auto" class="left"><span class="org">BeeL. (Honey Solutions, S.L.)</span></div>
+<div dir="auto" class="left">
+<span class="locality">Tarragona</span> </div>
+<div dir="auto" class="left"><span class="country-name">Spain</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:carlos@martinezgv.com" class="email">carlos@martinezgv.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>

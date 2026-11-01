@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>itp-drafts/invoice-trust-protocol main preview</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <style type="text/css">/*<![CDATA[*/
+      body { font-family: "Helvetica Neue","Open Sans", Helvetica, Calibri,sans-serif; }
+      h1, h2, td { font-family: "Helvetica Neue", "Roboto Condensed", "Open Sans", Helvetica, Calibri, sans-serif; }
+      h1 { font-size: 20px; } h2 { font-size: 16px; }
+      table { margin: 5px 10px; border-collapse: collapse; }
+      th, td { font-weight: normal; text-align: left; padding: 2px 5px; }
+      a:link { color: #000; } a:visited { color: #00a; }
+    /*]]>*/</style>
+  </head>
+  <body>
+    <h1>Editor's drafts for main branch of <a href="https://github.com/itp-drafts/invoice-trust-protocol">itp-drafts/invoice-trust-protocol</a></h1>
+    <p>View <a href="issues.html">saved issues</a>, or the latest GitHub <a href="https://github.com/itp-drafts/invoice-trust-protocol/issues">issues</a> and <a href="https://github.com/itp-drafts/invoice-trust-protocol/pulls">pull requests</a> in the <a href="https://github.com/itp-drafts/invoice-trust-protocol">repo</a>.</p>
+    <table id="branch-main">
+      <tr>
+        <td><a href="./draft-martinez-itp-core.html" class="html draft-martinez-itp-core" title="Invoice Trust Protocol (ITP): Discovery, Delivery, and Verification of Electronic Invoices (HTML)">ITP Core</a></td>
+        <td><a href="./draft-martinez-itp-core.txt" class="txt draft-martinez-itp-core" title="Invoice Trust Protocol (ITP): Discovery, Delivery, and Verification of Electronic Invoices (Text)">plain text</a></td>
+        <td><a href="https://datatracker.ietf.org/doc/draft-martinez-itp-core" class="dt draft-martinez-itp-core" title="Datatracker for draft-martinez-itp-core">datatracker</a></td>
+        <td><a href="https://author-tools.ietf.org/api/iddiff?doc_1=draft-martinez-itp-core&amp;url_2=https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-core.txt" class="diff draft-martinez-itp-core">diff with last submission</a></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a href="./draft-martinez-itp-lifecycle.html" class="html draft-martinez-itp-lifecycle" title="Invoice Trust Protocol (ITP): Lifecycle Status and Payment Information (HTML)">ITP Lifecycle and Payment</a></td>
+        <td><a href="./draft-martinez-itp-lifecycle.txt" class="txt draft-martinez-itp-lifecycle" title="Invoice Trust Protocol (ITP): Lifecycle Status and Payment Information (Text)">plain text</a></td>
+        <td><a href="https://datatracker.ietf.org/doc/draft-martinez-itp-lifecycle" class="dt draft-martinez-itp-lifecycle" title="Datatracker for draft-martinez-itp-lifecycle">datatracker</a></td>
+        <td><a href="https://author-tools.ietf.org/api/iddiff?doc_1=draft-martinez-itp-lifecycle&amp;url_2=https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-lifecycle.txt" class="diff draft-martinez-itp-lifecycle">diff with last submission</a></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a href="./draft-martinez-itp-agent-mandates.html" class="html draft-martinez-itp-agent-mandates" title="Invoice Trust Protocol (ITP): Agent Mandates (HTML)">ITP Agent Mandates</a></td>
+        <td><a href="./draft-martinez-itp-agent-mandates.txt" class="txt draft-martinez-itp-agent-mandates" title="Invoice Trust Protocol (ITP): Agent Mandates (Text)">plain text</a></td>
+        <td><a href="https://datatracker.ietf.org/doc/draft-martinez-itp-agent-mandates" class="dt draft-martinez-itp-agent-mandates" title="Datatracker for draft-martinez-itp-agent-mandates">datatracker</a></td>
+        <td><a href="https://author-tools.ietf.org/api/iddiff?doc_1=draft-martinez-itp-agent-mandates&amp;url_2=https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-agent-mandates.txt" class="diff draft-martinez-itp-agent-mandates">diff with last submission</a></td>
+        <td></td>
+      </tr>
+    </table>
+    <script>
+window.onload = function() {
+  var referrer_branch = 'main';
+  // e.g., "https://github.com/user/repo/tree/main"
+  var chunks = document.referrer.split("/");
+  if (chunks[2] === 'github.com' && chunks[5] === 'tree') {
+    referrer_branch = chunks[6];
+  }
+  let branch = document.querySelector('#branch-' + referrer_branch);
+  let h = document.location.hash.substring(1);
+  if (h === 'show') {
+    document.location.hash = '#' + branch.id;
+  } else if (branch && h.startsWith('go')) {
+    let e = branch.querySelector(h.substring(2));
+    if (e && e.href) {
+      document.location = e.href;
+    }
+  }
+};
+    </script>
+  </body>
+</html>
