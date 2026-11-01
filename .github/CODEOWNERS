@@ -1,0 +1,5 @@
+# Automatically generated CODEOWNERS
+# Regenerate with `make update-codeowners`
+draft-martinez-itp-agent-mandates.md carlos@martinezgv.com
+draft-martinez-itp-core.md carlos@martinezgv.com
+draft-martinez-itp-lifecycle.md carlos@martinezgv.com
