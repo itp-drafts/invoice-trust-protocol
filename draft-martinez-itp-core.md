@@ -5,7 +5,7 @@ category: exp
 docname: draft-martinez-itp-core-latest
 submissiontype: IETF
 number:
-date: 2026-10-28
+date:
 consensus: true
 v: 3
 keyword:
@@ -18,6 +18,8 @@ venue:
   type: "Working Group"
   mail: "dispatch@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/dispatch/"
+  github: "itp-drafts/invoice-trust-protocol"
+  latest: "https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-core.html"
 author:
  -
     fullname: "Carlos Martínez García-Villarrubia"
@@ -102,7 +104,7 @@ normative:
     date: 2026-02-17
     target: https://openid.net/specs/openid-federation-1_0-final.html
   I-D.ietf-httpapi-idempotency-key-header:
-  
+
 informative:
   I-D.martinez-itp-lifecycle:
     title: "Invoice Trust Protocol (ITP): Lifecycle Status and Payment Information"
@@ -1811,8 +1813,11 @@ the authority part of the invoice.
 
 The issuer signature is an envelope-level signature.  It is not by
 itself an advanced or qualified electronic signature or seal under
-{{EIDAS2}} or under any other regime, and a "delegated-issuer"
-signature identifies the operator, not the participant.  Whether ITP
+{{EIDAS2}} or under any other regime.  A "delegated-issuer"
+signature is made by an operator with a key that the participant
+lists in "delegates" of its Participant Document: it shows that the
+participant authorized that operator to issue in its name, not that
+the participant itself applied the signature.  Whether ITP
 evidence contributes to the controls that establish authenticity of
 origin and integrity of an invoice under the applicable tax law, for
 example Article 233 of {{EU-VAT-DIR}} in the European Union, is for
@@ -1821,6 +1826,30 @@ Where a signature or seal on the invoice itself is required, it is
 applied in the native syntax of the legal original, for example
 XAdES {{XADES}} on UBL, CAdES {{CADES}}, or JAdES {{JADES}}, and is
 declared in "native_signature".
+
+## Conversion by Service Providers {#conversion}
+
+Service providers often convert an issuer's data into the syntax
+that the recipient receives, or add data to it.  ITP does not make
+such a converted document second to the issuer's own.
+
+* Conversion before signing.  When the issuer's provider converts or
+  enriches the data before the envelope is signed, the converted
+  document is the "document" of the envelope.  The provider's node
+  signs it with a "delegated-issuer" key, or returns it to the issuer
+  for an "issuer" signature.  Either signature is checked by any later
+  holder like any other, and the delegated key shows which operator
+  the issuer authorized ({{legal-original}}).
+* Conversion after delivery.  When the recipient's node converts the
+  document into the syntax its participant uses, the conversion is
+  local processing and needs no signature or trust list.  The node
+  keeps the envelope, so that the participant and later holders can
+  verify the signed document from which the conversion was made.
+* Conversion in transit.  A node that converts an envelope signed by
+  the issuer before delivery cannot change the signed document.  It
+  either delivers the envelope unchanged, or adds the converted
+  document as a rendition, which is not the legal original unless a
+  profile says so ({{evidence}}).
 
 ## Signature Header Parameters {#sig-header}
 
@@ -1909,9 +1938,11 @@ The initial stamp types are "tax-registration", "tax-clearance",
 "timestamp".  The bridge retains the response whose digest is in
 "response_digest".  Verifiers accept
 a rendition or a stamp only if its signer is a bridge on an accepted
-trust list for the scheme concerned, or a node listed in "senders" of
+trust list for the scheme concerned, a node listed in "senders" of
 the issuer's Participant Document when the profile for that scheme
-allows the issuer's own node to act as bridge.  Unknown stamp types
+allows the issuer's own node to act as bridge, or a bridge whose key
+the verifier accepts by local configuration, for example the access
+point of a network the verifier already uses.  Unknown stamp types
 are reported and otherwise ignored.
 
 Stamps can also be attached to envelopes that are never delivered,
@@ -2442,6 +2473,12 @@ one they have seen for each log and check consistency against it.
 
 Registration shows that an envelope existed no later than the registration time, and lets participants or their monitors detect keys, attestations, or envelopes signed with a stolen key while they watch the log.  Registration does not detect duplicates or check invoice content, and a missing registration is not evidence of forgery.  Duplicates are detected by recipients and by the registration systems of tax authorities.
 
+Transparency services are not needed for discovery, delivery, or
+verification.  A deployment without them obtains a trusted signing
+time from a "timestamp" stamp ({{evidence}}) and loses only the
+detection of mis-issued attestations and of envelopes signed with a
+stolen key.
+
 Verifiers compare the registration time with "issue_date" and
 "invoice_period".  A gap larger than the issuance deadline of the
 applicable jurisdiction is reported as a risk signal.  Envelopes with "issuance_mode"
@@ -2648,6 +2685,20 @@ expire, and relying parties are expected to obtain the signing keys of
 the lists they use out of band, as they do for other trust anchors.
 Restricting each issuer to its jurisdictions limits the damage a
 single issuer can do.
+
+ITP does not establish that an issuer is a genuine supplier of the
+recipient.  It addresses one kind of supplier fraud: an envelope that
+claims to come from a supplier the recipient knows, or that changes
+that supplier's payment details, fails verification unless an
+attestation issuer that the recipient accepts has bound the sender's
+key to that supplier's PID.  It does not address an invoice from a
+legal entity that exists but has never supplied the recipient,
+possibly with the help of an insider: that envelope verifies.  The
+receiving node reports it as coming from a new issuer
+({{verification}}), and the recipient can check the "kyb"
+attestations of the issuer, where present ({{attestations}}).  Recipients
+detect such invoices with their own controls, such as supplier
+onboarding and matching invoices against orders and receipts.
 
 Envelopes from look-alike domains, re-registered expired domains, and shell companies with genuine registrations verify.  The damage is limited because "domain-control" attestations
 cover the legal entity and the key and expire after 90 days; a
@@ -3765,7 +3816,7 @@ Neither finds a receiving endpoint from a tax identifier, binds a
 payment account, or defines statuses.  An ITP envelope can be sent as
 an email attachment and verified like any other ({{verification}}).
 
-## Why Not Only an Existing Network
+## Why Not Only an Existing Network {#why-network}
 
 Four-corner networks such as Peppol and the Digital Business Networks
 Alliance {{DBNA}}, exchange platforms that tax authorities run or
@@ -3775,6 +3826,13 @@ does not depend on the delivering channel, transparency, and
 addressing for entities outside those networks.  ITP envelopes can
 travel over them, and the identifiers of a network that registers a
 PID scheme, such as Peppol identifiers, are ITP PIDs.
+
+An issuer-signed payload that can be verified independently of the
+channel may be useful inside such a network as well.  Carrying the
+envelope defined here as a payload of a Peppol business document
+would need a document type and process identifier, and rules for
+access points that convert documents ({{conversion}}), that OpenPeppol
+would have to define; this document does not define them.
 
 In clearance regimes, the legal original often already carries a
 signature or seal of the issuer and a stamp of the tax authority that
@@ -3817,9 +3875,32 @@ invoices from different regimes.
    and monitors.
 8. Event notifications to software that consumes a node, which this
    version leaves out.
+9. Whether the envelope should be profiled for use inside Peppol and
+   similar networks ({{why-network}}), which is for those networks to
+   decide.
+
+# Changes Since -00
+{:numbered="false"}
+
+Note to the RFC Editor: please remove this section before
+publication.
+
+* Clarified what a "delegated-issuer" signature shows.
+* Added a section on conversion by service providers.
+* Verifiers may accept bridge keys by local configuration until trust
+  lists for a scheme exist.
+* Stated that transparency services are optional and what a
+  deployment without them loses.
+* Described which kinds of supplier fraud ITP addresses and which it
+  does not.
+* Noted the possible use of the envelope inside Peppol as an open
+  issue.
 
 # Acknowledgments
 {:numbered="false"}
+
+Thanks to Henrik Möller for his review from the point of view of a
+Peppol service provider.
 
 The author used AI-based tools while drafting and reviewing this
 document.  The author checked all text, references, and test vectors

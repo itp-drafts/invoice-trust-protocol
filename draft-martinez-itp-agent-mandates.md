@@ -5,7 +5,7 @@ category: exp
 docname: draft-martinez-itp-agent-mandates-latest
 submissiontype: IETF
 number:
-date: 2026-10-28
+date:
 consensus: true
 v: 3
 keyword:
@@ -18,6 +18,8 @@ venue:
   type: "Working Group"
   mail: "dispatch@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/dispatch/"
+  github: "itp-drafts/invoice-trust-protocol"
+  latest: "https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-agent-mandates.html"
 author:
  -
     fullname: "Carlos Martínez García-Villarrubia"
@@ -48,6 +50,7 @@ normative:
     seriesinfo:
       Internet-Draft: draft-martinez-itp-lifecycle-00
   I-D.ietf-oauth-sd-jwt-vc:
+  I-D.gco-oauth-delegate-sd-jwt:
 
 informative:
   OPENID4VP:
@@ -59,8 +62,8 @@ informative:
   AP2:
     title: "Agent Payments Protocol (AP2)"
     author:
-      - org: Google LLC
-    date: 2025
+      - org: FIDO Alliance
+    date: 2026
     target: https://ap2-protocol.org/ap2/specification/
 
 --- abstract
@@ -110,16 +113,63 @@ a chain of delegation.  Both describe what an authorization server
 grants to a client for access to a resource.  A mandate is instead
 issued by a participant with its own keys, presented to counterparties
 that do not share an authorization server with it, and enforced by a
-node that records each use.  The Agent Payments Protocol {{AP2}} also
-uses mandates, as verifiable digital credentials, for payments by
-agents; ITP mandates cover invoices and their statuses and do not give
-access to payment instruments.  Frameworks for agent identity such as
+node that records each use.  The Agent Payments Protocol {{AP2}}, now being
+standardized in the FIDO Alliance, also uses mandates, as verifiable
+digital credentials, for payments by agents; ITP mandates cover
+invoices and their statuses and do not give access to payment
+instruments.  The two are complementary: between businesses, an
+invoice usually comes before its payment, so an agent can accept an
+invoice under an ITP mandate and then pay it under an AP2 mandate,
+and report the payment with the "pay" action.  Aligning the two is
+left for future work.  Frameworks for agent identity such as
 {{?I-D.ietf-wimse-aims}} identify an agent as a workload and
 authenticate it to services; how an agent authenticates to its
 enforcing node is outside this document, and the key bound by a
 mandate can be one that such a framework manages.  A mandate states
 which business the agent acts for and within which limits, which a
 workload identity does not.
+
+## Overview {#overview}
+
+This section is informative.  It summarizes the parts of
+{{I-D.martinez-itp-core}} and {{I-D.martinez-itp-lifecycle}} that this
+document relies on, and how a mandate is used.
+
+In ITP, an invoice travels inside an envelope: a JWS whose payload,
+the envelope core, carries the invoice and data such as its issuer
+and recipient, and whose signatures each state a signer role
+("itp_role").  A change in the state of an invoice after delivery,
+such as acceptance, rejection, or a reported payment, is a status
+message: a signed object that refers to the envelope by its
+identifier and digest, and that each signer chains to its previous
+ones.  Each participant publishes a Participant Document with its
+keys, the nodes that send for it ("senders"), and the keys that those
+nodes hold for it ("delegates").  Keys that are not listed in
+"delegates" stay with the participant.
+
+A mandate is used as follows:
+
+1. The principal signs a mandate for a key that the agent holds and
+   gives it to the agent.  It gives the enforcing node the mandate
+   with all its disclosures.
+
+2. To act, the agent builds the envelope core or status message that
+   it wants to send, places a presentation of the mandate in its
+   "agent" member, and signs the payload with its key ({{use}}).  The
+   presentation is bound to that payload and cannot be moved to
+   another document.
+
+3. The agent sends the signed payload to the enforcing node.  The node
+   checks the mandate and the limits, reserves the amount, asks a
+   person to approve if needed, records the use, and adds two
+   signatures: a "delegated-issuer" signature, so that the document
+   carries an issuer-level signature, and an "operator-seal"
+   signature, which states that the use was checked
+   ({{enforcement}}).
+
+4. The enforcing node sends the document to the counterparty, which
+   checks the signatures and the disclosed parts of the mandate and
+   relies on the seal for the limits ({{counterparties}}).
 
 ## The Experiment
 
@@ -237,8 +287,8 @@ software (optional):
   deployment that needs them records them in its own logs.
 
 Claims not registered in the "JSON Web Token Claims" registry, such
-as "actions", "limits", "max_delegation", "software", "principal",
-and "parent",
+as "actions", "limits", "max_delegation", "software", and
+"principal",
 are private claim names ({{Section 4.3 of RFC7519}}) whose meaning is
 given by this document for the "vct" values
 "urn:ietf:params:itp:mandate" and
@@ -284,14 +334,21 @@ The payload then contains:
 }
 ~~~
 
-"use" is a UUIDv7 chosen by the agent for this use.  The enforcing node
-rejects it if its timestamp differs from the node's clock by more than
-300 seconds, and keeps used values for at least 600 seconds to reject
-reuse.  The Key Binding JWT ({{!RFC9901}}) of the presented SD-JWT has "aud" set to
-the enforcing node and "nonce" set to a value that the enforcing node issued to the agent
-and accepts only once, so it proves freshness; how the agent obtains
-the nonce, like how it authenticates to the node, is outside this
-document.  The Key Binding JWT otherwise follows {{Section 4.3 of RFC9901}}.  Its "sd_hash" covers the presented SD-JWT.  The agent
+For a delegated mandate, "mandate" is a Delegate SD-JWT presentation
+of the whole chain ({{delegation}}), whose final Key Binding JWT is
+the one described below.
+
+Replay protection comes from the Key Binding JWT ({{!RFC9901}}) of the
+presented SD-JWT, which has "aud" set to the enforcing node and
+"nonce" set to a value that the enforcing node issued to the agent.
+The enforcing node accepts each nonce once, within a validity period
+that it chooses and that SHOULD NOT exceed five minutes, and refuses
+with "mandateInvalid" a presentation whose nonce is unknown, expired,
+or already used.  How the agent obtains the nonce, like how it
+authenticates to the node, is outside this document.  "use" is a
+UUIDv7 chosen by the agent that identifies this use in the record
+that the enforcing node keeps ({{enforcement}}); the node refuses a
+"use" value that it has already recorded.  The Key Binding JWT otherwise follows {{Section 4.3 of RFC9901}}.  Its "sd_hash" covers the presented SD-JWT.  The agent
 signature, made with the same key, covers the payload that contains
 the presentation, and so binds the presentation to the action.
 
@@ -319,9 +376,10 @@ Only the enforcing node named in "aud" can authorize a use of a
 mandate.  Before it signs or forwards anything for the agent, it MUST:
 
 1. verify the mandate signature against a key of the principal's
-   accepted Participant Document that is not listed in "delegates" or, for a delegated mandate, against the
-   "cnf" key of its parent, recursively up to a mandate signed by the
-   principal, and check the validity period and status of each
+   accepted Participant Document that is not listed in "delegates" and, for a delegated mandate, verify
+   the chain as specified in {{I-D.gco-oauth-delegate-sd-jwt}}, each
+   delegation being signed with the "cnf" key of the mandate before
+   it, and check the validity period and status of each
    mandate in the chain;
 
 2. verify the Key Binding JWT and its nonce, and the agent signature,
@@ -384,7 +442,10 @@ the "total_with_tax" of the envelope, and is released when acceptance becomes
 reserves the amount of the "payment-sent" message and is released only
 by a "payment-failed" that refers to it and is signed by the principal
 or by a bridge; a "payment-failed" signed by the payee does not
-release it.  "reject" and "dispute" reserve nothing.  A "pay" reservation for an
+release it.  "reject" and "dispute" reserve nothing.  A reservation for an action
+that is held for approval is released when the approval is refused,
+or when the principal or the agent withdraws the action before it is
+approved.  A "pay" reservation for an
 envelope on which the same mandate holds an "accept" reservation
 reduces that "accept" reservation by the amount paid, so that accepting
 and paying one invoice is counted once.  A reservation is
@@ -395,42 +456,82 @@ use occurred.  A reservation is held while none of its release
 conditions holds in the current state, and is held again if the state
 changes so that none holds.
 
-A counterparty node that receives an envelope or status message with
-an "agent" member MUST reject it with "mandateInvalid" unless: it
-carries an "operator-seal" made with a key listed in "kids" of the
-principal's "senders" entry for "enforced_by"; that node is the "aud" of the mandate; the root
-mandate's "iss" (or "principal") is the URN of the envelope's
-"issuer" or of the status message's "by"; the agent signature
-verifies with the key in "cnf"; the root mandate verifies with a key
-of the principal's accepted Participant Document that is not listed in
-"delegates", each delegated mandate verifies with the "cnf" key of its
-parent, and every mandate in the chain was valid at the signing time;
-and the action is among the disclosed
-"actions".
-
 Because each mandate has a single enforcing node, the same budget
 cannot be spent twice by sending through two nodes.  A principal that
 wants an agent to work through several nodes issues one mandate per
 node, each with its own limits.
 
+## Processing by Counterparties {#counterparties}
+
+A counterparty does not evaluate the limits of a mandate, and usually
+cannot, since the principal can keep them undisclosed ({{mandate}}).
+It checks who acted and that the enforcing node vouches for the use.
+A counterparty node MUST reject with "mandateInvalid" an envelope or
+status message with an "agent" member unless:
+
+1. it carries an "operator-seal" signature made with a key listed in
+   "kids" of the principal's "senders" entry for "enforced_by", and
+   that node is the "aud" of the mandate;
+
+2. the agent signature verifies with the key in "cnf" of the mandate
+   presented in "mandate";
+
+3. the root mandate verifies with a key of the principal's accepted
+   Participant Document that is not listed in "delegates", the chain
+   of a delegated mandate verifies as specified in
+   {{I-D.gco-oauth-delegate-sd-jwt}} ({{delegation}}), and every mandate in the chain was valid at the
+   signing time;
+
+4. the root mandate's "iss" (or "principal") is the URN of the
+   envelope's "issuer" or of the status message's "by"; and
+
+5. the action is among the disclosed "actions".
+
+The other signatures are checked as for any document sent through a
+node ({{I-D.martinez-itp-core}}).  When all checks pass, the
+counterparty treats the document as sent by the principal, and the
+"operator-seal" as the enforcing node's statement that the use was
+within the limits of every mandate in the chain and was approved
+where {{approval}} requires it.  A counterparty that does not trust a
+given enforcing node can refuse documents signed by agents through
+it.
+
+This is why "aud" names the enforcing node even though counterparties
+also process the mandate: "aud" says which node may authorize uses,
+and so whose seal a counterparty accepts.  A counterparty is never
+the audience of a mandate and does not reject it for that reason.
+
 # Delegation {#delegation}
 
-An agent whose mandate has "max_delegation" greater than 0 can issue
-a mandate to another agent, signed with the key in its own "cnf".  A
-delegated mandate has "vct" "urn:ietf:params:itp:mandate-delegated",
-"iss" set to "urn:ietf:params:oauth:jwk-thumbprint:sha-256:" followed
-by the thumbprint of the parent's "cnf" key {{!RFC9278}}, and a
-"principal" claim with the principal's PID in URN form.  It has the
-same "principal" and "aud" as its parent, "actions" and "limits" that
-are equal to or narrower than the parent's, an "exp" no later than the
-parent's, and "max_delegation" lower than the parent's.  A limit that
-is absent from the delegated mandate is inherited from the parent.
+An agent whose mandate has "max_delegation" greater than 0 can pass
+part of its authority to another agent.  Delegation uses Delegate
+SD-JWT {{I-D.gco-oauth-delegate-sd-jwt}}, in which the Key Binding JWT
+of one SD-JWT becomes itself an SD-JWT that carries the next
+credential.
 
-The delegated mandate carries its parent, with all its disclosures, in
-a "parent" claim that is never selectively disclosable, so that the
-enforcing node can check that the limits are narrower.  The enforcing
-node checks the whole chain and counts every use against every
-mandate in it, and SHOULD refuse chains longer than five mandates.
+The delegating agent creates a Key Binding SD-JWT with "typ"
+"kb+sd-jwt+kb", signed with the key in "cnf" of its own mandate.  Its
+Delegate Payload is the delegated mandate: it has "vct"
+"urn:ietf:params:itp:mandate-delegated", a "principal" claim with the
+principal's PID in URN form, "cnf" with the key of the new agent, the
+same "aud" as the mandate it extends, "actions" and "limits" that are
+equal to or narrower than those of that mandate, an "exp" no later
+than its "exp", "max_delegation" lower than its "max_delegation", and
+the other claims of {{mandate}} except "iss".  A limit that is absent
+from the delegated mandate is inherited.  The Key Binding SD-JWT uses
+"issuer_jwt_hash" and not "sd_hash", so that the new agent can leave
+out disclosures of earlier mandates when it presents the chain.
+Further delegations append further Key Binding SD-JWTs.
+
+The agent presents the chain, ending with a Key Binding JWT as in
+{{use}}, in the "mandate" member.  Each mandate in it carries only the
+disclosures that the agent chooses, so counterparties see only what
+is disclosed to them.  The enforcing node receives every mandate in
+the chain with all its disclosures, from the principal for the root
+and from the delegating agent for the others, by means outside this
+document, so that it can check that the limits are narrower.  It
+checks the whole chain, counts every use against every mandate in it,
+and SHOULD refuse chains longer than five mandates.
 
 # Approval by a Person {#approval}
 
@@ -439,7 +540,10 @@ the enforcing node requires it, the node asks the principal for
 approval.  An approval is a JWS in the Flattened JSON Serialization with "typ" "itp-approval+jws", signed
 with a key of a natural person whom the principal has authorized and
 registered with the enforcing node; how that registration is done is
-local configuration.  Its payload contains "mandate_sub", "action",
+local configuration.  That key SHOULD be held only by that person,
+for example as a non-exportable key in a browser or an
+authenticator: an approval signed with a key that the enforcing node
+holds does not show that the person approved.  Its payload contains "mandate_sub", "action",
 "envelope_digest" (or the status message digest), "amount",
 "currency", and "iat".  The principal can instead approve through a
 verifiable presentation, for example with {{OPENID4VP}}, whose
@@ -451,6 +555,11 @@ approver the action as stated in the signed envelope core or status
 message, and the document, and not a description written by the
 agent, since an agent manipulated by content it processed can
 describe an action misleadingly.
+
+Other mechanisms in which an authorization waits for a person, such
+as the deferred token responses under discussion in the OAuth
+working group, could carry the approval instead.  Whether to use one
+is left for a later revision.
 
 # Implementation Status
 
@@ -495,8 +604,17 @@ an enforcing node that provides the status list applies a revocation
 as soon as it records it; counterparties rely on
 the enforcing node for timely revocation.
 
-The Key Binding JWT names the enforcing node and contains a nonce issued by that node, and the agent signature covers the payload that contains it, which prevents replay of either.  The reservation is atomic, so concurrent
+The Key Binding JWT names the enforcing node and contains a nonce
+that the node issued and accepts only once, and the agent signature
+covers the payload that contains it, so neither the presentation nor
+the signed payload can be replayed, whatever the clocks of the agent
+and the node.  The reservation is atomic, so concurrent
 requests cannot exceed "per_period", and it is released only by a signed status, so the amount of a payment already made cannot be reused.
+
+The agent's private key SHOULD be generated and kept in the
+environment where the agent runs.  If a node or another intermediary
+signs for the agent, the key in "cnf" no longer identifies the agent,
+and the mandate limits only what that intermediary does.
 
 Selective disclosure hides limits from counterparties, so a
 counterparty cannot check them itself and depends on the
@@ -509,9 +627,15 @@ A mandate reveals the principal's PID and, through disclosed claims,
 part of its purchasing policy.  A disclosed "software" claim reveals
 which product the principal uses; principals can keep it undisclosed
 to counterparties, since only the enforcing node needs it.  The enforcing node learns every action
-of the agent, which it needs to enforce limits.  A delegated mandate carries
-its parent with all its disclosures, so a counterparty that receives
-it sees every limit of the parent.  Approvals identify
+of the agent, which it needs to enforce limits.  Counterparties that receive many documents from the
+same principal, or that share what they receive, could assemble its
+purchasing policy from the disclosures they see.  To limit this,
+principals SHOULD keep "limits" and "software" undisclosed to
+counterparties, agents SHOULD disclose of "actions" only what the
+action needs, and principals SHOULD add decoy digests ({{!RFC9901}})
+so that the number of undisclosed claims does not reveal the policy.
+In a delegated mandate, an agent discloses of each mandate in the
+chain only what it chooses ({{delegation}}).  Approvals identify
 the person who approved, and are kept only by the enforcing node and
 the principal.
 
@@ -642,8 +766,8 @@ This appendix is informative.  It follows one use of the mandate in
    "delegated-issuer" and "operator-seal" signatures, records the
    use, and sends the status message to the supplier's node.
 
-6. The supplier's node checks the "agent" member as described at the
-   end of {{enforcement}} and counts the status message as an
+6. The supplier's node checks the "agent" member as described in
+   {{counterparties}} and counts the status message as an
    acceptance by the business ({{I-D.martinez-itp-lifecycle}}).
 
 Had the invoice contained text that led the agent to accept 50000.00
@@ -674,8 +798,31 @@ checked by the node and not by the agent.
 }
 ~~~
 
+# Changes Since -00
+{:numbered="false"}
+
+Note to the RFC Editor: please remove this section before
+publication.
+
+* Added an overview of how a mandate is used, with the parts of the
+  core and lifecycle documents it relies on.
+* Moved the checks by counterparties to their own subsection and
+  explained why "aud" names the enforcing node.
+* Made the one-time nonce in the Key Binding JWT the protection
+  against replay, and dropped the time window on "use".
+* Delegation now uses Delegate SD-JWT, so that counterparties see
+  only the disclosures chosen for them from each mandate in the chain.
+* Described how ITP mandates and AP2 mandates fit together.
+* A reservation held for approval is released when the approval is
+  refused or the action is withdrawn.
+* Added guidance on where the agent and approver keys are held and on
+  limiting what counterparties learn of the principal's policy.
+
 # Acknowledgments
 {:numbered="false"}
+
+Thanks to Frederik Krogsdal Jacobsen and Gareth Oliver for their
+comments on the OAuth working group mailing list.
 
 The author used AI-based tools while drafting and reviewing this
 document.  The author checked all text and references and is

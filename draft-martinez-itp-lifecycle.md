@@ -5,7 +5,7 @@ category: exp
 docname: draft-martinez-itp-lifecycle-latest
 submissiontype: IETF
 number:
-date: 2026-10-28
+date:
 consensus: true
 v: 3
 keyword:
@@ -17,6 +17,8 @@ venue:
   type: "Working Group"
   mail: "dispatch@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/dispatch/"
+  github: "itp-drafts/invoice-trust-protocol"
+  latest: "https://itp-drafts.github.io/invoice-trust-protocol/draft-martinez-itp-lifecycle.html"
 author:
  -
     fullname: "Carlos Martínez García-Villarrubia"
